@@ -36,7 +36,7 @@ export default function TopHeader() {
             <input
               type="text"
               placeholder="Search..."
-              className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none h-[42px]
+              className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px]
               "
             />
           </div>
@@ -65,7 +65,7 @@ export default function TopHeader() {
             <input
               type="text"
               placeholder="Search..."
-              className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none h-[42px] w-full
+              className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px] w-full
               "
             />
       </div>

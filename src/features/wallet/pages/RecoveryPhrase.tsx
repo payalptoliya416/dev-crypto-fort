@@ -1,42 +1,35 @@
-
-import right from "@/assets/right.png";
+import wrong from "@/assets/wrong.png";
 import { IoCopyOutline } from "react-icons/io5";
-import { useState } from "react";
 import toast from "react-hot-toast";
-import AppLogo from "../../component/AppLogo";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store/store";
+import { useState } from "react";
+import AuthLayout from "../../layout/AuthLayout";
 
 function RecoveryPhrase() {
+  const wallet = useSelector((state: RootState) => state.wallet.wallet);
+  if (!wallet) return <p>No wallet found</p>;
+  const words: string[] = wallet.phrase.split(" ");
+const navigate = useNavigate();
+const [confirmLoading, setConfirmLoading] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(wallet.phrase);
+      toast.success("Recovery phrase copied!");
+    } catch {
+      toast.error("Failed to copy recovery phrase");
+    }
+  };
+const handleConfirm = () => {
+  setConfirmLoading(true);
 
-  // 🔹 API thi aavta recovery words (example)
-  const [words] = useState<string[]>([
-    "harbor", "desk", "orbit", "guitar",
-    "crisp", "ocean", "filter", "charge",
-    "panel", "dawn", "rocket", "maple"
-  ]);
-
-  // 🔹 Copy handler
-const handleCopy = async () => {
-  const textToCopy = words.join(" ");
-  try {
-    await navigator.clipboard.writeText(textToCopy);
-    toast.success("Recovery phrase copied!", { icon: "✅" });
-  } catch {
-    toast.error("Failed to copy recovery phrase", { icon: "❌" });
-  }
+  setTimeout(() => {
+    navigate("/create-password");
+  }, 500);
 };
-
   return (
-    <div
-      className="relative min-h-screen w-full bg-[#13192B]
-      p-4 sm:p-6.25
-      flex justify-center
-      items-start sm:items-center"
-    >
-      {/* ================= TOP LEFT LOGO ================= */}
-         <AppLogo/>
-
-      {/* ================= CENTER CARD ================= */}
+<AuthLayout>
       <div
         className="
         w-full max-w-full sm:max-w-162.5
@@ -48,7 +41,7 @@ const handleCopy = async () => {
         text-center"
       >
         <h1 className="text-white font-bold text-xl sm:text-[28px] leading-7 sm:leading-8.5 mb-3 sm:mb-3.75">
-          Secure Your Digital Assets
+          Your 12 word Recovery Phrase
         </h1>
 
         <p className="text-base sm:text-lg text-[#7D7E84] mb-6 sm:mb-8.75">
@@ -57,7 +50,7 @@ const handleCopy = async () => {
 
         {/* ================= RECOVERY WORDS ================= */}
         <div className="grid grid-cols-3 gap-3 sm:gap-6.25">
-          {words.map((word, i) => (
+          {words.map((word: string, i: number) => (
             <div
               key={i}
               className="w-full sm:w-38.5
@@ -97,17 +90,28 @@ const handleCopy = async () => {
           flex items-center gap-2 sm:gap-2.5
           px-3 sm:px-4.5 lg:mx-10"
         >
-          <img src={right} alt="Secure Wallet" className="h-4 sm:h-auto" />
+          <img src={wrong} alt="Secure Wallet" className="h-4 sm:h-auto" />
           <span>Losing this means losing access forever.</span>
         </div>
 
         <div className="px-10 lg:mx-16">
-          <Link to="/create-password" className="block w-full bg-[#25C866] text-white py-3.5 sm:py-4.5 rounded-xl font-semibold">
-            Confirm Recovery Phrase
-          </Link>
+          <button
+  onClick={handleConfirm}
+  disabled={confirmLoading}
+  className={`block w-full py-3.5 sm:py-4.5 rounded-xl font-semibold transition cursor-pointer
+    ${
+      confirmLoading
+        ? "bg-green-400 cursor-not-allowed opacity-70"
+        : "bg-[#25C866] hover:bg-green-500"
+    }
+    text-white`}
+>
+  {confirmLoading ? "Confirming..." : "Confirm Recovery Phrase"}
+</button>
+
         </div>
       </div>
-    </div>
+</AuthLayout>
   );
 }
 

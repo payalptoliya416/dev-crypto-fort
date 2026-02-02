@@ -1,20 +1,11 @@
 import wallet from "@/assets/wallet.png";
-import AppLogo from "../../component/AppLogo";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import AuthLayout from "../../layout/AuthLayout";
 
 function ExistingWallet() {
+   const navigate = useNavigate();
   return (
-       <div
-      className="relative min-h-screen w-full bg-[#13192B]
-      p-4 sm:p-6.25
-      flex justify-center
-      items-start sm:items-center"
-    >
-      {/* ================= TOP LEFT LOGO ================= */}
-      <AppLogo/>
-
-      {/* ================= CENTER CARD ================= */}
+    <AuthLayout>
       <div
         className="
         w-full max-w-full sm:max-w-118.25
@@ -37,28 +28,33 @@ function ExistingWallet() {
           leading-7 sm:leading-8.5
           mb-3 sm:mb-3.75"
         >
-         Import Existing Wallet
+          Import Existing Wallet
         </h1>
 
         {/* Subtitle */}
         <p className="text-base sm:text-lg text-[#7D7E84] mb-6 sm:mb-8.75">
-        Choose the method to restore your wallet.
+          Choose the method to restore your wallet.
         </p>
 
         {/* Buttons */}
         <div className="space-y-4 sm:space-y-5">
-          <Link to="/recovery-phrase" className="block w-full bg-[#25C866] text-white py-3.5 sm:py-4.5 rounded-xl font-semibold">
-           Import with Seed Phrase
-          </Link>
+          <button
+           onClick={() => navigate("/seed-phrase", { state: { type: "phrase" } })}
+            className="block w-full bg-[#25C866] text-white py-3.5 sm:py-4.5 rounded-xl font-semibold cursor-pointer"
+          >
+            Import with Seed Phrase
+          </button>
 
-          <Link to="/seed-phrase" className="block w-full border border-[#202A43] rounded-xl py-3.5 sm:py-4.5 text-[#999AA1]">
-          Import with Private Key
-          </Link>
+          <button
+            onClick={() => navigate("/private-key", { state: { type: "key" } })}
+            className="block w-full border border-[#202A43] rounded-xl py-3.5 sm:py-4.5 text-[#999AA1] cursor-pointer"
+          >
+            Import with Private Key
+          </button>
         </div>
-
       </div>
-    </div>
-  )
+    </AuthLayout>
+  );
 }
 
-export default ExistingWallet
+export default ExistingWallet;

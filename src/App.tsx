@@ -9,6 +9,7 @@ import ExistingWallet from "./features/wallet/pages/ExistingWallet"
 import Dashboard from "./features/wallet/dashboard/Dashboard"
 import Balance from "./features/wallet/balance/Balance"
 import Transaction from "./features/wallet/transaction/Transaction"
+import Login from "./features/wallet/pages/Login"
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <BrowserRouter>
       <Routes>
          <Route path="/" element={<CreateWallet />} />
+         <Route path="/login" element={<Login />} />
          <Route path="/recovery-phrase" element={<RecoveryPhrase />} />
          <Route path="/create-password" element={<SecureWallet />} />
 

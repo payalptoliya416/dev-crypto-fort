@@ -1,20 +1,38 @@
 import lock from "@/assets/lock.png";
 import right from "@/assets/right.png";
-import AppLogo from "../../component/AppLogo";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import AuthLayout from "../../layout/AuthLayout";
+import { useState } from "react";
+import { createWallet } from "../../../api/createWallet";
+import { useDispatch } from "react-redux";
+import { setWallet } from "../../../redux/walletSlice";
 
 function CreateWallet() {
-  return (
-    <div
-      className="relative min-h-screen w-full bg-[#13192B]
-      p-4 sm:p-6.25
-      flex justify-center
-      items-start sm:items-center"
-    >
-      {/* ================= TOP LEFT LOGO ================= */}
-      <AppLogo/>
+ const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+ const handleCreateWallet = async () => {
+    try {
+      setLoading(true); // ✅ Start Loader
 
-      {/* ================= CENTER CARD ================= */}
+      const res = await createWallet();
+
+      dispatch(setWallet(res.data));
+
+      navigate("/recovery-phrase");
+    } catch (error: any) {
+      alert(error.message || "Something went wrong");
+    } finally {
+      setLoading(false); // ✅ Stop Loader
+    }
+  };
+
+  const handleImportWallet = () => {
+    navigate("/existing-wallet");
+  };
+
+  return (
+    <AuthLayout>
       <div
         className="
         w-full max-w-full sm:max-w-118.25
@@ -47,13 +65,24 @@ function CreateWallet() {
 
         {/* Buttons */}
         <div className="space-y-4 sm:space-y-5 mb-6 sm:mb-7.5">
-          <Link to="/recovery-phrase" className="block w-full bg-[#25C866] text-white py-3.5 sm:py-4.5 rounded-xl font-semibold">
-            Create New Wallet
-          </Link>
+          <button
+            onClick={handleCreateWallet}
+             disabled={loading}
+            className={`block w-full text-white py-3.5 sm:py-4.5 rounded-xl font-semibold cursor-pointer  ${
+                loading
+                  ? "bg-green-400 cursor-not-allowed opacity-70"
+                  : "bg-[#25C866] hover:bg-green-500"
+              }`}
+          >
+            {loading ? "Creating Wallet..." : "Create New Wallet"}
+          </button>
 
-          <Link to="/existing-wallet" className="block w-full border border-[#202A43] rounded-xl py-3.5 sm:py-4.5 text-[#999AA1]">
+          <button
+           onClick={handleImportWallet}
+            className="block w-full border border-[#202A43] rounded-xl py-3.5 sm:py-4.5 text-[#999AA1] cursor-pointer"
+          >
             Import Existing Wallet
-          </Link>
+          </button>
         </div>
 
         {/* Info */}
@@ -68,8 +97,17 @@ function CreateWallet() {
           <img src={right} alt="Secure Wallet" className="h-4 sm:h-auto" />
           <span>Your keys never leave your device.</span>
         </div>
+        <p className="text-[#7A7D83] text-sm sm:text-base mt-4">
+          Already have a wallet?{" "}
+          <button
+            onClick={() => navigate("/login")}
+            className="text-[#25C866] font-semibold hover:underline cursor-pointer transition-all duration-500"
+          >
+            Login
+          </button>
+        </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 
