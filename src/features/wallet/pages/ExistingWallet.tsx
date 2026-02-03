@@ -1,5 +1,5 @@
 import wallet from "@/assets/wallet.png";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AuthLayout from "../../layout/AuthLayout";
 
 function ExistingWallet() {
