@@ -15,9 +15,9 @@ function ConfirmTransactionModal({
 const handleCopy = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text);
-    toast.success("Copied!", { icon: "✅" });
+    toast.success("Copied!");
   } catch {
-    toast.error("Failed to copy", { icon: "❌" });
+    toast.error("Failed to copy");
   }
 };
 

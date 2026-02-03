@@ -1,16 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import AuthLayout from "../../layout/AuthLayout";
 import CommonSuccessModal from "../../component/CommonSuccessModal";
 import SeedPhraseUI from "../components/SeedPhraseUI";
-
 import { importWallet } from "../../../api/importWallet";
 
-function SeedPhrase() {
-  const navigate = useNavigate();
-
+function SeedPhrasePopup({ onFinish }: { onFinish: () => void }) {
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +24,7 @@ function SeedPhrase() {
 
       const res = await importWallet(
         { type: "phrase", data: input.trim() },
-        false // ❌ No token
+        true 
       );
 
       toast.success(res.message);
@@ -43,29 +38,30 @@ function SeedPhrase() {
 
   return (
     <>
-      <AuthLayout>
-        <SeedPhraseUI
-          input={input}
-          error={error}
-          loading={loading}
-          setInput={(v) => {
-            setInput(v);
-            setError("");
-          }}
-          onImport={handleImport}
-        />
-      </AuthLayout>
+      <SeedPhraseUI
+        input={input}
+        error={error}
+        loading={loading}
+        setInput={(v) => {
+          setInput(v);
+          setError("");
+        }}
+        onImport={handleImport}
+      />
 
       <CommonSuccessModal
         open={showModal}
         onClose={() => setShowModal(false)}
         title="Access Unlocked"
-        description="Your funds are now accessible. Continue to your dashboard."
-        buttonText="Go to Dashboard"
-        onButtonClick={() => navigate("/dashboard")}
+        description="Your funds are now accessible."
+        buttonText="Done"
+        onButtonClick={() => {
+          setShowModal(false);
+          onFinish();
+        }}
       />
     </>
   );
 }
 
-export default SeedPhrase;
+export default SeedPhrasePopup;

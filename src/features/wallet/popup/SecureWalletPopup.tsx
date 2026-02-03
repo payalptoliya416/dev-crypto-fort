@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-
+import CommonSuccessModal from "../../component/CommonSuccessModal";
+import SecureWalletUI from "../components/SecureWalletUI";
 import type { RootState } from "../../../redux/store/store";
 import { setWalletPassword } from "../../../api/setWalletPassword";
 
-import AuthLayout from "../../layout/AuthLayout";
-import CommonSuccessModal from "../../component/CommonSuccessModal";
-import SecureWalletUI from "../components/SecureWalletUI";
-
-function SecureWallet() {
+function SecureWalletPopup({
+  onFinish,
+}: {
+  onFinish: () => void;
+}) {
   const wallet = useSelector((state: RootState) => state.wallet.wallet);
-  const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,7 +36,7 @@ function SecureWallet() {
         acknowledge_password_loss: values.acknowledge_password_loss,
       };
 
-      const res = await setWalletPassword(payload, false);;
+      const res = await setWalletPassword(payload, true);;
 
       toast.success(res.message);
       setShowModal(true);
@@ -50,7 +49,7 @@ function SecureWallet() {
   };
 
   return (
-    <AuthLayout>
+    <>
       <SecureWalletUI
         loading={loading}
         showPassword={showPassword}
@@ -65,11 +64,14 @@ function SecureWallet() {
         onClose={() => setShowModal(false)}
         title="Password Verified"
         description="Your password has been set. You now have full access to your wallet."
-        buttonText="Go to Dashboard"
-        onButtonClick={() => navigate("/dashboard")}
+        buttonText="Done"
+        onButtonClick={() => {
+          setShowModal(false);
+          onFinish(); // ✅ close flow
+        }}
       />
-    </AuthLayout>
+    </>
   );
 }
 
-export default SecureWallet;
+export default SecureWalletPopup;

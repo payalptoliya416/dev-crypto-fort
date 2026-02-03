@@ -1,9 +1,11 @@
+import toast from "react-hot-toast";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 
 interface AccountModalProps {
   open: boolean;
   onClose: () => void;
+  onAddAccount: () => void; 
 }
 
 const accounts = [
@@ -27,8 +29,17 @@ const accounts = [
   },
 ];
 
-function AccountModal({ open, onClose }: AccountModalProps) {
+function AccountModal({ open, onClose ,onAddAccount}: AccountModalProps) {
   if (!open) return null;
+
+const handleCopy = async (address: string) => {
+  try {
+    await navigator.clipboard.writeText(address);
+    toast.success("Address copied!");
+  } catch {
+    toast.error("Failed to copy!");
+  }
+};
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center  overflow-y-auto p-5">
@@ -70,7 +81,7 @@ function AccountModal({ open, onClose }: AccountModalProps) {
               <div className="flex items-center gap-3">
                 <p className="text-white text-lg">{acc.balance}</p>
 
-                <button className="border border-[#FFFFFF0D] w-[46px] h-[46px] rounded-[14px] flex justify-center items-center cursor-pointer">
+                <button  onClick={() => handleCopy(acc.address)} className="border border-[#FFFFFF0D] w-[46px] h-[46px] rounded-[14px] flex justify-center items-center cursor-pointer">
                   <BsThreeDotsVertical size={20} className="text-[#7A7D83]" />
                 </button>
               </div>
@@ -78,8 +89,8 @@ function AccountModal({ open, onClose }: AccountModalProps) {
           ))}
         </div>
 
-        {/* Add Button */}
         <button
+          onClick={onAddAccount}
           className="w-full mt-[30px] py-[18px] rounded-xl bg-[#25C866] text-white font-bold hover:opacity-90 transition cursor-pointer text-lg"
         >
           Add New Account

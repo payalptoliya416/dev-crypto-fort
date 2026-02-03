@@ -1,4 +1,5 @@
 import { publicApi } from "./publicApi";
+import { privateApi } from "./privateApi";
 
 type WalletResponse = {
   success: boolean;
@@ -6,11 +7,17 @@ type WalletResponse = {
   data: {
     wallet_id: number;
     address: string;
-    phrase: string; 
+    phrase: string;
   };
 };
 
-export const createWallet = () => {
+export const createWallet = (useToken: boolean = false) => {
+  if (useToken) {
+    return privateApi<WalletResponse>("/create-wallet", {
+      method: "GET",
+    });
+  }
+
   return publicApi<WalletResponse>("/create-wallet", {
     method: "GET",
   });

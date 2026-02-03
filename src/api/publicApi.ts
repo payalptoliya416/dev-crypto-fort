@@ -1,4 +1,4 @@
-const BASE_URL = "http://192.168.29.134:8080/api";
+const BASE_URL = "http://192.168.29.134:8001/api";
 
 type ApiOptions = {
   method?: "GET" | "POST";

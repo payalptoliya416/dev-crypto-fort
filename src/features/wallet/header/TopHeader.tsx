@@ -3,11 +3,42 @@ import logo from "@/assets/logo.png";
 import avtar from "@/assets/avtar.png";
 import { Link } from "react-router-dom";
 import { IoSettingsOutline } from "react-icons/io5";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SettingsModal from "../dashboard/SettingsModal";
+import AccountModal from "../dashboard/AccountModal";
+import SendTokenModal from "../dashboard/SendTokenModal";
+import ConfirmTransactionModal from "../dashboard/ConfirmTransactionModal";
+import CreateWalletPopup from "../popup/CreateWalletPopup";
+import RecoveryPhrasePopup from "../popup/RecoveryPhrasePopup";
+import SecureWalletPopup from "../popup/SecureWalletPopup";
+import ExistingWalletPopup from "../popup/ExistingWalletPopup";
+import SeedPhrasePopup from "../popup/SeedPhrasePopup";
+import PrivateKeyPopup from "../popup/PrivateKeyPopup";
 
 export default function TopHeader() {
     const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sendOpen, setSendOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+      const [walletFlowStep, setWalletFlowStep] = useState<
+    null | "create" | "recovery" | "password" | "import" | "seed" | "private"
+  >(null);
+
+  const [profileOpen, setProfileOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   return (
     <>
     <div className="w-full bg-[#0F1A2F] mb-[15px]">
@@ -52,9 +83,69 @@ export default function TopHeader() {
           </button>
 
           {/* PROFILE */}
-          <button className="w-10 sm:w-[42px] h-10 sm:h-[42px] bg-[#202A43] rounded-[10px] flex justify-center items-center relative cursor-pointer">
-            <img src={avtar} alt="" />
-          </button>
+          <div className="relative" ref={dropdownRef}>
+  {/* PROFILE BUTTON */}
+  <button
+    onClick={() => setProfileOpen((prev) => !prev)}
+    className="w-10 sm:w-[42px] h-10 sm:h-[42px] bg-[#202A43]
+    rounded-[10px] flex justify-center items-center cursor-pointer"
+  >
+    <img src={avtar} alt="Profile" />
+  </button>
+
+  {/* DROPDOWN MENU */}
+  {profileOpen && (
+    <div
+      className="
+        absolute right-0 mt-3 w-[220px]
+        rounded-xl bg-[#161F37]
+        border border-[#3C3D47]
+        shadow-lg z-[999]
+        overflow-hidden
+      "
+    >
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-[#3C3D47]">
+        <p className="text-white font-semibold text-sm">My Profile</p>
+        <p className="text-[#7A7D83] text-xs">Wallet Settings</p>
+      </div>
+
+      {/* Menu Items */}
+      <div className="flex flex-col">
+        <button
+          onClick={() => {
+            setProfileOpen(false);
+            setShowModal(true); // ✅ Account modal open
+          }}
+          className="px-4 py-3 text-left text-sm text-white hover:bg-[#202A43] transition cursor-pointer"
+        >
+          Accounts
+        </button>
+
+        {/* <button
+          onClick={() => {
+            setProfileOpen(false);
+            setSettingsOpen(true);
+          }}
+          className="px-4 py-3 text-left text-sm text-white hover:bg-[#202A43] transition"
+        >
+          Settings
+        </button> */}
+
+        {/* <button
+          onClick={() => {
+            setProfileOpen(false);
+            alert("Logout Logic Here");
+          }}
+          className="px-4 py-3 text-left text-sm text-red-400 hover:bg-[#202A43] transition"
+        >
+          Logout
+        </button> */}
+      </div>
+    </div>
+  )}
+</div>
+
         </div>
       </div>
       <div className="relative block sm:hidden mt-4">
@@ -70,10 +161,83 @@ export default function TopHeader() {
             />
       </div>
     </div>
+
      <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
+
+        {/* ---------------------- */}
+      <AccountModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onAddAccount={() => {
+          setShowModal(false);
+          setWalletFlowStep("create");
+        }}
+      />
+      {/* ---------------------- */}
+      <SendTokenModal
+        open={sendOpen}
+        onClose={() => setSendOpen(false)}
+        onNext={() => {
+          setSendOpen(false);
+          setConfirmOpen(true);
+        }}
+      />
+      {/* ---------------------- */}
+      <ConfirmTransactionModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+      />
+      {/* ---------------------- */}
+
+      {walletFlowStep && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-5">
+          {/* Overlay */}
+          <div
+            onClick={() => setWalletFlowStep(null)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          />
+
+          {/* Modal Content */}
+          <div className="relative z-10 w-full flex justify-center">
+           
+            {walletFlowStep === "create" && (
+              <CreateWalletPopup
+                onClose={() => setWalletFlowStep(null)}
+                onNext={() => setWalletFlowStep("recovery")}
+                onImport={() => setWalletFlowStep("import")}
+              />
+            )}
+
+            {walletFlowStep === "recovery" && (
+              <RecoveryPhrasePopup
+                onNext={() => setWalletFlowStep("password")}
+              />
+            )}
+
+            {walletFlowStep === "password" && (
+              <SecureWalletPopup onFinish={() => setWalletFlowStep(null)} />
+            )}
+
+            {walletFlowStep === "import" && (
+              <ExistingWalletPopup
+                onSeedNext={() => setWalletFlowStep("seed")}
+                onKeyNext={() => setWalletFlowStep("private")}
+              />
+            )}
+
+            {walletFlowStep === "seed" && (
+              <SeedPhrasePopup onFinish={() => setWalletFlowStep(null)} />
+            )}
+
+            {walletFlowStep === "private" && (
+              <PrivateKeyPopup onFinish={() => setWalletFlowStep(null)} />
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

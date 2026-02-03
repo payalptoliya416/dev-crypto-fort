@@ -7,9 +7,11 @@ type LoginPayload = {
 type LoginResponse = {
   success: boolean;
   message: string;
-  data?: {
+  data: {
+    token: string;
+    token_type: string;
+    expires_in: number;
     user_id: number;
-    wallet_id: number;
   };
 };
 

@@ -18,9 +18,9 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Address copied!", { icon: "✅" });
+      toast.success("Address copied!");
     } catch {
-      toast.error("Failed to copy!", { icon: "❌" });
+      toast.error("Failed to copy!");
     }
   };
 

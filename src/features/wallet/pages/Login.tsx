@@ -7,48 +7,44 @@ import { useState } from "react";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
-import { loginUser } from "../../../api/login"; // ✅ API Import
+import { loginUser } from "../../../api/login"; 
+import { useDispatch } from "react-redux";
+import { setToken } from "../../../redux/authSlice";
 
 function Login() {
   const navigate = useNavigate();
-
+const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Initial Values
   const initialValues = {
     password: "",
   };
 
-  // ✅ Validation Schema
   const validationSchema = Yup.object({
     password: Yup.string()
       .min(6, "Minimum 6 characters")
       .required("Password is required"),
   });
 
-  // ✅ Submit Handler with API Call
-  const handleSubmit = async (values: typeof initialValues) => {
-    try {
-      setLoading(true);
+const handleSubmit = async (values: typeof initialValues) => {
+  try {
+    setLoading(true);
+    const res = await loginUser({
+      password: values.password,
+    });
+    toast.success(res.message);
+    const token = res.data.token;
+    dispatch(setToken(token));
+    localStorage.setItem("token", token);
+    navigate("/dashboard");
 
-      // ✅ API Call
-      const res = await loginUser({
-        password: values.password,
-      });
-
-      toast.success(res.message);
-
-      // ✅ Redirect after success
-      navigate("/");
-
-    } catch (err: any) {
-      toast.error(err.message || "Invalid Password");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err: any) {
+    toast.error(err.message || "Invalid Password");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <AuthLayout>

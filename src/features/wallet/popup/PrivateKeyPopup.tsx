@@ -1,16 +1,11 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+    import { useState } from "react";
 import toast from "react-hot-toast";
 
 import CommonSuccessModal from "../../component/CommonSuccessModal";
-import AppLogo from "../../component/AppLogo";
 import PrivateKeyUI from "../components/PrivateKeyUI";
-
 import { importWallet } from "../../../api/importWallet";
 
-function PrivateKey() {
-  const navigate = useNavigate();
-
+function PrivateKeyPopup({ onFinish }: { onFinish: () => void }) {
   const [showModal, setShowModal] = useState(false);
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +22,7 @@ function PrivateKey() {
           type: "key",
           data: privateKey.trim(),
         },
-        false // ❌ No token (page)
+        true // ✅ Token required (popup)
       );
 
       toast.success(res.message);
@@ -41,29 +36,28 @@ function PrivateKey() {
 
   return (
     <>
-      <div className="relative min-h-screen w-full bg-[#13192B] flex items-center justify-center px-4 sm:px-6">
-        <AppLogo />
-
-        <PrivateKeyUI
-          loading={loading}
-          apiError={apiError}
-          showKey={showKey}
-          setShowKey={setShowKey}
-          clearError={() => setApiError("")}
-          onSubmit={handleImportKey}
-        />
-      </div>
+      <PrivateKeyUI
+        loading={loading}
+        apiError={apiError}
+        showKey={showKey}
+        setShowKey={setShowKey}
+        clearError={() => setApiError("")}
+        onSubmit={handleImportKey}
+      />
 
       <CommonSuccessModal
         open={showModal}
         onClose={() => setShowModal(false)}
         title="Access Unlocked"
-        description="Your funds are now accessible. Continue to your dashboard."
-        buttonText="Go to Dashboard"
-        onButtonClick={() => navigate("/dashboard")}
+        description="Your funds are now accessible."
+        buttonText="Done"
+        onButtonClick={() => {
+          setShowModal(false);
+          onFinish();
+        }}
       />
     </>
   );
 }
 
-export default PrivateKey;
+export default PrivateKeyPopup;

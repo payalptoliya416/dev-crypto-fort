@@ -1,23 +1,21 @@
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useState } from "react";
-
-import type { RootState } from "../../../redux/store/store";
-import AuthLayout from "../../layout/AuthLayout";
 import RecoveryPhraseUI from "../components/RecoveryPhraseUI";
+import type { RootState } from "../../../redux/store/store";
 
-function RecoveryPhrase() {
+function RecoveryPhrasePopup({
+  onNext,
+}: {
+  onNext: () => void;
+}) {
   const wallet = useSelector((state: RootState) => state.wallet.wallet);
-  const navigate = useNavigate();
-
   const [confirmLoading, setConfirmLoading] = useState(false);
 
   if (!wallet) return <p>No wallet found</p>;
 
   const words = wallet.phrase.split(" ");
 
-  // ✅ Copy Handler
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(wallet.phrase);
@@ -27,26 +25,23 @@ function RecoveryPhrase() {
     }
   };
 
-  // ✅ Confirm → Navigate
   const handleConfirm = () => {
     setConfirmLoading(true);
 
     setTimeout(() => {
-      navigate("/create-password");
+      onNext(); 
     }, 500);
   };
 
   return (
-    <AuthLayout>
-      <RecoveryPhraseUI
-        words={words}
-        phrase={wallet.phrase}
-        confirmLoading={confirmLoading}
-        onCopy={handleCopy}
-        onConfirm={handleConfirm}
-      />
-    </AuthLayout>
+    <RecoveryPhraseUI
+      words={words}
+      phrase={wallet.phrase}
+      confirmLoading={confirmLoading}
+      onCopy={handleCopy}
+      onConfirm={handleConfirm}
+    />
   );
 }
 
-export default RecoveryPhrase;
+export default RecoveryPhrasePopup;

@@ -1,4 +1,5 @@
 import { publicApi } from "./publicApi";
+import { privateApi } from "./privateApi";
 
 type ImportPayload = {
   type: "phrase" | "key";
@@ -15,7 +16,17 @@ type ImportResponse = {
   };
 };
 
-export const importWallet = (body: ImportPayload) => {
+export const importWallet = (
+  body: ImportPayload,
+  useToken: boolean = false
+) => {
+  if (useToken) {
+    return privateApi<ImportResponse>("/recover-wallet", {
+      method: "POST",
+      body,
+    });
+  }
+
   return publicApi<ImportResponse>("/recover-wallet", {
     method: "POST",
     body,

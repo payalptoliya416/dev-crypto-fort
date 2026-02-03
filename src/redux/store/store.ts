@@ -2,24 +2,37 @@ import { configureStore } from "@reduxjs/toolkit";
 import walletReducer from "../walletSlice";
 
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // localStorage
+import storage from "redux-persist/lib/storage";
 
-// ✅ Persist Config
+import {
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+
 const persistConfig = {
-  key: "root",
+  key: "wallet",
   storage,
 };
 
-// ✅ Persisted Reducer
 const persistedReducer = persistReducer(persistConfig, walletReducer);
 
 export const store = configureStore({
   reducer: {
     wallet: persistedReducer,
   },
+
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
-// ✅ Persistor Export
 export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
