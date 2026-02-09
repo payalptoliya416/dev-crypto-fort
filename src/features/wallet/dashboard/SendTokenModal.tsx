@@ -36,7 +36,7 @@ function SendTokenModal({ open, onClose,onNext }: SendTokenModalProps) {
             Send Token
           </h3>
 
-          <div className="mb-5">
+          {/* <div className="mb-5">
             <label className="text-lg text-[#7A7D83] mb-[10px] block">
               Select Token
             </label>
@@ -51,7 +51,7 @@ function SendTokenModal({ open, onClose,onNext }: SendTokenModalProps) {
 
               <option className="bg-[#161F37] text-white">Bitcoin</option>
             </select>
-          </div>
+          </div> */}
 
           <div className="mb-5">
             <label className="text-lg text-[#7A7D83] mb-[10px] block">
@@ -65,12 +65,12 @@ function SendTokenModal({ open, onClose,onNext }: SendTokenModalProps) {
                 rounded-xl px-5 py-4 text-lg leading-[18px] placeholder:text-[#3C3D47] text-white outline-none"
               />
 
-              <button
+              {/* <button
                 className="w-[50px] h-[50px] rounded-xl bg-[#202A43] 
                 border border-[#3C3D47] flex justify-center items-center text-[#7D7E84]"
               >
                 <HiOutlineQrCode size={26} />
-              </button>
+              </button> */}
             </div>
           </div>
 

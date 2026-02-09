@@ -96,15 +96,9 @@ export default function TopHeader() {
   {/* DROPDOWN MENU */}
   {profileOpen && (
     <div
-      className="
-        absolute right-0 mt-3 w-[220px]
-        rounded-xl bg-[#161F37]
-        border border-[#3C3D47]
-        shadow-lg z-[999]
-        overflow-hidden
-      "
-    >
-      {/* Header */}
+      className="absolute right-0 mt-3 w-[220px] rounded-xl bg-[#161F37] border border-[#3C3D47]
+        shadow-lg z-[999] overflow-hidden">
+     
       <div className="px-4 py-3 border-b border-[#3C3D47]">
         <p className="text-white font-semibold text-sm">My Profile</p>
         <p className="text-[#7A7D83] text-xs">Wallet Settings</p>
@@ -115,7 +109,7 @@ export default function TopHeader() {
         <button
           onClick={() => {
             setProfileOpen(false);
-            setShowModal(true); // ✅ Account modal open
+            setShowModal(true); 
           }}
           className="px-4 py-3 text-left text-sm text-white hover:bg-[#202A43] transition cursor-pointer"
         >

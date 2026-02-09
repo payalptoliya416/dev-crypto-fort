@@ -1,4 +1,4 @@
-const BASE_URL = "http://192.168.29.134:8001/api";
+const BASE_URL = "http://192.168.29.134:8080/api";
 
 type ApiOptions = {
   method?: "GET" | "POST";
@@ -9,11 +9,11 @@ export class ApiError extends Error {
   status: number;
   data: any;
 
-  constructor(message: string, status: number, data: any) {
+constructor(message: string, status: number, data: any) {
     super(message);
     this.status = status;
     this.data = data;
-  }
+}
 }
 
 export async function publicApi<T>(
