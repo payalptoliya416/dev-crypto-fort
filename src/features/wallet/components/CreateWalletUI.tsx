@@ -5,7 +5,7 @@ interface Props {
   loading: boolean;
   onCreateWallet: () => void;
   onImportWallet: () => void;
-  onLogin: () => void;
+  onLogin?: () => void;
 }
 
 function CreateWalletUI({
@@ -80,15 +80,17 @@ function CreateWalletUI({
         <span>Your keys never leave your device.</span>
       </div>
 
-      <p className="text-[#7A7D83] text-sm sm:text-base mt-4">
-        Already have a wallet?{" "}
-        <button
-          onClick={onLogin}
-          className="text-[#25C866] font-semibold hover:underline cursor-pointer transition-all duration-500"
-        >
-          Login
-        </button>
-      </p>
+    {onLogin && (
+  <p className="text-[#7A7D83] text-sm sm:text-base mt-4">
+    Already have a wallet?{" "}
+    <button
+      onClick={onLogin}
+      className="text-[#25C866] font-semibold hover:underline cursor-pointer transition-all duration-500"
+    >
+      Login
+    </button>
+  </p>
+)}
     </div>
   );
 }

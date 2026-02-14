@@ -1,11 +1,17 @@
-    import { useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 import CommonSuccessModal from "../../component/CommonSuccessModal";
 import PrivateKeyUI from "../components/PrivateKeyUI";
 import { importWallet } from "../../../api/importWallet";
 
-function PrivateKeyPopup({ onFinish }: { onFinish: () => void }) {
+function PrivateKeyPopup({
+  onFinish,
+  onClose,
+}: {
+  onFinish: () => void;
+  onClose: () => void;
+}) {
   const [showModal, setShowModal] = useState(false);
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +28,7 @@ function PrivateKeyPopup({ onFinish }: { onFinish: () => void }) {
           type: "key",
           data: privateKey.trim(),
         },
-        true // ✅ Token required (popup)
+        true, // ✅ Token required (popup)
       );
 
       toast.success(res.message);
@@ -36,15 +42,23 @@ function PrivateKeyPopup({ onFinish }: { onFinish: () => void }) {
 
   return (
     <>
-      <PrivateKeyUI
-        loading={loading}
-        apiError={apiError}
-        showKey={showKey}
-        setShowKey={setShowKey}
-        clearError={() => setApiError("")}
-        onSubmit={handleImportKey}
-      />
-
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        onClick={onClose} // 👈 outside click closes popup
+      >
+        {/* ================= MODAL CONTENT ================= */}
+        <div onClick={(e) => e.stopPropagation()}>
+          <PrivateKeyUI
+            loading={loading}
+            apiError={apiError}
+            showKey={showKey}
+            setShowKey={setShowKey}
+            clearError={() => setApiError("")}
+            onSubmit={handleImportKey}
+          />
+        </div>
+      </div>
+      
       <CommonSuccessModal
         open={showModal}
         onClose={() => setShowModal(false)}

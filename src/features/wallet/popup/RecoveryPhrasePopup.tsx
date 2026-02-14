@@ -6,8 +6,10 @@ import type { RootState } from "../../../redux/store/store";
 
 function RecoveryPhrasePopup({
   onNext,
+   onClose,
 }: {
   onNext: () => void;
+   onClose: () => void;
 }) {
   const wallet = useSelector((state: RootState) => state.wallet.wallet);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -34,13 +36,21 @@ function RecoveryPhrasePopup({
   };
 
   return (
-    <RecoveryPhraseUI
-      words={words}
-      phrase={wallet.phrase}
-      confirmLoading={confirmLoading}
-      onCopy={handleCopy}
-      onConfirm={handleConfirm}
-    />
+     <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      onClick={onClose} // 👈 outside click close
+    >
+      {/* ================= MODAL CONTENT ================= */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <RecoveryPhraseUI
+          words={words}
+          phrase={wallet.phrase}
+          confirmLoading={confirmLoading}
+          onCopy={handleCopy}
+          onConfirm={handleConfirm}
+        />
+      </div>
+    </div>
   );
 }
 

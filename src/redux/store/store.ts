@@ -1,5 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import walletReducer from "../walletSlice";
+import activeWalletReducer from "../activeWalletSlice";
 
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
@@ -13,22 +14,45 @@ import {
   REGISTER,
 } from "redux-persist";
 
+/**
+ * Root reducer
+ */
+const rootReducer = combineReducers({
+  wallet: walletReducer,
+  activeWallet: activeWalletReducer,
+});
+
+/**
+ * Persist config
+ */
 const persistConfig = {
-  key: "wallet",
+  key: "root",
   storage,
+  whitelist: ["wallet", "activeWallet"], // ✅ both persist
 };
 
-const persistedReducer = persistReducer(persistConfig, walletReducer);
+/**
+ * Persisted reducer
+ */
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+/**
+ * Store
+ */
 export const store = configureStore({
-  reducer: {
-    wallet: persistedReducer,
-  },
+  reducer: persistedReducer,
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+        ],
       },
     }),
 });

@@ -8,8 +8,10 @@ import { setWalletPassword } from "../../../api/setWalletPassword";
 
 function SecureWalletPopup({
   onFinish,
+  onClose,
 }: {
   onFinish: () => void;
+  onClose: () => void;
 }) {
   const wallet = useSelector((state: RootState) => state.wallet.wallet);
 
@@ -36,7 +38,7 @@ function SecureWalletPopup({
         acknowledge_password_loss: values.acknowledge_password_loss,
       };
 
-      const res = await setWalletPassword(payload, true);;
+      const res = await setWalletPassword(payload, true);
 
       toast.success(res.message);
       setShowModal(true);
@@ -50,14 +52,22 @@ function SecureWalletPopup({
 
   return (
     <>
-      <SecureWalletUI
-        loading={loading}
-        showPassword={showPassword}
-        showConfirm={showConfirm}
-        setShowPassword={setShowPassword}
-        setShowConfirm={setShowConfirm}
-        onSubmit={handleSubmit}
-      />
+       <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        onClick={onClose} // 👈 outside click closes popup
+      >
+        {/* ================= MODAL CONTENT ================= */}
+        <div onClick={(e) => e.stopPropagation()}>
+          <SecureWalletUI
+            loading={loading}
+            showPassword={showPassword}
+            showConfirm={showConfirm}
+            setShowPassword={setShowPassword}
+            setShowConfirm={setShowConfirm}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      </div>
 
       <CommonSuccessModal
         open={showModal}

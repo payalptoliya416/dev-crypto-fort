@@ -6,6 +6,7 @@ export interface Wallet {
   label: string | null;
   status: string;
   created_at: string;
+  balance: string;
 }
 
 export interface WalletListResponse {

@@ -1,4 +1,4 @@
-const BASE_URL = "http://192.168.29.134:8080/api";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 type ApiOptions = {
   method?: "GET" | "POST";
@@ -22,8 +22,8 @@ export async function privateApi<T>(
 
   const data = await res.json();
 
-  if (!res.ok) {
-    throw new Error(data?.message || "Something went wrong");
+ if (!res.ok) {
+    throw data; // 🔥 IMPORTANT
   }
 
   return data as T;

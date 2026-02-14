@@ -5,7 +5,7 @@ import CommonSuccessModal from "../../component/CommonSuccessModal";
 import SeedPhraseUI from "../components/SeedPhraseUI";
 import { importWallet } from "../../../api/importWallet";
 
-function SeedPhrasePopup({ onFinish }: { onFinish: () => void }) {
+function SeedPhrasePopup({ onFinish , onClose }: { onFinish: () => void,   onClose: () => void; }) {
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,17 +38,24 @@ function SeedPhrasePopup({ onFinish }: { onFinish: () => void }) {
 
   return (
     <>
-      <SeedPhraseUI
-        input={input}
-        error={error}
-        loading={loading}
-        setInput={(v) => {
-          setInput(v);
-          setError("");
-        }}
-        onImport={handleImport}
-      />
-
+           <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        onClick={onClose} // 👈 outside click close
+      >
+        {/* ================= MODAL CONTENT ================= */}
+        <div onClick={(e) => e.stopPropagation()}>
+          <SeedPhraseUI
+            input={input}
+            error={error}
+            loading={loading}
+            setInput={(v) => {
+              setInput(v);
+              setError("");
+            }}
+            onImport={handleImport}
+          />
+        </div>
+      </div>
       <CommonSuccessModal
         open={showModal}
         onClose={() => setShowModal(false)}

@@ -15,8 +15,6 @@ function CreateWallet() {
   const handleCreateWallet = async () => {
     try {
       setLoading(true);
-
-      // ❌ Page version → no token
       const res = await createWallet(false);
 
       dispatch(setWallet(res.data));

@@ -6,7 +6,7 @@ import { createWallet } from "../../../api/createWallet";
 import { setWallet } from "../../../redux/walletSlice";
 
 function CreateWalletPopup({
-//   onClose,
+  onClose,
   onNext,
   onImport,
 }: {
@@ -31,12 +31,18 @@ function CreateWalletPopup({
   };
 
   return (
-     <CreateWalletUI
-    loading={loading}
-    onCreateWallet={handleCreateWallet}
-    onImportWallet={onImport}          
-    onLogin={() => alert("Login popup")}
-  />
+      <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      onClick={onClose} 
+    >
+      <div onClick={(e) => e.stopPropagation()}>
+        <CreateWalletUI
+          loading={loading}
+          onCreateWallet={handleCreateWallet}
+          onImportWallet={onImport}
+        />
+      </div>
+    </div>
   );
 }
 

@@ -3,6 +3,11 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 import { getWallets, type Wallet } from "../../../api/walletApi";
 import { useEffect, useState } from "react";
+import Loader from "../../component/Loader";
+import { formatBalance } from "../../component/format";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store/store";
+import { setActiveWallet } from "../../../redux/activeWalletSlice";
 
 interface AccountModalProps {
   open: boolean;
@@ -14,6 +19,7 @@ interface AccountModalProps {
 function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -22,22 +28,33 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
       toast.error("Failed to copy!");
     }
   };
-useEffect(() => {
-  const closeMenu = () => setOpenMenuId(null);
-  window.addEventListener("click", closeMenu);
-  return () => window.removeEventListener("click", closeMenu);
-}, []);
+  const dispatch = useDispatch();
+  const activeWallet = useSelector(
+    (state: RootState) => state.activeWallet.wallet,
+  );
+  useEffect(() => {
+    const closeMenu = () => setOpenMenuId(null);
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
 
     const fetchWallets = async () => {
       try {
+        setLoading(true);
         const res = await getWallets();
         if (res.success) {
           setWallets(res.data);
+          if (res.data.length > 0 && !activeWallet) {
+            dispatch(setActiveWallet(res.data[0]));
+          }
         }
       } catch {
         toast.error("Failed to load wallets");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -70,62 +87,82 @@ useEffect(() => {
 
           {/* Account List */}
           <div className="space-y-3 overflow-y-auto scroll-thin flex-1 pr-1">
-            {wallets.map((wallet, index) => (
-              <div
-               key={wallet.id}
-               className="flex justify-between items-center p-5 rounded-xl border border-[#25C8661A] bg-transparent"
-              >
-                {/* Left */}
-                <div>
-                  <p className="text-white text-lg font-normal mb-[5px]">
-                    {wallet.label?.trim()
-                      ? wallet.label
-                      : `Account ${index + 1}`}
-                  </p>
-                  <p className="text-sm text-[#7A7D83]">
-                    {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
-                  </p>
-                </div>
+            {loading ? (
+              <div className="flex items-center justify-center min-h-[200px]">
+                <Loader />
+              </div>
+            ) : wallets.length > 0 ? (
+              wallets.map((wallet, index) => (
+                <div
+                  key={wallet.id}
+                  onClick={() => dispatch(setActiveWallet(wallet))}
+                  className={`flex justify-between items-center p-5 rounded-xl border cursor-pointer
+    ${
+      activeWallet?.id === wallet.id
+        ? "border-[#25C866] bg-[#25C86614]"
+        : "border-[#25C8661A]"
+    }`}
+                >
+                  {/* Left */}
+                  <div>
+                    <p className="text-white text-lg font-normal mb-[5px]">
+                      {wallet.label?.trim()
+                        ? wallet.label
+                        : `Account ${index + 1}`}
+                    </p>
+                    <p className="text-sm text-[#7A7D83]">
+                      {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+                    </p>
+                  </div>
 
-                {/* Right */}
-                <div className="flex items-center gap-3">
-                  {/* <p className="text-white text-lg">{wallet.balance}</p> */}
-                  <div className="relative">
-                    <button
-                      onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenMenuId(openMenuId === wallet.id ? null : wallet.id);
-                    }}
-                      className="border border-[#FFFFFF0D] w-[46px] h-[46px] rounded-[14px] flex justify-center items-center cursor-pointer"
-                    >
-                      <BsThreeDotsVertical
-                        size={20}
-                        className="text-[#7A7D83]"
-                      />
-                    </button>
-                    {openMenuId === wallet.id && (
-                      <div className="absolute right-0 top-[52px] w-[170px] rounded-xl bg-[#0F172A] border border-[#FFFFFF0D] shadow-lg z-50">
-                        <button
-                          onClick={() => {
-                            handleCopy(wallet.address);
-                            setOpenMenuId(null);
-                          }}
-                          className="w-full text-left px-4 py-3 text-sm text-white hover:bg-[#25C8661A] rounded-t-xl cursor-pointer">
-                          Copy Address
-                        </button>
-                        <button
-                          onClick={() => {
-                            setOpenMenuId(null);
-                          }}
-                          className="w-full text-left px-4 py-3 text-sm text-white hover:bg-[#25C8661A] rounded-b-xl cursor-pointer">
-                          Update Label
-                        </button>
-                      </div>
-                    )}
+                  {/* Right */}
+                  <div className="flex items-center gap-3">
+                    <p className="text-white text-lg">
+                      {formatBalance(wallet.balance)} ETH
+                    </p>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(
+                            openMenuId === wallet.id ? null : wallet.id,
+                          );
+                        }}
+                        className="border border-[#FFFFFF0D] w-[46px] h-[46px] rounded-[14px] flex justify-center items-center cursor-pointer"
+                      >
+                        <BsThreeDotsVertical
+                          size={20}
+                          className="text-[#7A7D83]"
+                        />
+                      </button>
+                      {openMenuId === wallet.id && (
+                        <div className="absolute right-0 top-[52px] w-[170px] rounded-xl bg-[#0F172A] border border-[#FFFFFF0D] shadow-lg z-50">
+                          <button
+                            onClick={() => {
+                              handleCopy(wallet.address);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-[#25C8661A] rounded-t-xl cursor-pointer"
+                          >
+                            Copy Address
+                          </button>
+                          <button
+                            onClick={() => {
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-[#25C8661A] rounded-b-xl cursor-pointer"
+                          >
+                            Update Label
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-[#7A7D83] text-sm">No accounts found</p>
+            )}
           </div>
 
           <button

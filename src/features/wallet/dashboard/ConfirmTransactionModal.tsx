@@ -1,6 +1,8 @@
 import { IoClose } from "react-icons/io5";
 import { FiCopy } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store/store";
 
 interface ConfirmTransactionModalProps {
   open: boolean;
@@ -11,7 +13,9 @@ function ConfirmTransactionModal({
   open,
   onClose,
 }: ConfirmTransactionModalProps) {
-
+// const transaction = useSelector(
+//   (state: RootState) => state.transaction
+// );
 const handleCopy = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text);

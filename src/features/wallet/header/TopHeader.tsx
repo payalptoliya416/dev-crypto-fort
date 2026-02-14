@@ -16,16 +16,17 @@ import SeedPhrasePopup from "../popup/SeedPhrasePopup";
 import PrivateKeyPopup from "../popup/PrivateKeyPopup";
 
 export default function TopHeader() {
-    const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-      const [walletFlowStep, setWalletFlowStep] = useState<
+  const [showModal, setShowModal] = useState(false);
+  const [walletFlowStep, setWalletFlowStep] = useState<
     null | "create" | "recovery" | "password" | "import" | "seed" | "private"
   >(null);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -41,82 +42,79 @@ export default function TopHeader() {
   }, []);
   return (
     <>
-    <div className="w-full bg-[#0F1A2F] mb-[15px]">
-      <div
-        className="flex items-center justify-between rounded-xl bg-[#131F3A] p-4 sm:px-5 sm:py-[19px]  border border-[#3C3D47]">
-        {/* LEFT : LOGO + NAME */}
-        <Link
-          to="/"
-          className={`flex items-center gap-2 z-10`}
-        >
-          <img
-            src={logo}
-            alt="Secure Wallet"
-            className="h-6 sm:h-auto"
-          />
-        </Link>
+      <div className="w-full bg-[#0F1A2F] mb-[15px]">
+        <div className="flex items-center justify-between rounded-xl bg-[#131F3A] p-4 sm:px-5 sm:py-[19px]  border border-[#3C3D47]">
+          {/* LEFT : LOGO + NAME */}
+          <Link to="/" className={`flex items-center gap-2 z-10`}>
+            <img src={logo} alt="Secure Wallet" className="h-6 sm:h-auto" />
+          </Link>
 
-        {/* RIGHT */}
-        <div className="flex items-center gap-2 sm:gap-[15px]">
-          {/* SEARCH */}
-          <div className="relative hidden sm:block">
-            <BiSearch
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7D83]"
-            />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px]
+          {/* RIGHT */}
+          <div className="flex items-center gap-2 sm:gap-[15px]">
+            {/* SEARCH */}
+            <div className="relative hidden sm:block">
+              <BiSearch
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7D83]"
+              />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px]
               "
-            />
-          </div>
+              />
+            </div>
 
-          {/* ICONS */}
-          <button className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47]  rounded-[10px] flex justify-center items-center cursor-pointer"   onClick={() => setSettingsOpen(true)}>
-            <IoSettingsOutline size={20} className="text-[#7A7D83]" />
-          </button>
+            {/* ICONS */}
+            <button
+              className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47]  rounded-[10px] flex justify-center items-center cursor-pointer"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <IoSettingsOutline size={20} className="text-[#7A7D83]" />
+            </button>
 
-          <button className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47]  rounded-[10px] flex justify-center items-center relative cursor-pointer">
-            <BiBell size={20} className="text-[#7A7D83]" />
-            <span className="absolute top-3 right-3 w-1.5 h-1.5 bg-red-500 rounded-full" />
-          </button>
+            <button className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47]  rounded-[10px] flex justify-center items-center relative cursor-pointer">
+              <BiBell size={20} className="text-[#7A7D83]" />
+              <span className="absolute top-3 right-3 w-1.5 h-1.5 bg-red-500 rounded-full" />
+            </button>
 
-          {/* PROFILE */}
-          <div className="relative" ref={dropdownRef}>
-  {/* PROFILE BUTTON */}
-  <button
-    onClick={() => setProfileOpen((prev) => !prev)}
-    className="w-10 sm:w-[42px] h-10 sm:h-[42px] bg-[#202A43]
+            {/* PROFILE */}
+            <div className="relative" ref={dropdownRef}>
+              {/* PROFILE BUTTON */}
+              <button
+                onClick={() => setProfileOpen((prev) => !prev)}
+                className="w-10 sm:w-[42px] h-10 sm:h-[42px] bg-[#202A43]
     rounded-[10px] flex justify-center items-center cursor-pointer"
-  >
-    <img src={avtar} alt="Profile" />
-  </button>
+              >
+                <img src={avtar} alt="Profile" />
+              </button>
 
-  {/* DROPDOWN MENU */}
-  {profileOpen && (
-    <div
-      className="absolute right-0 mt-3 w-[220px] rounded-xl bg-[#161F37] border border-[#3C3D47]
-        shadow-lg z-[999] overflow-hidden">
-     
-      <div className="px-4 py-3 border-b border-[#3C3D47]">
-        <p className="text-white font-semibold text-sm">My Profile</p>
-        <p className="text-[#7A7D83] text-xs">Wallet Settings</p>
-      </div>
+              {/* DROPDOWN MENU */}
+              {profileOpen && (
+                <div
+                  className="absolute right-0 mt-3 w-[220px] rounded-xl bg-[#161F37] border border-[#3C3D47]
+        shadow-lg z-[999] overflow-hidden"
+                >
+                  <div className="px-4 py-3 border-b border-[#3C3D47]">
+                    <p className="text-white font-semibold text-sm">
+                      My Profile
+                    </p>
+                    <p className="text-[#7A7D83] text-xs">Wallet Settings</p>
+                  </div>
 
-      {/* Menu Items */}
-      <div className="flex flex-col">
-        <button
-          onClick={() => {
-            setProfileOpen(false);
-            setShowModal(true); 
-          }}
-          className="px-4 py-3 text-left text-sm text-white hover:bg-[#202A43] transition cursor-pointer"
-        >
-          Accounts
-        </button>
+                  {/* Menu Items */}
+                  <div className="flex flex-col">
+                    <button
+                      onClick={() => {
+                        setProfileOpen(false);
+                        setShowModal(true);
+                      }}
+                      className="px-4 py-3 text-left text-sm text-white hover:bg-[#202A43] transition cursor-pointer"
+                    >
+                      Accounts
+                    </button>
 
-        {/* <button
+                    {/* <button
           onClick={() => {
             setProfileOpen(false);
             setSettingsOpen(true);
@@ -126,7 +124,7 @@ export default function TopHeader() {
           Settings
         </button> */}
 
-        {/* <button
+                    {/* <button
           onClick={() => {
             setProfileOpen(false);
             alert("Logout Logic Here");
@@ -135,33 +133,32 @@ export default function TopHeader() {
         >
           Logout
         </button> */}
-      </div>
-    </div>
-  )}
-</div>
-
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="relative block sm:hidden mt-4">
+          <BiSearch
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7D83]"
+          />
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px] w-full
+              "
+          />
         </div>
       </div>
-      <div className="relative block sm:hidden mt-4">
-            <BiSearch
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7D83]"
-            />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px] w-full
-              "
-            />
-      </div>
-    </div>
 
-     <SettingsModal
+      <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
 
-        {/* ---------------------- */}
+      {/* ---------------------- */}
       <AccountModal
         open={showModal}
         onClose={() => setShowModal(false)}
@@ -196,7 +193,6 @@ export default function TopHeader() {
 
           {/* Modal Content */}
           <div className="relative z-10 w-full flex justify-center">
-           
             {walletFlowStep === "create" && (
               <CreateWalletPopup
                 onClose={() => setWalletFlowStep(null)}
@@ -208,26 +204,37 @@ export default function TopHeader() {
             {walletFlowStep === "recovery" && (
               <RecoveryPhrasePopup
                 onNext={() => setWalletFlowStep("password")}
+                onClose={() => setWalletFlowStep(null)}
               />
             )}
 
             {walletFlowStep === "password" && (
-              <SecureWalletPopup onFinish={() => setWalletFlowStep(null)} />
+              <SecureWalletPopup
+                onFinish={() => setWalletFlowStep(null)}
+                onClose={() => setWalletFlowStep(null)}
+              />
             )}
 
             {walletFlowStep === "import" && (
               <ExistingWalletPopup
                 onSeedNext={() => setWalletFlowStep("seed")}
                 onKeyNext={() => setWalletFlowStep("private")}
+                onClose={() => setWalletFlowStep(null)}
               />
             )}
 
             {walletFlowStep === "seed" && (
-              <SeedPhrasePopup onFinish={() => setWalletFlowStep(null)} />
+              <SeedPhrasePopup
+                onFinish={() => setWalletFlowStep(null)}
+                onClose={() => setWalletFlowStep(null)}
+              />
             )}
 
             {walletFlowStep === "private" && (
-              <PrivateKeyPopup onFinish={() => setWalletFlowStep(null)} />
+              <PrivateKeyPopup
+                onFinish={() => setWalletFlowStep(null)}
+                onClose={() => setWalletFlowStep(null)}
+              />
             )}
           </div>
         </div>

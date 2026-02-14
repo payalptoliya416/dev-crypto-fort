@@ -16,7 +16,7 @@ function App() {
   return (
     <>
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           style: {
             background: "#202A43",
