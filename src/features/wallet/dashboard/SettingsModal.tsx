@@ -19,7 +19,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
     (state: RootState) => state.activeWallet.wallet,
   );
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
-
+  const [showExportOptions, setShowExportOptions] = useState(false);
   const handleExportTxHash = async () => {
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
@@ -96,7 +96,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto p-5">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto px-3 sm:px-5">
       <div
         onClick={onClose}
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
@@ -122,13 +122,13 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           </h3>
 
           <div className="mb-[30px]">
-            <label className="text-lg text-[#7A7D83] block mb-3">
+            <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
               Currency
             </label>
 
             <select
               className="w-full bg-[#161F37] border border-[#3C3D47]
-  rounded-xl px-6 py-4 text-lg text-white outline-none"
+  rounded-xl px-6 py-4 text-base sm:text-lg text-white outline-none"
             >
               <option className="bg-[#161F37] text-[#7A7D83]">
                 Select currency
@@ -140,13 +140,13 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           </div>
 
           <div className="mb-10">
-            <label className="text-lg text-[#7A7D83] block mb-3">
+            <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
               Language
             </label>
 
             <select
               className="w-full bg-[#161F37] border border-[#3C3D47]
-  rounded-xl px-5 py-4 text-lg text-white outline-none"
+  rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
             >
               <option className="bg-[#161F37] text-[#7A7D83]">
                 Select token
@@ -156,13 +156,13 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             </select>
           </div>
 
-          <h3 className="text-white text-xl font-medium mb-[15px]">
+          <h3 className="text-white text-lg sm:text-xl font-medium mb-[15px]">
             Backup & Export
           </h3>
 
           <div
             onClick={exporting ? undefined : handleExportTxHash}
-            className={`relative w-full border border-[#3C3D47] rounded-xl p-5 mb-[15px]
+            className={`relative w-full border border-[#3C3D47] rounded-xl p-3 sm:p-5 mb-[15px]
   bg-[#202A43]/40 transition
   ${exporting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#202A43]/70"}`}
           >
@@ -174,7 +174,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               </div>
             )}
 
-            <p className="text-[#7A7D83] text-lg font-medium">
+            <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
               Backup Recovery Phrase
             </p>
             <p className="text-[#434548] text-sm mt-2">
@@ -183,10 +183,8 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           </div>
 
           <div
-            onClick={
-              exporting ? undefined : () => handleExportTxReport("excel")
-            }
-            className={`relative w-full border border-[#3C3D47] rounded-xl p-5
+            onClick={exporting ? undefined : () => setShowExportOptions(true)}
+            className={`relative w-full border border-[#3C3D47] rounded-xl p-3 sm:p-5
   bg-[#202A43]/40 transition
   ${exporting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#202A43]/70"}`}
           >
@@ -198,13 +196,40 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               </div>
             )}
 
-            <p className="text-[#7A7D83] text-lg font-medium">
+            <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
               Export TxHash Report
             </p>
             <p className="text-[#434548] text-sm mt-2">
               Download your transaction history report
             </p>
           </div>
+          {showExportOptions && (
+            <div className="mt-3 flex gap-3">
+              {/* Excel */}
+              <button
+                onClick={() => {
+                  setShowExportOptions(false);
+                  handleExportTxReport("excel");
+                }}
+                className="flex-1 rounded-lg border border-[#3C3D47] 
+      bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]"
+              >
+                Export as Excel
+              </button>
+
+              {/* PDF */}
+              <button
+                onClick={() => {
+                  setShowExportOptions(false);
+                  handleExportTxReport("pdf");
+                }}
+                className="flex-1 rounded-lg border border-[#3C3D47] 
+      bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]"
+              >
+                Export as PDF
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

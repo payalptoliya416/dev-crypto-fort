@@ -89,7 +89,7 @@ const handleSubmit = async (values: typeof initialValues) => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter password"
                     className={`w-full rounded-xl bg-[#161F37]
-                      px-5 py-4 text-white placeholder:text-[#52535B]
+                      px-5 py-3 text-white placeholder:text-[#52535B]
                       border text-lg
                       ${
                         errors.password && touched.password

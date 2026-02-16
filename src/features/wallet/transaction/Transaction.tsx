@@ -3,11 +3,9 @@ import { useSelector } from "react-redux";
 import DashboardLayout from "../../layout/DashboardLayout";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import toast from "react-hot-toast";
-
 import type { RootState } from "../../../redux/store/store";
 import { getTransactions, type Transaction } from "../../../api/walletApi";
-
-import d1 from "@/assets/d1.png"; // Ethereum icon (default)
+import d1 from "@/assets/d1.png";
 import Loader from "../../component/Loader";
 
 interface TransactionRow {
@@ -35,14 +33,25 @@ function TransactionPage() {
         const res = await getTransactions({
           wallet_id: activeWallet.id,
         });
-
+        const mapTxStatus = (
+          status: Transaction["txreceipt_status"],
+        ): TransactionRow["status"] => {
+          switch (status) {
+            case "Success":
+              return "Confirmed";
+            case "Pending":
+              return "Pending";
+            default:
+              return "Failed";
+          }
+        };
         const mapped: TransactionRow[] = res.data.map((tx: Transaction) => ({
           name: "Ethereum",
           address:
-            tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
+          tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
           amount: `${tx.amount} ETH`,
           type: tx.transaction_type === "Send" ? "Sent" : "Received",
-          status: tx.txreceipt_status === "Success" ? "Confirmed" : "Failed",
+          status: mapTxStatus(tx.txreceipt_status),
           icon: d1,
         }));
 

@@ -108,7 +108,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center  overflow-y-auto p-5">
+      <div className="fixed inset-0 z-[999] flex items-center justify-center  overflow-y-auto px-3 sm:px-5">
         <div
           onClick={onClose}
           className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
@@ -127,15 +127,15 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
           </div>
 
           <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]  max-h-[90vh] overflow-y-auto">
-            <h3 className="text-[#25C866] font-medium text-lg mb-[15px]">
+            <h3 className="text-[#25C866] font-medium text-base sm:text-lg mb-[15px]">
               Send Token
             </h3>
             <div className="mb-5">
-              <label className="text-lg text-[#7A7D83] mb-[10px] block">
+              <label className="text-base sm:text-lg text-[#7A7D83] mb-[10px] block">
                 Select Token
               </label>
 
-              <select className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-lg text-white outline-none">
+              <select className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none">
                 <option value="" className="bg-[#161F37] text-[#7A7D83]">
                   Select token
                 </option>
@@ -155,7 +155,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
             </div>
 
             <div className="mb-5">
-              <label className="text-lg text-[#7A7D83] mb-[10px] block">
+              <label className="text-base sm:text-lg text-[#7A7D83] mb-[10px] block">
                 Recipient Address
               </label>
 
@@ -169,7 +169,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                     }
                   }}
                   placeholder="Enter recipient address"
-                  className={`flex-1 bg-transparent border rounded-xl px-5 py-3 text-lg text-white outline-none
+                  className={`flex-1 min-w-0 bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none
   ${errors.toAddress ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
                 />
                 <button
@@ -189,7 +189,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
             </div>
 
             <div>
-              <label className="text-lg text-[#7A7D83] mb-[10px] block">
+              <label className="text-base sm:text-lg text-[#7A7D83] mb-[10px] block">
                 Amount
               </label>
 
@@ -208,7 +208,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                 }}
                 placeholder="Amount"
                 inputMode="decimal"
-                className={`w-full bg-transparent border rounded-xl px-5 py-3 text-lg text-white outline-none
+                className={`w-full bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none
     ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
               />
 
@@ -218,7 +218,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
             </div>
 
             <div className="mt-[25px] space-y-5 text-sm">
-              <div className="flex justify-between text-white text-lg font-medium">
+              <div className="flex justify-between text-white text-base sm:text-lg font-medium">
                 <p>Gas Fees</p>
                 {gasLoading ? (
                   <div className="w-10 h-5 overflow-hidden">
@@ -229,7 +229,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                 )}
               </div>
 
-              <div className="flex justify-between text-white text-lg font-medium">
+              <div className="flex justify-between text-white text-base sm:text-lg font-medium">
                 <p>Total Cost</p>
                 <p>
                   {amount && gasFee
@@ -242,8 +242,8 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
             <button
               onClick={handleSend}
               disabled={false}
-              className="w-full mt-[30px] py-[18px] rounded-xl bg-[#25C866] 
-          text-white font-bold transition cursor-pointer text-lg
+              className="w-full mt-[30px] py-3 sm:py-[18px] rounded-xl bg-[#25C866] 
+          text-white font-bold transition cursor-pointer text-base sm:text-lg
           flex items-center justify-center gap-2
           disabled:opacity-70 disabled:cursor-not-allowed"
             >
@@ -261,7 +261,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
           />
 
           <div className="relative bg-[#161F37] border border-[#3C3D47] rounded-xl p-6 w-[300px]">
-            <h4 className="text-white text-lg mb-4 text-center">
+            <h4 className="text-white text-base sm:text-lg mb-4 text-center">
               Recipient Address QR
             </h4>
 

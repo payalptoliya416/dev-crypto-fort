@@ -80,7 +80,7 @@ export interface Transaction {
   block_number: number;
   nonce: string;
   transaction_type: "Send" | "Receive";
-  txreceipt_status: "Success" | "Failed";
+  txreceipt_status: "Success" | "Failed" | "Pending";
   timestamp: string;
 }
 
@@ -107,3 +107,75 @@ export const getTransactions = (
 };
 
 // -------------------
+
+export interface CoinPriceResponse {
+  [coin: string]: {
+    usd: number;
+    usd_24h_change: number;
+  };
+}
+
+export const getLivePrices = async () => {
+  const res = await fetch(
+    "https://api.coingecko.com/api/v3/simple/price" +
+      "?ids=ethereum,bitcoin,binancecoin,solana,tether,arbitrum,xrp,dogecoin" +
+      "&vs_currencies=usd" +
+      "&include_24hr_change=true"
+  );
+
+  return (await res.json()) as CoinPriceResponse;
+};
+
+export interface UpdateWalletLabelPayload {
+  id: number;
+  label: string;
+}
+
+export interface UpdateWalletLabelResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: number;
+    address: string;
+    label: string;
+  };
+}
+
+export const updateWalletLabel = (
+  payload: UpdateWalletLabelPayload,
+) => {
+  return privateApi<UpdateWalletLabelResponse>(
+    "/wallets/label-update",
+    {
+      method: "POST",
+      body: payload,
+    }
+  );
+};
+
+export interface GetBalancePayload {
+  wallet_id: number;
+}
+
+export interface GetBalanceResponse {
+  success: boolean;
+  message: string;
+  data: {
+    wallet_id: number;
+    address: string;
+    balance: string;            
+    formatted_balance: string;  
+  };
+}
+
+export const getBalance = (
+  payload: GetBalancePayload,
+) => {
+  return privateApi<GetBalanceResponse>(
+    "/get-balance",
+    {
+      method: "POST",
+      body: payload,
+    }
+  );
+};

@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import DashboardLayout from "../../layout/DashboardLayout";
-import d1 from "@/assets/d1.png";
-import d2 from "@/assets/d2.png";
-import d3 from "@/assets/d3.png";
-import d4 from "@/assets/d4.png";
-import d5 from "@/assets/d5.png";
-import d6 from "@/assets/d6.png";
-import d7 from "@/assets/d7.png";
-import d8 from "@/assets/d8.png";
-import up from "@/assets/up.svg";
 import CommonTabs from "../../component/CommonTabs";
 import CommonTable, { type Column } from "../../component/CommonTable";
+import Loader from "../../component/Loader";
+import toast from "react-hot-toast";
+
+import type { RootState } from "../../../redux/store/store";
+import { getBalance, getLivePrices } from "../../../api/walletApi";
+
+import d1 from "@/assets/d1.png";
+import up from "@/assets/up.svg";
 
 interface Asset {
   name: string;
@@ -22,92 +22,63 @@ interface Asset {
   icon: string;
 }
 
-const assets = [
-  {
-    name: "Ethereum",
-    symbol: "ETH",
-    balance: "1.2345 ETH",
-    price: "$2,435.20",
-    change: "+2.5%",
-    up: true,
-    icon: d1,
-  },
-  {
-    name: "Bitcoin",
-    symbol: "BTC",
-    balance: "0.0421 BTC",
-    price: "$62,880.00",
-    change: "+1.2%",
-    up: true,
-    icon: d2,
-  },
-  {
-    name: "Binance",
-    symbol: "BNB",
-    balance: "3.85 BNB",
-    price: "$320.00",
-    change: "-0.8%",
-    up: false,
-    icon: d3,
-  },
-  {
-    name: "Solana",
-    symbol: "SOL",
-    balance: "12.44 SOL",
-    price: "$143.20",
-    change: "+4.5%",
-    up: true,
-    icon: d4,
-  },
-  {
-    name: "Tether",
-    symbol: "USDT",
-    balance: "520 USDT",
-    price: "$1.0",
-    change: "+1.8%",
-    up: true,
-    icon: d5,
-  },
-  {
-    name: "Arbitrum One",
-    symbol: "ARB",
-    balance: "420.00 ARB",
-    price: "$1.08",
-    change: "1.6%",
-    up: true,
-    icon: d6,
-  },
-  {
-    name: "XRP Ledger",
-    symbol: "XRP",
-    balance: "900.00 XRP",
-    price: "$0.56",
-    change: "0.3%",
-    up: true,
-    icon: d7,
-  },
-  {
-    name: "Dogecoin",
-    symbol: "DOGE",
-    balance: "1,200 DOGE",
-    price: "$0.08",
-    change: "1.1%",
-    up: true,
-    icon: d8,
-  },
-];
-
 function Balance() {
   const tabs = ["Favorites", "Top", "Popular", "Token price", "New token"];
   const [activeTab, setActiveTab] = useState("Favorites");
+
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const activeWallet = useSelector(
+    (state: RootState) => state.activeWallet.wallet,
+  );
+
+useEffect(() => {
+  if (!activeWallet?.id) return;
+
+  let intervalId: ReturnType<typeof setInterval>;
+
+  const fetchBalanceAndPrice = async () => {
+    try {
+      const balanceRes = await getBalance({
+        wallet_id: activeWallet.id,
+      });
+
+      const priceRes = await getLivePrices();
+      const ethPrice = priceRes.ethereum.usd;
+      const ethChange = priceRes.ethereum.usd_24h_change;
+
+      const asset: Asset = {
+        name: "Ethereum",
+        symbol: "ETH",
+        balance: balanceRes.data.formatted_balance,
+        price: `$${ethPrice.toLocaleString()}`,
+        change: `${ethChange.toFixed(2)}%`,
+        up: ethChange >= 0,
+        icon: d1,
+      };
+
+      setAssets([asset]);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to load balance");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchBalanceAndPrice();
+  intervalId = setInterval(fetchBalanceAndPrice, 12000);
+
+  return () => clearInterval(intervalId);
+}, [activeWallet?.id]);
 
   const columns: Column<Asset>[] = [
     {
       header: "Name",
       key: "name",
-      render: (row: any) => (
+      render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" />
+          <img src={row.icon} alt="icon" className="w-8 h-8" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
             <p className="text-xs text-[#7A7D83]">{row.symbol}</p>
@@ -115,23 +86,23 @@ function Balance() {
         </div>
       ),
     },
-      {
-    header: "Balance",
-    key: "balance",
-    align: "right",
-    render: (row) => (
-      <p className="text-[#7A7D83] text-base font-normal">
-        {row.balance}
-      </p>
-    ),
-  },
+    {
+      header: "Balance",
+      key: "balance",
+      align: "right",
+      render: (row) => (
+        <p className="text-[#7A7D83] text-base font-normal">
+           {row.balance} ETH
+        </p>
+      ),
+    },
     {
       header: "Last Price",
       key: "price",
       align: "right",
       width: "13%",
-      render: (row: any) => (
-        <p className="text-[#7A7D83]  text-base font-normal">{row.price}</p>
+      render: (row) => (
+        <p className="text-[#7A7D83] text-base font-normal">{row.price}</p>
       ),
     },
     {
@@ -139,9 +110,9 @@ function Balance() {
       key: "change",
       align: "right",
       width: "13%",
-      render: (row: any) => (
+      render: (row) => (
         <span
-          className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px] w-full max-w-[65px]
+          className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
           ${row.up ? "bg-[#25C866]" : "bg-[#C82525]"} text-white`}
         >
           <img
@@ -154,7 +125,7 @@ function Balance() {
       ),
     },
   ];
-  
+
   return (
     <DashboardLayout>
       <div className="w-full rounded-2xl bg-[#161F37] border border-[#3C3D47]">
@@ -162,13 +133,21 @@ function Balance() {
           <h3 className="tet-xl text-[#25C866] font-semibold mb-[15px]">
             Balance
           </h3>
+
           <CommonTabs
             tabs={tabs}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
         </div>
-        <CommonTable data={assets} columns={columns} />
+
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader />
+          </div>
+        ) : (
+          <CommonTable data={assets} columns={columns} />
+        )}
       </div>
     </DashboardLayout>
   );

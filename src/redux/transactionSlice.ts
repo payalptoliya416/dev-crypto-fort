@@ -20,7 +20,7 @@ const transactionSlice = createSlice({
   initialState,
   reducers: {
     setTransactionData(
-      state,
+      _,
       action: PayloadAction<TransactionState>
     ) {
       return action.payload;

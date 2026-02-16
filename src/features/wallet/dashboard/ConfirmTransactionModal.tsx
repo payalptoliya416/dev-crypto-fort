@@ -80,7 +80,7 @@ function ConfirmTransactionModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
         onClick={onClose}
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
@@ -98,22 +98,22 @@ function ConfirmTransactionModal({
           </button>
         </div>
 
-        <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-6 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]">
+        <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-4 sm:p-6 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]">
           <h3 className="text-[#25C866] font-medium text-xl mb-[15px]">
             Confirm transaction
           </h3>
           <div className="space-y-5">
             {/* Token */}
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
-              <p className="text-white text-lg font-medium">Token:</p>
-              <p className="text-[#7A7D83] text-lg font-medium">ETH</p>
+              <p className="text-white text-base sm:text-lg font-medium">Token:</p>
+              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">ETH</p>
             </div>
 
             {/* From (static wallet for now) */}
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
-              <p className="text-white text-lg font-medium">From:</p>
+              <p className="text-white text-base sm:text-lg font-medium">From:</p>
 
-              <div className="flex items-center gap-3 text-[#7A7D83] text-lg">
+              <div className="flex items-center gap-3 text-[#7A7D83] text-base sm:text-lg">
                 {shortenAddress(activeWallet?.address || "")}
                 <FiCopy
                   onClick={() => handleCopy(activeWallet?.address || "")}
@@ -124,8 +124,8 @@ function ConfirmTransactionModal({
 
             {/* To */}
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
-              <p className="text-white text-lg font-medium">To:</p>
-              <div className="flex items-center gap-3 text-[#7A7D83] text-lg">
+              <p className="text-white text-base sm:text-lg font-medium">To:</p>
+              <div className="flex items-center gap-3 text-[#7A7D83] text-base sm:text-lg">
                 {shortenAddress(toAddress)}
                 <FiCopy
                   onClick={() => handleCopy(toAddress)}
@@ -135,32 +135,31 @@ function ConfirmTransactionModal({
             </div>
 
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
-              <p className="text-white text-lg font-medium">Amount:</p>
-              <p className="text-[#7A7D83] text-lg font-medium">
+              <p className="text-white text-base sm:text-lg font-medium">Amount:</p>
+              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
                 {amount || "0"} ETH
               </p>
             </div>
 
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
-              <p className="text-white text-lg font-medium">Total:</p>
-              <p className="text-[#7A7D83] text-lg font-medium">
+              <p className="text-white text-base sm:text-lg font-medium">Total:</p>
+              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
                 {totalCost || "0"} ETH
               </p>
             </div>
           </div>
-          <div className="mt-5 border border-[#FACC15]/40 bg-[#FFDD1D05] rounded-[6px] px-[15px] py-3 w-max">
-            <p className="text-[#FFDD1D] text-lg font-medium">
+          <div className="mt-5 border border-[#FACC15]/40 bg-[#FFDD1D05] rounded-[6px] px-[15px] py-3  w-full sm:w-max">
+            <p className="text-[#FFDD1D] text-base sm:text-lg font-medium">
               Blockchain transactions cannot be reversed.
             </p>
           </div>
           <button
             onClick={handleConfirmSend}
             disabled={loading}
-            className="w-full mt-[30px] py-[18px] rounded-xl bg-[#25C866] text-white font-bold hover:opacity-90 transition cursor-pointer text-lg disabled:opacity-70"
+            className="w-full mt-[30px] py-3 sm:py-[18px] rounded-xl bg-[#25C866] text-white font-bold hover:opacity-90 transition cursor-pointer text-base sm:text-lg disabled:opacity-70"
           >
             {loading ? "Sending..." : "Confirm & Send"}
           </button>
-          F
         </div>
       </div>
     </div>
