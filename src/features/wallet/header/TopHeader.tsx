@@ -52,7 +52,7 @@ export default function TopHeader() {
           {/* RIGHT */}
           <div className="flex items-center gap-2 sm:gap-[15px]">
             {/* SEARCH */}
-            <div className="relative hidden sm:block">
+            {/* <div className="relative hidden sm:block">
               <BiSearch
                 size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7D83]"
@@ -63,7 +63,7 @@ export default function TopHeader() {
                 className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px]
               "
               />
-            </div>
+            </div> */}
 
             {/* ICONS */}
             <button

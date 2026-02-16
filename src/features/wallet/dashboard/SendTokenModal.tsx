@@ -1,13 +1,13 @@
 import { IoClose } from "react-icons/io5";
-import type { RootState } from "../../../redux/store/store";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { getGasFee } from "../../../api/transactionApi";
-import ButtonLoader from "../../component/ButtonLoader";
 import Loader from "../../component/Loader";
 import { formatBalance } from "../../component/format";
 import { setTransactionData } from "../../../redux/transactionSlice";
+import { HiOutlineQrCode } from "react-icons/hi2";
+import toast from "react-hot-toast";
+import QRCode from "react-qr-code";
 interface SendTokenModalProps {
   open: boolean;
   onClose: () => void;
@@ -15,16 +15,15 @@ interface SendTokenModalProps {
 }
 
 function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
-  const activeWallet = useSelector(
-  (state: RootState) => state.activeWallet.wallet
-);
+  // const activeWallet = useSelector(
+  //   (state: RootState) => state.activeWallet.wallet,
+  // );
   const dispatch = useDispatch();
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [gasLoading, setGasLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
   const [gasFee, setGasFee] = useState<string | null>(null);
+  const [showQR, setShowQR] = useState(false);
   const [errors, setErrors] = useState<{
     toAddress?: string;
     amount?: string;
@@ -32,13 +31,13 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
   const totalCost = Number(amount || 0) + gasFeeInEth;
 
-  useEffect(() => {
-  if (!open) return;
+  //   useEffect(() => {
+  //   if (!open) return;
 
-  if (activeWallet?.address) {
-    setToAddress(activeWallet.address);
-  }
-}, [open, activeWallet]);
+  //   if (activeWallet?.address) {
+  //     setToAddress(activeWallet.address);
+  //   }
+  // }, [open, activeWallet]);
 
   useEffect(() => {
     if (!open) return;
@@ -77,49 +76,33 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  const handleShowQR = () => {
+    if (!toAddress.trim()) {
+      toast.error("Please enter recipient address first");
+      return;
+    }
 
-  const handleApiErrors = (apiErrors: Record<string, string[]>) => {
-    const newErrors: typeof errors = {};
-    let generalError: string | null = null;
-
-    Object.entries(apiErrors).forEach(([key, messages]) => {
-      const message = messages[0]; // first error message
-
-      if (key === "to_address") {
-        newErrors.toAddress = message;
-      } else if (key === "amount") {
-        newErrors.amount = message;
-      } else {
-        // wallet_id or any other backend error
-        generalError = message;
-      }
-    });
-
-    setErrors(newErrors);
-    setFormError(generalError);
+    setShowQR(true);
   };
+  const handleSend = () => {
+    if (!validate()) return;
 
-const handleSend = () => {
-  if (!validate()) return;
+    const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
+    const totalCost = Number(amount || 0) + gasFeeInEth;
 
-  const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
-  const totalCost = Number(amount || 0) + gasFeeInEth;
+    dispatch(
+      setTransactionData({
+        toAddress,
+        amount,
+        gasFee: gasFee || "0",
+        totalCost: totalCost.toString(),
+      }),
+    );
 
-  // ✅ store data in redux
-  dispatch(
-    setTransactionData({
-      toAddress,
-      amount,
-      gasFee: gasFee || "0",
-      totalCost: totalCost.toString(),
-    })
-  );
-
-  // ✅ move to confirm modal
-  onClose();
-  onNext();
-};
-
+    // ✅ move to confirm modal
+    onClose();
+    onNext();
+  };
 
   if (!open) return null;
 
@@ -147,19 +130,12 @@ const handleSend = () => {
             <h3 className="text-[#25C866] font-medium text-lg mb-[15px]">
               Send Token
             </h3>
-            {formError && (
-              <div className="mb-4 rounded-lg border border-[#ef4343] bg-[#ef43431a] px-4 py-3">
-                <p className="text-[#ef4343] text-sm font-medium">
-                  {formError}
-                </p>
-              </div>
-            )}
             <div className="mb-5">
               <label className="text-lg text-[#7A7D83] mb-[10px] block">
                 Select Token
               </label>
 
-              <select className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-lg text-white outline-none">
+              <select className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-lg text-white outline-none">
                 <option value="" className="bg-[#161F37] text-[#7A7D83]">
                   Select token
                 </option>
@@ -184,7 +160,7 @@ const handleSend = () => {
               </label>
 
               <div className="flex gap-3 items-center">
-                {/* <input
+                <input
                   value={toAddress}
                   onChange={(e) => {
                     setToAddress(e.target.value);
@@ -193,20 +169,17 @@ const handleSend = () => {
                     }
                   }}
                   placeholder="Enter recipient address"
-                  className={`flex-1 bg-transparent border rounded-xl px-5 py-4 text-lg text-white outline-none
-     ${errors.toAddress ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
-                /> */}
-                <input
-                value={toAddress}
-                readOnly
-                className="flex-1 bg-transparent border rounded-xl px-5 py-4 text-lg text-white outline-none border-[#3C3D47] opacity-80"
-              />
-                {/* <button
-                className="w-[50px] h-[50px] rounded-xl bg-[#202A43] 
+                  className={`flex-1 bg-transparent border rounded-xl px-5 py-3 text-lg text-white outline-none
+  ${errors.toAddress ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
+                />
+                <button
+                  type="button"
+                  onClick={handleShowQR}
+                  className=" px-3 py-3 rounded-xl bg-[#202A43] cursor-pointer
                 border border-[#3C3D47] flex justify-center items-center text-[#7D7E84]"
                 >
-                <HiOutlineQrCode size={26} />
-                </button> */}
+                  <HiOutlineQrCode size={26} />
+                </button>
               </div>
               {errors.toAddress && (
                 <p className="text-[#ef4343] text-sm mt-1">
@@ -235,7 +208,7 @@ const handleSend = () => {
                 }}
                 placeholder="Amount"
                 inputMode="decimal"
-                className={`w-full bg-transparent border rounded-xl px-5 py-4 text-lg text-white outline-none
+                className={`w-full bg-transparent border rounded-xl px-5 py-3 text-lg text-white outline-none
     ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
               />
 
@@ -259,7 +232,9 @@ const handleSend = () => {
               <div className="flex justify-between text-white text-lg font-medium">
                 <p>Total Cost</p>
                 <p>
-                  {amount && gasFee ? `${formatBalance(totalCost)} ETH` : "--"}
+                  {amount && gasFee
+                    ? `${formatBalance(totalCost)} ETH`
+                    : "0.00 ETH"}
                 </p>
               </div>
             </div>
@@ -272,11 +247,42 @@ const handleSend = () => {
           flex items-center justify-center gap-2
           disabled:opacity-70 disabled:cursor-not-allowed"
             >
-            Send Token
+              Send Token
             </button>
           </div>
         </div>
       </div>
+
+      {showQR && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+          <div
+            onClick={() => setShowQR(false)}
+            className="absolute inset-0 bg-black/70"
+          />
+
+          <div className="relative bg-[#161F37] border border-[#3C3D47] rounded-xl p-6 w-[300px]">
+            <h4 className="text-white text-lg mb-4 text-center">
+              Recipient Address QR
+            </h4>
+
+            <div className="bg-[#202A43] p-3 rounded flex justify-center">
+              <QRCode
+                value={toAddress}
+                size={200}
+                bgColor="#202A43"
+                fgColor="#ffffff"
+              />
+            </div>
+
+            <button
+              onClick={() => setShowQR(false)}
+              className="w-full mt-4 py-2 rounded-lg bg-[#202A43] text-white cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

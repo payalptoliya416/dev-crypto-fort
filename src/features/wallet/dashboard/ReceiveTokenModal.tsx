@@ -1,8 +1,9 @@
 import { IoClose } from "react-icons/io5";
 import { FiCopy } from "react-icons/fi";
 import toast from "react-hot-toast";
-import scanner from "@/assets/scanner.png";
 import QRCode from "react-qr-code";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store/store";
 
 interface ReceiveTokenModalProps {
   open: boolean;
@@ -10,19 +11,27 @@ interface ReceiveTokenModalProps {
 }
 
 function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
+   const activeWallet = useSelector(
+    (state: RootState) => state.activeWallet.wallet,
+  );
+
   if (!open) return null;
 
-  const address = "51cdd0b050d998c1bfb3af19fb5ffd048";
+  const address = activeWallet?.address || "";
 
-  // ✅ Copy Address Function
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(address);
-      toast.success("Address copied!");
-    } catch {
-      toast.error("Failed to copy!");
-    }
-  };
+ const handleCopy = async () => {
+  if (!address) {
+    toast.error("Address not available");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(address);
+    toast.success("Address copied!");
+  } catch {
+    toast.error("Failed to copy!");
+  }
+};
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto p-5">
@@ -70,7 +79,7 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
 
           <div className="flex justify-center mb-[30px]">
              <div className="border border-[#3C3D47] rounded-xl bg-[#202A43] p-[26px]">
-                <QRCode value={scanner} bgColor="#202A43" fgColor="#ffffff" size={220} />
+               {address &&  <QRCode value={address} bgColor="#202A43" fgColor="#ffffff" size={220} />}
              </div>
           </div>
 
@@ -78,7 +87,7 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
             <p className="text-white text-lg font-medium">Your Address:</p>
             <div className="flex justify-center items-center gap-2">
             <p className="text-[#7A7D83] text-sm truncate flex-1">
-              {address}
+               {address || "--"}
             </p>
 
             <FiCopy

@@ -154,6 +154,7 @@ function Balance() {
       ),
     },
   ];
+  
   return (
     <DashboardLayout>
       <div className="w-full rounded-2xl bg-[#161F37] border border-[#3C3D47]">

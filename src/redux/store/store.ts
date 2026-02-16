@@ -1,7 +1,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import walletReducer from "../walletSlice";
 import activeWalletReducer from "../activeWalletSlice";
-
+import transactionReducer from "../transactionSlice";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
@@ -20,6 +20,7 @@ import {
 const rootReducer = combineReducers({
   wallet: walletReducer,
   activeWallet: activeWalletReducer,
+    transaction: transactionReducer,
 });
 
 /**
@@ -28,7 +29,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["wallet", "activeWallet"], // ✅ both persist
+  whitelist: ["wallet", "activeWallet"], 
 };
 
 /**
