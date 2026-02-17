@@ -34,7 +34,7 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto px-3 sm:px-5">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
         onClick={onClose}
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"

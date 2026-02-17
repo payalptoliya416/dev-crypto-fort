@@ -16,7 +16,6 @@ function CreateWallet() {
     try {
       setLoading(true);
       const res = await createWallet(false);
-
       dispatch(setWallet(res.data));
       navigate("/recovery-phrase");
     } finally {

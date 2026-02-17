@@ -98,7 +98,7 @@ function ConfirmTransactionModal({
           </button>
         </div>
 
-        <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-4 sm:p-6 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]">
+        <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-4 sm:p-6 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] max-h-[90vh] overflow-y-auto">
           <h3 className="text-[#25C866] font-medium text-xl mb-[15px]">
             Confirm transaction
           </h3>

@@ -20,6 +20,36 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   );
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
+  const downloadFile = async (
+    url: string,
+    filename: string,
+    mimeType?: string,
+  ) => {
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "*/*" },
+      });
+
+      if (!res.ok) throw new Error("Download failed");
+
+      const blob = await res.blob();
+      const finalBlob = mimeType ? new Blob([blob], { type: mimeType }) : blob;
+
+      const blobUrl = URL.createObjectURL(finalBlob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      toast.error("Download blocked by browser");
+    }
+  };
+
   const handleExportTxHash = async () => {
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
@@ -41,12 +71,12 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       toast.success("Downloading...");
 
-      const link = document.createElement("a");
-      link.href = filePath;
-      link.download = filePath.split("/").pop() || "txhash_report";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      let fileName = filePath.split("/").pop() || "txhash_report";
+      if (!fileName.includes(".")) {
+        fileName += ".txt";
+      }
+
+      await downloadFile(filePath, fileName, "text/plain");
     } catch (err: any) {
       toast.error(err?.message || "Download failed");
     } finally {
@@ -72,7 +102,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       toast.dismiss();
 
       const fileUrl = res?.data?.file_url;
-      const fileName = res?.data?.file_name;
+      let fileName = res?.data?.file_name;
 
       if (!fileUrl) {
         toast.error("File not available");
@@ -81,12 +111,26 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       toast.success("Downloading...");
 
-      const link = document.createElement("a");
-      link.href = fileUrl;
-      link.download = fileName || `transactions.${type}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const extension = type === "excel" ? "xlsx" : "pdf";
+      if (!fileName) {
+        fileName = `transactions.${extension}`;
+      } else {
+        if (
+          type === "excel" &&
+          (fileName.endsWith(".excel") || !fileName.includes("."))
+        ) {
+          fileName = fileName.replace(/\.excel$/, "") + ".xlsx";
+        } else if (!fileName.includes(".")) {
+          fileName += `.${extension}`;
+        }
+      }
+
+      const mimeType =
+        type === "excel"
+          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          : "application/pdf";
+
+      await downloadFile(fileUrl, fileName, mimeType);
     } catch (err: any) {
       toast.dismiss();
       toast.error(err?.message || "Export failed");
@@ -96,13 +140,11 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto px-3 sm:px-5">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
         onClick={onClose}
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
       />
-
-      {/* Modal Box */}
       <div className="relative w-full max-w-[760px]">
         {/* Close Button */}
         <div className="flex justify-end">
@@ -126,10 +168,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               Currency
             </label>
 
-            <select
-              className="w-full bg-[#161F37] border border-[#3C3D47]
-  rounded-xl px-6 py-4 text-base sm:text-lg text-white outline-none"
-            >
+            <select className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-6 py-4 text-base sm:text-lg text-white outline-none">
               <option className="bg-[#161F37] text-[#7A7D83]">
                 Select currency
               </option>
@@ -163,8 +202,8 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           <div
             onClick={exporting ? undefined : handleExportTxHash}
             className={`relative w-full border border-[#3C3D47] rounded-xl p-3 sm:p-5 mb-[15px]
-  bg-[#202A43]/40 transition
-  ${exporting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#202A43]/70"}`}
+          bg-[#202A43]/40 transition
+          ${exporting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#202A43]/70"}`}
           >
             {exporting === "backup" && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#161F37]/70 rounded-xl">

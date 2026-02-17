@@ -97,7 +97,7 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
   if (!open) return null;
   return (
     <>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto px-3 sm:px-5">
+      <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
         {/* Overlay */}
         <div
           onClick={onClose}
