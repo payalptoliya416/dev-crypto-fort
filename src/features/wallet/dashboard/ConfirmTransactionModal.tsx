@@ -51,6 +51,7 @@ function ConfirmTransactionModal({
         wallet_id: activeWallet.id,
         to_address: toAddress,
         amount: amount,
+        type: "eth", 
       });
 
       if (res.success) {

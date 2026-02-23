@@ -4,6 +4,7 @@ export interface SendTransactionPayload {
   wallet_id: number;
   to_address: string;
   amount: string;
+    type: string; 
 }
 
 export const sendTransaction = (payload: SendTransactionPayload) => {

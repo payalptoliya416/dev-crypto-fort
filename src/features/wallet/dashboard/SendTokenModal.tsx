@@ -21,6 +21,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   const dispatch = useDispatch();
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
+  const [selectedToken, setSelectedToken] = useState("");
   const [gasLoading, setGasLoading] = useState(false);
   const [gasFee, setGasFee] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
@@ -135,21 +136,25 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                 Select Token
               </label>
 
-              <select className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none">
+              <select
+                value={selectedToken}
+                onChange={(e) => setSelectedToken(e.target.value)}
+                className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none"
+              >
                 <option value="" className="bg-[#161F37] text-[#7A7D83]">
                   Select token
                 </option>
 
-                <option value="ETH" className="bg-[#161F37] text-white">
+                <option value="eth" className="bg-[#161F37] text-white">
                   ETH
                 </option>
 
-                <option value="USDT" className="bg-[#161F37] text-white">
+                <option value="usdt" className="bg-[#161F37] text-white">
                   USDT
                 </option>
 
-                <option value="BTS" className="bg-[#161F37] text-white">
-                  BTS
+                <option value="btc" className="bg-[#161F37] text-white">
+                  BTC
                 </option>
               </select>
             </div>
@@ -172,14 +177,14 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                   className={`flex-1 min-w-0 bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none
   ${errors.toAddress ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
                 />
-                <button
+                {/* <button
                   type="button"
                   onClick={handleShowQR}
                   className=" px-3 py-3 rounded-xl bg-[#202A43] cursor-pointer
                 border border-[#3C3D47] flex justify-center items-center text-[#7D7E84]"
                 >
                   <HiOutlineQrCode size={26} />
-                </button>
+                </button> */}
               </div>
               {errors.toAddress && (
                 <p className="text-[#ef4343] text-sm mt-1">

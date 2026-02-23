@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import CurrencyDropdown from "./CurrencyDropdown";
 import vector from "@/assets/vector.png";
@@ -16,6 +16,40 @@ export default function WalletSummary() {
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
+const [currency, setCurrency] = useState("USD");
+const [ethPrice, setEthPrice] = useState(0);
+
+const ethBalance = 28.05605;
+const totalValue = ethBalance * ethPrice;
+
+useEffect(() => {
+  const fetchPrice = async () => {
+     const res = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd,eur,gbp,aed,aud,cad,nok,nzd,chf,btc`
+      );
+    const data = await res.json();
+    setEthPrice(data.ethereum[currency.toLowerCase()]);
+  };
+
+  fetchPrice();
+}, [currency]);
+
+const getSymbol = (cur: string) => {
+  const symbols: any = {
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    AED: "د.إ",
+    AUD: "A$",
+    CAD: "C$",
+    NOK: "kr",
+    NZD: "NZ$",
+    CHF: "CHF",
+    BTC: "₿",
+  };
+
+  return symbols[cur] || "";
+};
 
   return (
     <>
@@ -79,16 +113,17 @@ export default function WalletSummary() {
                   </div>
                 </div>
                 <div>
-                  <CurrencyDropdown />
+                 <CurrencyDropdown value={currency} onChange={setCurrency} />
                 </div>
               </div>
-              <h2 className="text-[#25C866] text-3xl xl:text-5xl font-semibold mb-[15px]">
-                $80657.48
-              </h2>
+             <h2 className="text-[#25C866] text-3xl xl:text-5xl font-semibold mb-[15px]">
+              {getSymbol(currency)}
+              {totalValue?.toLocaleString()}
+            </h2>
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div className="flex items-center gap-[10px] text-white text-xl">
                   <img src={vector} alt="vector" />
-                  <span>28.05605 ETH</span>
+                 <span>{ethBalance} ETH</span>
                 </div>
                 <div className="bg-[#25C8660D] rounded-lg py-[6px] px-[10px] flex items-center gap-[5px] text-[#25C866] text-xs">
                   <FaArrowTrendUp className="" /> +79.79 (2.85%)

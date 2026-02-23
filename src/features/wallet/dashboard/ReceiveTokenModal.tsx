@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
+import { useEffect, useState } from "react";
+import { getWallets } from "../../../api/walletApi";
 
 interface ReceiveTokenModalProps {
   open: boolean;
@@ -15,10 +17,50 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
     (state: RootState) => state.activeWallet.wallet,
   );
 
-  if (!open) return null;
+  const [wallets, setWallets] = useState<any[]>([]);
 
-  const address = activeWallet?.address || "";
+  const [selectedToken, setSelectedToken] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState("eth");
+ const address = selectedAddress;
+  console.log("wallets",selectedAddress)
+  useEffect(() => {
+    if (!open) return;
 
+    const fetchWallets = async () => {
+      try {
+        const res = await getWallets();
+        if (res.success && res.data) {
+          setWallets(res.data);
+        }
+      } catch {
+        toast.error("Failed to load wallets");
+      }
+    };
+
+    fetchWallets();
+  }, [open]);
+  useEffect(() => {
+    if (!wallets.length || !activeWallet?.id) return;
+
+    const currentWallet = wallets.find(
+      (wallet) => wallet.id === activeWallet.id,
+    );
+
+    if (!currentWallet) return;
+
+    if (selectedToken === "eth") {
+      setSelectedAddress(currentWallet.address || "");
+    } else if (selectedToken === "btc") {
+      setSelectedAddress(currentWallet.btc_address || "");
+    } else {
+      setSelectedAddress("");
+    }
+  }, [selectedToken, wallets, activeWallet]);
+useEffect(() => {
+  if (open) {
+    setSelectedToken("eth");
+  }
+}, [open]);
   const handleCopy = async () => {
     if (!address) {
       toast.error("Address not available");
@@ -32,7 +74,7 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
       toast.error("Failed to copy!");
     }
   };
-
+  if (!open) return null;
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
@@ -66,14 +108,13 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
             </label>
 
             <select
-              className="w-full bg-[#161F37] border border-[#3C3D47] 
-              rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
+              value={selectedToken}
+              onChange={(e) => setSelectedToken(e.target.value)}
+              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
             >
-              <option className="bg-[#161F37] text-[#7A7D83]">
-                Select token
-              </option>
-              <option className="bg-[#161F37] text-white">Ethereum</option>
-              <option className="bg-[#161F37] text-white">Bitcoin</option>
+              <option value="">Select token</option>
+              <option value="eth">Ethereum</option>
+              <option value="btc">Bitcoin</option>
             </select>
           </div>
 
@@ -124,12 +165,12 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
               Only send ETH / ERC-20 tokens to this address.
             </p>
           </div>
-          <button
+          {/* <button
             className="w-full mt-[30px] py-3 sm:py-[18px] rounded-xl bg-[#25C866] 
             text-white font-bold hover:opacity-90 transition cursor-pointer text-base sm:text-lg"
           >
             Confirm &amp; Send
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

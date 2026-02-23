@@ -173,8 +173,15 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                 Select currency
               </option>
               <option className="bg-[#161F37] text-white">USD</option>
-              <option className="bg-[#161F37] text-white">INR</option>
               <option className="bg-[#161F37] text-white">EUR</option>
+              <option className="bg-[#161F37] text-white">GBP</option>
+              <option className="bg-[#161F37] text-white">AED</option>
+              <option className="bg-[#161F37] text-white">AUD</option>
+              <option className="bg-[#161F37] text-white">CAD</option>
+              <option className="bg-[#161F37] text-white">NOK</option>
+              <option className="bg-[#161F37] text-white">NZD</option>
+              <option className="bg-[#161F37] text-white">CHF</option>
+              <option className="bg-[#161F37] text-white">BTC</option>
             </select>
           </div>
 
@@ -184,14 +191,16 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             </label>
 
             <select
-              className="w-full bg-[#161F37] border border-[#3C3D47]
-  rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
+              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
             >
               <option className="bg-[#161F37] text-[#7A7D83]">
                 Select token
               </option>
-              <option className="bg-[#161F37] text-white">Ethereum</option>
-              <option className="bg-[#161F37] text-white">Bitcoin</option>
+              <option className="bg-[#161F37] text-white">French</option>
+              <option className="bg-[#161F37] text-white">English</option>
+              <option className="bg-[#161F37] text-white">Finnish</option>
+              <option className="bg-[#161F37] text-white">German</option>
+              <option className="bg-[#161F37] text-white">Arabic</option>
             </select>
           </div>
 
