@@ -101,7 +101,7 @@ function Balance() {
     };
 
     fetchBalanceAndPrice();
-    intervalId = setInterval(fetchBalanceAndPrice, 12000);
+    intervalId = setInterval(fetchBalanceAndPrice, 500000);
 
     return () => clearInterval(intervalId);
   }, [activeWallet?.id]);
@@ -126,7 +126,7 @@ function Balance() {
       align: "right",
       render: (row) => (
         <p className="text-[#7A7D83] text-base font-normal">
-          {formatBalance(row.balance)}  ETH
+         {formatBalance(row.balance)} {row.symbol}
         </p>
       ),
     },
