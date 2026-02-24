@@ -32,6 +32,7 @@ function TransactionPage() {
       try {
         const res = await getTransactions({
           wallet_id: activeWallet.id,
+          type: "all",
         });
         const mapTxStatus = (
           status: Transaction["txreceipt_status"],
@@ -48,7 +49,7 @@ function TransactionPage() {
         const mapped: TransactionRow[] = res.data.map((tx: Transaction) => ({
           name: "Ethereum",
           address:
-          tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
+            tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
           amount: `${tx.amount} ETH`,
           type: tx.transaction_type === "Send" ? "Sent" : "Received",
           status: mapTxStatus(tx.txreceipt_status),
@@ -127,10 +128,18 @@ function TransactionPage() {
         <div className="px-5 pt-5 pb-[15px]">
           <h3 className="tet-xl text-[#25C866] font-semibold">Transaction</h3>
         </div>
-
         {loading ? (
-          <div className="flex justify-center items-center py-20">
+          <div className="flex justify-center items-center py-20">  
             <Loader />
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <p className="text-lg text-[#7A7D83] font-medium">
+              No transactions found
+            </p>
+            <p className="text-sm text-[#434548] mt-2">
+              This wallet does not have any transaction history yet.
+            </p>
           </div>
         ) : (
           <CommonTable data={rows} columns={columns} />

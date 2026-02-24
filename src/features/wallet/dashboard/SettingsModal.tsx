@@ -8,7 +8,6 @@ import {
 } from "../../../api/walletApi";
 import { useState } from "react";
 import { setCurrency } from "../../../redux/currencySlice";
-import { useTranslation } from "react-i18next";
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
@@ -21,39 +20,71 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   );
   const dispatch = useDispatch();
   const currency = useSelector((state: RootState) => state.currency.value);
-  const { t } = useTranslation();
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
-  const downloadFile = async (
-    url: string,
-    filename: string,
-    mimeType?: string,
-  ) => {
-    try {
-      const res = await fetch(url, {
-        method: "GET",
-        credentials: "include",
-        headers: { Accept: "*/*" },
-      });
+  // const downloadFile = async (
+  //   url: string,
+  //   filename: string,
+  //   mimeType?: string,
+  // ) => {
+  //   try {
+  //     const res = await fetch(url, {
+  //       method: "GET",
+  //       credentials: "include",
+  //       headers: { Accept: "*/*" },
+  //     });
 
-      if (!res.ok) throw new Error("Download failed");
+  //     if (!res.ok) throw new Error("Download failed");
 
-      const blob = await res.blob();
-      const finalBlob = mimeType ? new Blob([blob], { type: mimeType }) : blob;
+  //     const blob = await res.blob();
+  //     const finalBlob = mimeType ? new Blob([blob], { type: mimeType }) : blob;
 
-      const blobUrl = URL.createObjectURL(finalBlob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch (e) {
-      toast.error("Download blocked by browser");
-    }
-  };
+  //     const blobUrl = URL.createObjectURL(finalBlob);
+  //     const a = document.createElement("a");
+  //     a.href = blobUrl;
+  //     a.download = filename;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     document.body.removeChild(a);
+  //     URL.revokeObjectURL(blobUrl);
+  //   } catch (e) {
+  //     toast.error("Download blocked by browser");
+  //   }
+  // };
 
+  // const handleExportTxHash = async () => {
+  //   if (!activeWallet?.id) {
+  //     toast.error("Wallet not found");
+  //     return;
+  //   }
+
+  //   try {
+  //     setExporting("backup");
+  //     const res = await downloadWalletBackup({
+  //       wallet_id: activeWallet.id,
+  //     });
+
+  //     const filePath = res?.data?.file_path;
+
+  //     if (!filePath) {
+  //       toast.error("File not available");
+  //       return;
+  //     }
+
+  //     toast.success("Downloading...");
+
+  //     let fileName = filePath.split("/").pop() || "txhash_report";
+  //     if (!fileName.includes(".")) {
+  //       fileName += ".txt";
+  //     }
+
+  //     await downloadFile(filePath, fileName, "text/plain");
+  //   } catch (err: any) {
+  //     toast.error(err?.message || "Download failed");
+  //   } finally {
+  //     setExporting(null);
+  //   }
+  // };
   const handleExportTxHash = async () => {
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
@@ -62,6 +93,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
     try {
       setExporting("backup");
+
       const res = await downloadWalletBackup({
         wallet_id: activeWallet.id,
       });
@@ -75,20 +107,24 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       toast.success("Downloading...");
 
-      let fileName = filePath.split("/").pop() || "txhash_report";
-      if (!fileName.includes(".")) {
-        fileName += ".txt";
-      }
+      const fileName = filePath.split("/").pop() || "backup.txt";
 
-      await downloadFile(filePath, fileName, "text/plain");
+      const link = document.createElement("a");
+      link.href = filePath;
+      link.download = fileName; 
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err: any) {
       toast.error(err?.message || "Download failed");
     } finally {
       setExporting(null);
     }
   };
-
-  const handleExportTxReport = async (type: "excel" | "pdf") => {
+  const handleExportTxReport = async (
+    format: "excel" | "pdf",
+    exportType: "all" | "eth" | "btc" | "usdt" = "all",
+  ) => {
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
       return;
@@ -100,14 +136,14 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       const res = await exportTransactions({
         wallet_id: activeWallet.id,
-        type,
+        format: format,
+        type: exportType,
       });
 
       toast.dismiss();
 
       const fileUrl = res?.data?.file_url;
       let fileName = res?.data?.file_name;
-
       if (!fileUrl) {
         toast.error("File not available");
         return;
@@ -115,26 +151,25 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       toast.success("Downloading...");
 
-      const extension = type === "excel" ? "xlsx" : "pdf";
+      const extension = format === "excel" ? "xlsx" : "pdf";
+
       if (!fileName) {
         fileName = `transactions.${extension}`;
-      } else {
-        if (
-          type === "excel" &&
-          (fileName.endsWith(".excel") || !fileName.includes("."))
-        ) {
-          fileName = fileName.replace(/\.excel$/, "") + ".xlsx";
-        } else if (!fileName.includes(".")) {
-          fileName += `.${extension}`;
-        }
+      } else if (!fileName.includes(".")) {
+        fileName += `.${extension}`;
       }
 
-      const mimeType =
-        type === "excel"
-          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          : "application/pdf";
+      // const mimeType =
+      //   format === "excel"
+      //     ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      //     : "application/pdf";
 
-      await downloadFile(fileUrl, fileName, mimeType);
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err: any) {
       toast.dismiss();
       toast.error(err?.message || "Export failed");
@@ -142,12 +177,13 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setExporting(null);
     }
   };
+
   const changeLanguage = (lang: string) => {
     localStorage.setItem("lang", lang);
 
     const interval = setInterval(() => {
       const select = document.querySelector(
-        ".goog-te-combo"
+        ".goog-te-combo",
       ) as HTMLSelectElement;
 
       if (select) {
@@ -210,11 +246,11 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
           <div className="mb-10">
             <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
-              <label>{t("language")}</label>
+              <label>Language</label>
             </label>
 
             <select
-            defaultValue="en"
+              defaultValue="en"
               onChange={(e) => changeLanguage(e.target.value)}
               className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
             >
@@ -289,7 +325,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               <button
                 onClick={() => {
                   setShowExportOptions(false);
-                  handleExportTxReport("excel");
+                  handleExportTxReport("excel", "all");
                 }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]"
@@ -301,7 +337,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               <button
                 onClick={() => {
                   setShowExportOptions(false);
-                  handleExportTxReport("pdf");
+                  handleExportTxReport("pdf", "all");
                 }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]"

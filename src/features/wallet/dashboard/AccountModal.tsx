@@ -200,7 +200,8 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
                                 left: menuPosition.left,
                               }}
                               className="fixed w-[170px] rounded-xl bg-[#0F172A] border border-[#FFFFFF0D] shadow-lg
-                            z-[9999]">
+                            z-[9999]"
+                            >
                               <button
                                 onClick={() => {
                                   handleCopy(wallet.address);

@@ -10,7 +10,7 @@ import Dashboard from "./features/wallet/dashboard/Dashboard";
 import Balance from "./features/wallet/balance/Balance";
 import Transaction from "./features/wallet/transaction/Transaction";
 import Login from "./features/wallet/pages/Login";
-// import ProtectedRoute from "./routes/ProtectedRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (
@@ -36,11 +36,11 @@ function App() {
           <Route path="/private-key" element={<PrivateKey />} />
           <Route path="/seed-phrase" element={<SeedPhrase />} />
 
-          {/* <Route element={<ProtectedRoute />}> */}
+          <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/balance" element={<Balance />} />
             <Route path="/transaction" element={<Transaction />} />
-          {/* </Route> */}
+          </Route>
         </Routes>
       </BrowserRouter>
     </>

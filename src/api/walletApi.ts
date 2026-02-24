@@ -43,7 +43,8 @@ export const downloadWalletBackup = (payload: DownloadBackupPayload) => {
 
 export interface ExportTransactionsPayload {
   wallet_id: number;
-  type: "excel" | "pdf";
+  format: "excel" | "pdf";
+  type: "all" | "eth" | "btc" | "usdt";
 }
 
 export interface ExportTransactionsResponse {
@@ -55,18 +56,12 @@ export interface ExportTransactionsResponse {
   };
 }
 
-export const exportTransactions = (
-  payload: ExportTransactionsPayload,
-) => {
-  return privateApi<ExportTransactionsResponse>(
-    "/transactions/export",
-    {
-      method: "POST",
-      body: payload,
-    }
-  );
+export const exportTransactions = (payload: ExportTransactionsPayload) => {
+  return privateApi<ExportTransactionsResponse>("/transactions/export", {
+    method: "POST",
+    body: payload,
+  });
 };
-
 
 export interface Transaction {
   id: number;
@@ -86,6 +81,7 @@ export interface Transaction {
 
 export interface GetTransactionsPayload {
   wallet_id: number;
+   type: "all" | "eth" | "btc" | "usdt";
 }
 
 export interface GetTransactionsResponse {
@@ -94,16 +90,11 @@ export interface GetTransactionsResponse {
   data: Transaction[];
 }
 
-export const getTransactions = (
-  payload: GetTransactionsPayload,
-) => {
-  return privateApi<GetTransactionsResponse>(
-    "/get-transactions",
-    {
-      method: "POST",
-      body: payload,
-    }
-  );
+export const getTransactions = (payload: GetTransactionsPayload) => {
+  return privateApi<GetTransactionsResponse>("/get-transactions", {
+    method: "POST",
+    body: payload,
+  });
 };
 
 // -------------------
@@ -120,7 +111,7 @@ export const getLivePrices = async () => {
     "https://api.coingecko.com/api/v3/simple/price" +
       "?ids=ethereum,bitcoin,binancecoin,solana,tether,arbitrum,xrp,dogecoin" +
       "&vs_currencies=usd" +
-      "&include_24hr_change=true"
+      "&include_24hr_change=true",
   );
 
   return (await res.json()) as CoinPriceResponse;
@@ -141,20 +132,23 @@ export interface UpdateWalletLabelResponse {
   };
 }
 
-export const updateWalletLabel = (
-  payload: UpdateWalletLabelPayload,
-) => {
-  return privateApi<UpdateWalletLabelResponse>(
-    "/wallets/label-update",
-    {
-      method: "POST",
-      body: payload,
-    }
-  );
+export const updateWalletLabel = (payload: UpdateWalletLabelPayload) => {
+  return privateApi<UpdateWalletLabelResponse>("/wallets/label-update", {
+    method: "POST",
+    body: payload,
+  });
 };
 
 export interface GetBalancePayload {
   wallet_id: number;
+  type: "all";
+}
+
+
+export interface CoinBalance {
+  eth: string;
+  btc: string;
+  usdt: string;
 }
 
 export interface GetBalanceResponse {
@@ -163,19 +157,15 @@ export interface GetBalanceResponse {
   data: {
     wallet_id: number;
     address: string;
-    balance: string;            
-    formatted_balance: string;  
+    btc_address: string;
+    type: string;
+    balance: CoinBalance;
   };
 }
 
-export const getBalance = (
-  payload: GetBalancePayload,
-) => {
-  return privateApi<GetBalanceResponse>(
-    "/get-balance",
-    {
-      method: "POST",
-      body: payload,
-    }
-  );
+export const getBalance = (payload: GetBalancePayload) => {
+  return privateApi<GetBalanceResponse>("/get-balance", {
+    method: "POST",
+    body: payload,
+  });
 };

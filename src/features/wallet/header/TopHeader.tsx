@@ -54,7 +54,6 @@ export default function TopHeader() {
 
       navigate("/login");
     } catch (error) {
-      console.error("Logout Error:", error);
       localStorage.removeItem("token");
       navigate("/login");
     }

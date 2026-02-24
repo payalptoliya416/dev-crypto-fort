@@ -10,7 +10,10 @@ import type { RootState } from "../../../redux/store/store";
 import { getBalance, getLivePrices } from "../../../api/walletApi";
 
 import d1 from "@/assets/d1.png";
+import d2 from "@/assets/d2.png";
+import d5 from "@/assets/d5.png";
 import up from "@/assets/up.svg";
+import { formatBalance } from "../../component/format";
 
 interface Asset {
   name: string;
@@ -33,44 +36,75 @@ function Balance() {
     (state: RootState) => state.activeWallet.wallet,
   );
 
-useEffect(() => {
-  if (!activeWallet?.id) return;
+  useEffect(() => {
+    if (!activeWallet?.id) return;
 
-  let intervalId: ReturnType<typeof setInterval>;
+    let intervalId: ReturnType<typeof setInterval>;
 
-  const fetchBalanceAndPrice = async () => {
-    try {
-      const balanceRes = await getBalance({
-        wallet_id: activeWallet.id,
-      });
+    const fetchBalanceAndPrice = async () => {
+      try {
+        const balanceRes = await getBalance({
+          wallet_id: activeWallet.id,
+          type: "all",
+        });
 
-      const priceRes = await getLivePrices();
-      const ethPrice = priceRes.ethereum.usd;
-      const ethChange = priceRes.ethereum.usd_24h_change;
+        let priceRes;
 
-      const asset: Asset = {
-        name: "Ethereum",
-        symbol: "ETH",
-        balance: balanceRes.data.formatted_balance,
-        price: `$${ethPrice.toLocaleString()}`,
-        change: `${ethChange.toFixed(2)}%`,
-        up: ethChange >= 0,
-        icon: d1,
-      };
+        try {
+          priceRes = await getLivePrices();
+        } catch {
+          priceRes = {
+            ethereum: { usd: 0, usd_24h_change: 0 },
+            bitcoin: { usd: 0, usd_24h_change: 0 },
+            tether: { usd: 0, usd_24h_change: 0 },
+          };
+        }
 
-      setAssets([asset]);
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to load balance");
-    } finally {
-      setLoading(false);
-    }
-  };
+        const balances = balanceRes.data.balance;
 
-  fetchBalanceAndPrice();
-  intervalId = setInterval(fetchBalanceAndPrice, 12000);
+        const assetList: Asset[] = [
+          {
+            name: "Ethereum",
+            symbol: "ETH",
+            balance: balances.eth,
+            price: `$${priceRes.ethereum.usd}`,
+            change: `${priceRes.ethereum.usd_24h_change}%`,
+            up: priceRes.ethereum.usd_24h_change >= 0,
+            icon: d1,
+          },
+          {
+            name: "Bitcoin",
+            symbol: "BTC",
+            balance: balances.btc,
+            price: `$${priceRes.bitcoin.usd}`,
+            change: `${priceRes.bitcoin.usd_24h_change}%`,
+            up: priceRes.bitcoin.usd_24h_change >= 0,
+            icon: d2,
+          },
+          {
+            name: "Tether",
+            symbol: "USDT",
+            balance: balances.usdt,
+            price: `$${priceRes.tether.usd}`,
+            change: `${priceRes.tether.usd_24h_change}%`,
+            up: priceRes.tether.usd_24h_change >= 0,
+            icon: d5,
+          },
+        ];
 
-  return () => clearInterval(intervalId);
-}, [activeWallet?.id]);
+        setAssets(assetList);
+      } catch (err: any) {
+        toast.error(err?.message || "Failed to load balance");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBalanceAndPrice();
+    intervalId = setInterval(fetchBalanceAndPrice, 12000);
+
+    return () => clearInterval(intervalId);
+  }, [activeWallet?.id]);
 
   const columns: Column<Asset>[] = [
     {
@@ -92,7 +126,7 @@ useEffect(() => {
       align: "right",
       render: (row) => (
         <p className="text-[#7A7D83] text-base font-normal">
-           {row.balance} ETH
+          {formatBalance(row.balance)}  ETH
         </p>
       ),
     },
@@ -144,6 +178,15 @@ useEffect(() => {
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <Loader />
+          </div>
+        ) : assets.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <p className="text-lg text-[#7A7D83] font-medium">
+              No balance available
+            </p>
+            <p className="text-sm text-[#434548] mt-2">
+              This wallet does not contain any assets yet.
+            </p>
           </div>
         ) : (
           <CommonTable data={assets} columns={columns} />

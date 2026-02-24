@@ -19,7 +19,7 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
 
   const [wallets, setWallets] = useState<any[]>([]);
 
-  const [selectedToken, setSelectedToken] = useState("");
+  const [selectedToken, setSelectedToken] = useState("eth");
   const [selectedAddress, setSelectedAddress] = useState("eth");
  const address = selectedAddress;
   useEffect(() => {
@@ -111,7 +111,6 @@ useEffect(() => {
               onChange={(e) => setSelectedToken(e.target.value)}
               className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
             >
-              <option value="">Select token</option>
               <option value="eth">Ethereum</option>
               <option value="btc">Bitcoin</option>
             </select>
