@@ -5,8 +5,8 @@ import { getGasFee } from "../../../api/transactionApi";
 import Loader from "../../component/Loader";
 import { formatBalance } from "../../component/format";
 import { setTransactionData } from "../../../redux/transactionSlice";
-import { HiOutlineQrCode } from "react-icons/hi2";
-import toast from "react-hot-toast";
+// import { HiOutlineQrCode } from "react-icons/hi2";
+// import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 interface SendTokenModalProps {
   open: boolean;
@@ -77,14 +77,14 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  const handleShowQR = () => {
-    if (!toAddress.trim()) {
-      toast.error("Please enter recipient address first");
-      return;
-    }
+  // const handleShowQR = () => {
+  //   if (!toAddress.trim()) {
+  //     toast.error("Please enter recipient address first");
+  //     return;
+  //   }
 
-    setShowQR(true);
-  };
+  //   setShowQR(true);
+  // };
   const handleSend = () => {
     if (!validate()) return;
 

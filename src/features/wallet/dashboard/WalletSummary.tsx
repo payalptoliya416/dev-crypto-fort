@@ -9,6 +9,9 @@ import { LuArrowLeftRight } from "react-icons/lu";
 import SendTokenModal from "./SendTokenModal";
 import ConfirmTransactionModal from "./ConfirmTransactionModal";
 import ReceiveTokenModal from "./ReceiveTokenModal";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store/store";
+import { setCurrency } from "../../../redux/currencySlice";
 
 export default function WalletSummary() {
   const [open, setOpen] = useState(false);
@@ -16,8 +19,17 @@ export default function WalletSummary() {
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
-const [currency, setCurrency] = useState("USD");
 const [ethPrice, setEthPrice] = useState(0);
+
+const dispatch = useDispatch();
+
+const currency = useSelector(
+  (state: RootState) => state.currency.value
+);
+
+const handleCurrencyChange = (val: string) => {
+  dispatch(setCurrency(val));
+};
 
 const ethBalance = 28.05605;
 const totalValue = ethBalance * ethPrice;
@@ -32,7 +44,7 @@ useEffect(() => {
   };
 
   fetchPrice();
-}, [currency]);
+}, []);
 
 const getSymbol = (cur: string) => {
   const symbols: any = {
@@ -113,7 +125,7 @@ const getSymbol = (cur: string) => {
                   </div>
                 </div>
                 <div>
-                 <CurrencyDropdown value={currency} onChange={setCurrency} />
+                 <CurrencyDropdown value={currency} onChange={handleCurrencyChange} />
                 </div>
               </div>
              <h2 className="text-[#25C866] text-3xl xl:text-5xl font-semibold mb-[15px]">

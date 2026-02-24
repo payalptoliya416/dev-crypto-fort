@@ -1,5 +1,5 @@
 import { IoClose } from "react-icons/io5";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
 import toast from "react-hot-toast";
 import {
@@ -7,7 +7,10 @@ import {
   exportTransactions,
 } from "../../../api/walletApi";
 import { useState } from "react";
-
+import { setCurrency } from "../../../redux/currencySlice";
+import { useTranslation } from "react-i18next";
+import { setLanguage } from "../../../redux/languageSlice";
+import i18n from "../../../i18n";
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
@@ -18,6 +21,10 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
+  const dispatch = useDispatch();
+  const currency = useSelector((state: RootState) => state.currency.value);
+  const { t } = useTranslation();
+  const language = useSelector((state: RootState) => state.language.value);
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const downloadFile = async (
@@ -168,7 +175,11 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               Currency
             </label>
 
-            <select className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-6 py-4 text-base sm:text-lg text-white outline-none">
+            <select
+              value={currency}
+              onChange={(e) => dispatch(setCurrency(e.target.value))}
+              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-6 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
+            >
               <option className="bg-[#161F37] text-[#7A7D83]">
                 Select currency
               </option>
@@ -187,20 +198,36 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
           <div className="mb-10">
             <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
-              Language
+              <label>{t("language")}</label>
             </label>
 
             <select
-              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
+              value={language}
+              onChange={(e) => {
+                const lang = e.target.value;
+                dispatch(setLanguage(lang));
+                i18n.changeLanguage(lang);
+              }}
+              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
             >
               <option className="bg-[#161F37] text-[#7A7D83]">
-                Select token
+                Select language
               </option>
-              <option className="bg-[#161F37] text-white">French</option>
-              <option className="bg-[#161F37] text-white">English</option>
-              <option className="bg-[#161F37] text-white">Finnish</option>
-              <option className="bg-[#161F37] text-white">German</option>
-              <option className="bg-[#161F37] text-white">Arabic</option>
+              <option className="bg-[#161F37] text-white" value="en">
+                French
+              </option>
+              <option className="bg-[#161F37] text-white" value="fr">
+                English
+              </option>
+              <option className="bg-[#161F37] text-white" value="fi">
+                Finnish
+              </option>
+              <option className="bg-[#161F37] text-white" value="de">
+                German
+              </option>
+              <option className="bg-[#161F37] text-white" value="ar">
+                Arabic
+              </option>
             </select>
           </div>
 

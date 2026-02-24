@@ -1,7 +1,7 @@
 import { BiBell, BiSearch } from "react-icons/bi";
 import logo from "@/assets/logo.png";
 import avtar from "@/assets/avtar.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
 import SettingsModal from "../dashboard/SettingsModal";
@@ -14,8 +14,10 @@ import SecureWalletPopup from "../popup/SecureWalletPopup";
 import ExistingWalletPopup from "../popup/ExistingWalletPopup";
 import SeedPhrasePopup from "../popup/SeedPhrasePopup";
 import PrivateKeyPopup from "../popup/PrivateKeyPopup";
+import { logoutUser } from "../../../api/authApi";
 
 export default function TopHeader() {
+  const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -40,6 +42,23 @@ export default function TopHeader() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      const res = await logoutUser(true);
+
+      if (res?.success) {
+        console.log(res.message);
+      }
+      localStorage.removeItem("token");
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout Error:", error);
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
   return (
     <>
       <div className="w-full bg-[#0F1A2F] mb-[15px]">
@@ -113,26 +132,15 @@ export default function TopHeader() {
                     >
                       Accounts
                     </button>
-
-                    {/* <button
-          onClick={() => {
-            setProfileOpen(false);
-            setSettingsOpen(true);
-          }}
-          className="px-4 py-3 text-left text-sm text-white hover:bg-[#202A43] transition"
-        >
-          Settings
-        </button> */}
-
-                    {/* <button
-          onClick={() => {
-            setProfileOpen(false);
-            alert("Logout Logic Here");
-          }}
-          className="px-4 py-3 text-left text-sm text-red-400 hover:bg-[#202A43] transition"
-        >
-          Logout
-        </button> */}
+                    <button
+                      onClick={() => {
+                        setProfileOpen(false);
+                        handleLogout();
+                      }}
+                      className="px-4 py-3 text-left text-sm text-red-400 hover:bg-[#202A43] transition cursor-pointer"
+                    >
+                      Logout
+                    </button>
                   </div>
                 </div>
               )}

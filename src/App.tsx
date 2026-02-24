@@ -36,11 +36,11 @@ function App() {
           <Route path="/private-key" element={<PrivateKey />} />
           <Route path="/seed-phrase" element={<SeedPhrase />} />
 
-          <Route element={<ProtectedRoute />}>
+          {/* <Route element={<ProtectedRoute />}> */}
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/balance" element={<Balance />} />
             <Route path="/transaction" element={<Transaction />} />
-          </Route>
+          {/* </Route> */}
         </Routes>
       </BrowserRouter>
     </>

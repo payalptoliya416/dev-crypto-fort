@@ -22,9 +22,8 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
   const [selectedToken, setSelectedToken] = useState("");
   const [selectedAddress, setSelectedAddress] = useState("eth");
  const address = selectedAddress;
-  console.log("wallets",selectedAddress)
   useEffect(() => {
-    if (!open) return;
+    if (!open) return;  
 
     const fetchWallets = async () => {
       try {

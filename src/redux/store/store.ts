@@ -2,6 +2,8 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import walletReducer from "../walletSlice";
 import activeWalletReducer from "../activeWalletSlice";
 import transactionReducer from "../transactionSlice";
+import currencyReducer from "../currencySlice";
+import languageReducer from "../languageSlice";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
@@ -20,7 +22,9 @@ import {
 const rootReducer = combineReducers({
   wallet: walletReducer,
   activeWallet: activeWalletReducer,
-    transaction: transactionReducer,
+  transaction: transactionReducer,
+  currency: currencyReducer,
+  language: languageReducer,
 });
 
 /**
@@ -29,7 +33,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["wallet", "activeWallet"], 
+  whitelist: ["wallet", "activeWallet"],
 };
 
 /**
@@ -46,14 +50,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [
-          FLUSH,
-          REHYDRATE,
-          PAUSE,
-          PERSIST,
-          PURGE,
-          REGISTER,
-        ],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),
 });

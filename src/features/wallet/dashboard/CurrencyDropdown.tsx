@@ -8,21 +8,21 @@ interface Props {
 
 export default function CurrencyDropdown({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const currencies = [
-  "USD",
-  "EUR",
-  "GBP",
-  "AED",
-  "AUD",
-  "CAD",
-  "NOK",
-  "NZD",
-  "CHF",
-  "BTC",
-];
+    "USD",
+    "EUR",
+    "GBP",
+    "AED",
+    "AUD",
+    "CAD",
+    "NOK",
+    "NZD",
+    "CHF",
+    "BTC",
+  ];
 
- useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -40,7 +40,7 @@ export default function CurrencyDropdown({ value, onChange }: Props) {
   }, []);
 
   return (
-    <div  ref={dropdownRef}  className="relative inline-block">
+    <div ref={dropdownRef} className="relative inline-block">
       <button
         onClick={() => setOpen(!open)}
         className="bg-[#202A43] rounded-lg py-3 px-[15px] flex items-center gap-[10px] text-[#7A7D83] text-sm font-medium cursor-pointer"
