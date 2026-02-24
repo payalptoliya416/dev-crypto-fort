@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
 import { setCurrency } from "../../../redux/currencySlice";
 import { formatBalance } from "../../component/format";
+import SwapModal from "./SwapModal";
 
 export default function WalletSummary() {
   const [open, setOpen] = useState(false);
@@ -20,6 +21,7 @@ export default function WalletSummary() {
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
+  const [swapOpen, setSwapOpen] = useState(false);
   const [ethPrice, setEthPrice] = useState(0);
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
@@ -34,7 +36,7 @@ export default function WalletSummary() {
   const totalValue = ethBalanceNumber * ethPrice;
   const formattedBalance = formatBalance(ethBalanceNumber);
   const formattedTotal = formatBalance(totalValue);
-  
+
   useEffect(() => {
     const cached = sessionStorage.getItem("ethPrice");
 
@@ -182,7 +184,10 @@ export default function WalletSummary() {
                 </div>
                 <h4 className="text-white smtext-base :text-xl">Receive</h4>
               </div>
-              <div className="col-span-12 sm:col-span-4 mt-6 sm:mt-0 border border-[#3C3D47] rounded-[10px] p-[15px] flex flex-col justify-center items-center cursor-pointer">
+              <div
+                className="col-span-12 sm:col-span-4 mt-6 sm:mt-0 border border-[#3C3D47] rounded-[10px] p-[15px] flex flex-col justify-center items-center cursor-pointer"
+                onClick={() => setSwapOpen(true)}
+              >
                 <div className="w-10 md:w-[52px] h-10 sm:h-[50px] rounded-[10px] flex justify-center items-center bg-[#202A43] text-white mb-[15px]">
                   <LuArrowLeftRight className="text-base sm:text-[22px]" />
                 </div>
@@ -211,6 +216,8 @@ export default function WalletSummary() {
         open={receiveOpen}
         onClose={() => setReceiveOpen(false)}
       />
+      {/* ------------ */}
+      <SwapModal open={swapOpen} onClose={() => setSwapOpen(false)} />
     </>
   );
 }

@@ -34,3 +34,29 @@ export const getGasFee = () => {
     method: "GET",
   });
 };
+
+export interface SwapPayload {
+  wallet_id: number;
+  from_currency: string;
+  to_currency: string;
+  amount: number;
+}
+
+export const swapToken = (payload: SwapPayload) => {
+  return privateApi<{
+    success: boolean;
+    message?: string;
+    errors?: {
+      amount?: string[];
+    };
+    hash?: string;
+    data?: {
+      success: boolean;
+      hash: string;
+      message: string;
+    };
+  }>("/swap", {
+    method: "POST",
+    body: payload,
+  });
+};
