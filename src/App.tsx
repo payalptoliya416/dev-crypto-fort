@@ -10,7 +10,7 @@ import Dashboard from "./features/wallet/dashboard/Dashboard";
 import Balance from "./features/wallet/balance/Balance";
 import Transaction from "./features/wallet/transaction/Transaction";
 import Login from "./features/wallet/pages/Login";
-import ProtectedRoute from "./routes/ProtectedRoute";
+// import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (

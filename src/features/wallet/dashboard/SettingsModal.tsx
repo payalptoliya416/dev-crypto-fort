@@ -142,19 +142,21 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setExporting(null);
     }
   };
-const changeLanguage = (lang: string) => {
-  const interval = setInterval(() => {
-    const select = document.querySelector(
-      ".goog-te-combo"
-    ) as HTMLSelectElement;
+  const changeLanguage = (lang: string) => {
+    localStorage.setItem("lang", lang);
 
-    if (select) {
-      select.value = lang;
-      select.dispatchEvent(new Event("change"));
-      clearInterval(interval);
-    }
-  }, 200);
-};
+    const interval = setInterval(() => {
+      const select = document.querySelector(
+        ".goog-te-combo"
+      ) as HTMLSelectElement;
+
+      if (select) {
+        select.value = lang;
+        select.dispatchEvent(new Event("change"));
+        clearInterval(interval);
+      }
+    }, 300);
+  };
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
@@ -212,12 +214,10 @@ const changeLanguage = (lang: string) => {
             </label>
 
             <select
+            defaultValue="en"
               onChange={(e) => changeLanguage(e.target.value)}
               className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
             >
-              <option className="bg-[#161F37] text-[#7A7D83]">
-                Select language
-              </option>
               <option className="bg-[#161F37] text-white" value="en">
                 English
               </option>
