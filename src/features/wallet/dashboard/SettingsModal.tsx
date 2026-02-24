@@ -9,8 +9,6 @@ import {
 import { useState } from "react";
 import { setCurrency } from "../../../redux/currencySlice";
 import { useTranslation } from "react-i18next";
-import { setLanguage } from "../../../redux/languageSlice";
-import i18n from "../../../i18n";
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
@@ -24,7 +22,6 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const dispatch = useDispatch();
   const currency = useSelector((state: RootState) => state.currency.value);
   const { t } = useTranslation();
-  const language = useSelector((state: RootState) => state.language.value);
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const downloadFile = async (
@@ -145,6 +142,19 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setExporting(null);
     }
   };
+const changeLanguage = (lang: string) => {
+  const interval = setInterval(() => {
+    const select = document.querySelector(
+      ".goog-te-combo"
+    ) as HTMLSelectElement;
+
+    if (select) {
+      select.value = lang;
+      select.dispatchEvent(new Event("change"));
+      clearInterval(interval);
+    }
+  }, 200);
+};
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
@@ -202,22 +212,17 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             </label>
 
             <select
-              value={language}
-              onChange={(e) => {
-                const lang = e.target.value;
-                dispatch(setLanguage(lang));
-                i18n.changeLanguage(lang);
-              }}
+              onChange={(e) => changeLanguage(e.target.value)}
               className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
             >
               <option className="bg-[#161F37] text-[#7A7D83]">
                 Select language
               </option>
               <option className="bg-[#161F37] text-white" value="en">
-                French
+                English
               </option>
               <option className="bg-[#161F37] text-white" value="fr">
-                English
+                French
               </option>
               <option className="bg-[#161F37] text-white" value="fi">
                 Finnish

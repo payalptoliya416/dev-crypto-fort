@@ -105,3 +105,45 @@ body{
 *::-webkit-scrollbar-thumb:hover {
   background-color: #6b7280;
 }
+
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+iframe.goog-te-banner-frame {
+  display: none !important;
+}
+
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+iframe.goog-te-banner-frame {
+  display: none !important;
+}
+
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+.goog-logo-link {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  font-size: 0px !important;
+}
+
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.VIpgJd-ZVi9od-ORHb-OEVmcd{
+  visibility: hidden !important;
+  height: 0 !important;
+}

@@ -3,7 +3,6 @@ import walletReducer from "../walletSlice";
 import activeWalletReducer from "../activeWalletSlice";
 import transactionReducer from "../transactionSlice";
 import currencyReducer from "../currencySlice";
-import languageReducer from "../languageSlice";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
@@ -24,7 +23,6 @@ const rootReducer = combineReducers({
   activeWallet: activeWalletReducer,
   transaction: transactionReducer,
   currency: currencyReducer,
-  language: languageReducer,
 });
 
 /**
