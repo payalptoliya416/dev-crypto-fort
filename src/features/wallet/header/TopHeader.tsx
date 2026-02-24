@@ -1,5 +1,6 @@
 import { BiBell, BiSearch } from "react-icons/bi";
 import logo from "@/assets/logo.png";
+import logo2 from "@/assets/logo2.png";
 import avtar from "@/assets/avtar.png";
 import { Link, useNavigate } from "react-router-dom";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -15,6 +16,8 @@ import ExistingWalletPopup from "../popup/ExistingWalletPopup";
 import SeedPhrasePopup from "../popup/SeedPhrasePopup";
 import PrivateKeyPopup from "../popup/PrivateKeyPopup";
 import { logoutUser } from "../../../api/authApi";
+import { HiOutlineBars3 } from "react-icons/hi2";
+import toast from "react-hot-toast";
 
 export default function TopHeader() {
   const navigate = useNavigate();
@@ -25,10 +28,10 @@ export default function TopHeader() {
   const [walletFlowStep, setWalletFlowStep] = useState<
     null | "create" | "recovery" | "password" | "import" | "seed" | "private"
   >(null);
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+ const token = localStorage.getItem("token");
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -48,7 +51,7 @@ export default function TopHeader() {
       const res = await logoutUser(true);
 
       if (res?.success) {
-        console.log(res.message);
+        toast.success(res.message);
       }
       localStorage.removeItem("token");
 
@@ -58,18 +61,27 @@ export default function TopHeader() {
       navigate("/login");
     }
   };
+
+    const [isSmall, setIsSmall] = useState(window.innerWidth < 375);
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsSmall(window.innerWidth < 375);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
   return (
     <>
       <div className="w-full bg-[#0F1A2F] mb-[15px]">
         <div className="flex items-center justify-between rounded-xl bg-[#131F3A] p-4 sm:px-5 sm:py-[19px]  border border-[#3C3D47]">
-          {/* LEFT : LOGO + NAME */}
-          <Link to="/" className={`flex items-center gap-2 z-10`}>
-            <img src={logo} alt="Secure Wallet" className="h-6 sm:h-auto" />
+          <Link to={token ? "/dashboard" : "/"} className={`flex items-center gap-2 z-10`}>
+            <img src={isSmall ? logo2 : logo} alt="Secure Wallet" className="pe-1" />
           </Link>
 
-          {/* RIGHT */}
           <div className="flex items-center gap-2 sm:gap-[15px]">
-            {/* SEARCH */}
             {/* <div className="relative hidden sm:block">
               <BiSearch
                 size={18}
@@ -101,18 +113,14 @@ export default function TopHeader() {
               {/* PROFILE BUTTON */}
               <button
                 onClick={() => setProfileOpen((prev) => !prev)}
-                className="w-10 sm:w-[42px] h-10 sm:h-[42px] bg-[#202A43]
-    rounded-[10px] flex justify-center items-center cursor-pointer"
+                className="w-10 sm:w-[42px] h-10 sm:h-[42px] bg-[#202A43] rounded-[10px] flex justify-center items-center cursor-pointer"
               >
                 <img src={avtar} alt="Profile" />
               </button>
 
               {/* DROPDOWN MENU */}
               {profileOpen && (
-                <div
-                  className="absolute right-0 mt-3 w-[220px] rounded-xl bg-[#161F37] border border-[#3C3D47]
-        shadow-lg z-[999] overflow-hidden"
-                >
+                <div className="absolute right-0 mt-3 w-[220px] rounded-xl bg-[#161F37] border border-[#3C3D47] shadow-lg z-[999] overflow-hidden">
                   <div className="px-4 py-3 border-b border-[#3C3D47]">
                     <p className="text-white font-semibold text-sm">
                       My Profile
@@ -144,6 +152,12 @@ export default function TopHeader() {
                 </div>
               )}
             </div>
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47] rounded-[10px] flex justify-center items-center cursor-pointer"
+            >
+              <HiOutlineBars3 size={20} className="text-[#7A7D83]" />
+            </button>
           </div>
         </div>
         <div className="relative block sm:hidden mt-4">
@@ -159,7 +173,35 @@ export default function TopHeader() {
           />
         </div>
       </div>
+      {/* SIDEBAR */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-[999] flex">
+          {/* Overlay */}
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          />
 
+          {/* Sidebar Content */}
+          <div className="relative w-[260px] bg-[#131F3A] h-full border-r border-[#3C3D47] p-5 z-10">
+            <h2 className="text-white text-lg font-semibold mb-6">Menu</h2>
+
+            <div className="flex flex-col gap-4">
+              <button className="text-left text-white hover:text-[#25C866] transition">
+                Assets
+              </button>
+
+              <button className="text-left text-white hover:text-[#25C866] transition">
+                History
+              </button>
+
+              <button className="text-left text-white hover:text-[#25C866] transition">
+                Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}

@@ -7,6 +7,7 @@ export interface Wallet {
   status: string;
   created_at: string;
   balance: string;
+eth_balance?: string;
 }
 
 export interface WalletListResponse {
@@ -72,6 +73,7 @@ export interface Transaction {
   amount: string;
   gas_price: string;
   gas_used: string;
+  currency? : string;
   block_number: number;
   nonce: string;
   transaction_type: "Send" | "Receive";

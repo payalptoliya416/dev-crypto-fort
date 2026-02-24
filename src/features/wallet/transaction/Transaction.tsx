@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
 import { getTransactions, type Transaction } from "../../../api/walletApi";
 import d1 from "@/assets/d1.png";
+import d2 from "@/assets/d2.png";
+import d5 from "@/assets/d5.png";
 import Loader from "../../component/Loader";
 
 interface TransactionRow {
@@ -15,6 +17,7 @@ interface TransactionRow {
   type: "Sent" | "Received";
   status: "Confirmed" | "Pending" | "Failed";
   icon: string;
+  currency?: string;
 }
 
 function TransactionPage() {
@@ -46,16 +49,32 @@ function TransactionPage() {
               return "Failed";
           }
         };
-        const mapped: TransactionRow[] = res.data.map((tx: Transaction) => ({
-          name: "Ethereum",
-          address:
-            tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
-          amount: `${tx.amount} ETH`,
-          type: tx.transaction_type === "Send" ? "Sent" : "Received",
-          status: mapTxStatus(tx.txreceipt_status),
-          icon: d1,
-        }));
+        const mapped: TransactionRow[] = res.data.map((tx: Transaction) => {
+          const symbol = tx.currency?.toUpperCase() || "ETH";
 
+          const tokenMap: Record<string, { name: string; icon: string }> = {
+            ETH: { name: "Ethereum", icon: d1 },
+            BTC: { name: "Bitcoin", icon: d2 },
+            USDT: { name: "Tether", icon: d5 },
+          };
+
+          const tokenData = tokenMap[symbol] || tokenMap["ETH"];
+
+          return {
+            name: tokenData.name,
+
+            address:
+              tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
+
+            amount: `${tx.amount} ${symbol}`,
+
+            type: tx.transaction_type === "Send" ? "Sent" : "Received",
+
+            status: mapTxStatus(tx.txreceipt_status),
+
+            icon: tokenData.icon,
+          };
+        });
         setRows(mapped);
       } catch (err: any) {
         toast.error(err?.message || "Failed to load transactions");
@@ -129,7 +148,7 @@ function TransactionPage() {
           <h3 className="tet-xl text-[#25C866] font-semibold">Transaction</h3>
         </div>
         {loading ? (
-          <div className="flex justify-center items-center py-20">  
+          <div className="flex justify-center items-center py-20">
             <Loader />
           </div>
         ) : rows.length === 0 ? (

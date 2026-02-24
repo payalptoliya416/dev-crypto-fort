@@ -22,6 +22,9 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const currency = useSelector((state: RootState) => state.currency.value);
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
+  const [language, setLanguage] = useState(
+  localStorage.getItem("lang") || "en"
+);
   // const downloadFile = async (
   //   url: string,
   //   filename: string,
@@ -177,22 +180,22 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setExporting(null);
     }
   };
+const changeLanguage = (lang: string) => {
+  setLanguage(lang);
+  localStorage.setItem("lang", lang);
 
-  const changeLanguage = (lang: string) => {
-    localStorage.setItem("lang", lang);
+  const interval = setInterval(() => {
+    const select = document.querySelector(
+      ".goog-te-combo"
+    ) as HTMLSelectElement;
 
-    const interval = setInterval(() => {
-      const select = document.querySelector(
-        ".goog-te-combo",
-      ) as HTMLSelectElement;
-
-      if (select) {
-        select.value = lang;
-        select.dispatchEvent(new Event("change"));
-        clearInterval(interval);
-      }
-    }, 300);
-  };
+    if (select) {
+      select.value = lang;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+      clearInterval(interval);
+    }
+  }, 300);
+};
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
@@ -250,7 +253,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             </label>
 
             <select
-              defaultValue="en"
+              value={language}
               onChange={(e) => changeLanguage(e.target.value)}
               className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
             >
