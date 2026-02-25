@@ -5,10 +5,8 @@ import CommonTabs from "../../component/CommonTabs";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import Loader from "../../component/Loader";
 import toast from "react-hot-toast";
-
 import type { RootState } from "../../../redux/store/store";
 import { getBalance, getLivePrices } from "../../../api/walletApi";
-
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
 import d5 from "@/assets/d5.png";
@@ -62,35 +60,52 @@ function Balance() {
 
         const balances = balanceRes.data.balance;
 
-        const assetList: Asset[] = [
-          {
-            name: "Ethereum",
-            symbol: "ETH",
-            balance: balances.eth,
-            price: `$${priceRes.ethereum.usd}`,
-            change: `${priceRes.ethereum.usd_24h_change.toFixed(2)}%`,
-            up: priceRes.ethereum.usd_24h_change >= 0,
-            icon: d1,
-          },
-          {
-            name: "Bitcoin",
-            symbol: "BTC",
-            balance: balances.btc,
-            price: `$${priceRes.bitcoin.usd}`,
-            change: `${priceRes.bitcoin.usd_24h_change.toFixed(2)}%`,
-            up: priceRes.bitcoin.usd_24h_change >= 0,
-            icon: d2,
-          },
-          {
-            name: "Tether",
-            symbol: "USDT",
-            balance: balances.usdt,
-            price: `$${priceRes.tether.usd}`,
-            change: `${priceRes.tether.usd_24h_change.toFixed(2)}%`,
-            up: priceRes.tether.usd_24h_change >= 0,
-            icon: d5,
-          },
-        ];
+        // const assetList: Asset[] = [
+        //   {
+        //     name: "Ethereum",
+        //     symbol: "ETH",
+        //     balance: balances.eth,
+        //     price: `$${priceRes.ethereum.usd}`,
+        //     change: `${priceRes.ethereum.usd_24h_change.toFixed(2)}%`,
+        //     up: priceRes.ethereum.usd_24h_change >= 0,
+        //     icon: d1,
+        //   },
+        //   {
+        //     name: "Bitcoin",
+        //     symbol: "BTC",
+        //     balance: balances.btc,
+        //     price: `$${priceRes.bitcoin.usd}`,
+        //     change: `${priceRes.bitcoin.usd_24h_change.toFixed(2)}%`,
+        //     up: priceRes.bitcoin.usd_24h_change >= 0,
+        //     icon: d2,
+        //   },
+        //   {
+        //     name: "Tether",
+        //     symbol: "USDT",
+        //     balance: balances.usdt,
+        //     price: `$${priceRes.tether.usd}`,
+        //     change: `${priceRes.tether.usd_24h_change.toFixed(2)}%`,
+        //     up: priceRes.tether.usd_24h_change >= 0,
+        //     icon: d5,
+        //   },
+        // ];
+       
+        // ===========================
+        
+        const assetList: Asset[] = priceRes.map((coin: any) => ({
+          name: coin.name,
+          symbol: coin.symbol.toUpperCase(),
+          balance:
+            coin.id === "ethereum"
+              ? balances.eth
+              : coin.id === "bitcoin"
+                ? balances.btc
+                : balances.usdt,
+          price: `$${coin.current_price}`,
+          change: `${coin.price_change_percentage_1h_in_currency?.toFixed(2)}%`,
+          up: coin.price_change_percentage_1h_in_currency >= 0,
+          icon: coin.id === "ethereum" ? d1 : coin.id === "bitcoin" ? d2 : d5,
+        }));
 
         setAssets(assetList);
       } catch (err: any) {
@@ -101,11 +116,10 @@ function Balance() {
     };
 
     fetchBalanceAndPrice();
-    intervalId = setInterval(fetchBalanceAndPrice, 500000);
+    intervalId = setInterval(fetchBalanceAndPrice, 30000);
 
     return () => clearInterval(intervalId);
   }, [activeWallet?.id]);
-
   const columns: Column<Asset>[] = [
     {
       header: "Name",
@@ -126,7 +140,7 @@ function Balance() {
       align: "right",
       render: (row) => (
         <p className="text-[#7A7D83] text-base font-normal">
-         {formatBalance(row.balance)} {row.symbol}
+          {formatBalance(row.balance)} {row.symbol}
         </p>
       ),
     },

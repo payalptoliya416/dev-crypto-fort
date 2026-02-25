@@ -108,17 +108,28 @@ export interface CoinPriceResponse {
   };
 }
 
+// export const getLivePrices = async () => {
+//   const res = await fetch(
+//     "https://api.coingecko.com/api/v3/simple/price" +
+//       "?ids=ethereum,bitcoin,binancecoin,solana,tether,arbitrum,xrp,dogecoin" +
+//       "&vs_currencies=usd" +
+//       "&include_24hr_change=true",
+//   );
+
+//   return (await res.json()) as CoinPriceResponse;
+// };
+// =-=============================================
+
 export const getLivePrices = async () => {
   const res = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price" +
-      "?ids=ethereum,bitcoin,binancecoin,solana,tether,arbitrum,xrp,dogecoin" +
-      "&vs_currencies=usd" +
-      "&include_24hr_change=true",
+    "https://api.coingecko.com/api/v3/coins/markets" +
+      "?vs_currency=usd" +
+      "&ids=ethereum,bitcoin,tether" +
+      "&price_change_percentage=1h"
   );
 
-  return (await res.json()) as CoinPriceResponse;
+  return await res.json();
 };
-
 export interface UpdateWalletLabelPayload {
   id: number;
   label: string;

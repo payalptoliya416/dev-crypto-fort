@@ -18,6 +18,8 @@ import PrivateKeyPopup from "../popup/PrivateKeyPopup";
 import { logoutUser } from "../../../api/authApi";
 import { HiOutlineBars3 } from "react-icons/hi2";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../redux/authSlice";
 
 export default function TopHeader() {
   const navigate = useNavigate();
@@ -31,6 +33,8 @@ export default function TopHeader() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
+
  const token = localStorage.getItem("token");
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -53,11 +57,9 @@ export default function TopHeader() {
       if (res?.success) {
         toast.success(res.message);
       }
-      localStorage.removeItem("token");
-
       navigate("/login");
     } catch (error) {
-      localStorage.removeItem("token");
+     dispatch(logout());
       navigate("/login");
     }
   };
