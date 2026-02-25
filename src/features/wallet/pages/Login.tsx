@@ -3,19 +3,27 @@ import lock from "@/assets/lock.png";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../../api/login"; 
-import { useDispatch } from "react-redux";
+import { loginUser } from "../../../api/login";
+import { useDispatch, useSelector } from "react-redux";
 import { setToken } from "../../../redux/authSlice";
+import type { RootState } from "../../../redux/store/store";
 
 function Login() {
   const navigate = useNavigate();
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const token = useSelector((state: RootState) => state.auth.token);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [token, navigate]);
 
   const initialValues = {
     password: "",
@@ -27,24 +35,24 @@ const dispatch = useDispatch();
       .required("Password is required"),
   });
 
-const handleSubmit = async (values: typeof initialValues) => {
-  try {
-    setLoading(true);
-    const res = await loginUser({
-      password: values.password,
-    });
-    toast.success(res.message);
-    const token = res.data.token;
-    dispatch(setToken(token));
-    localStorage.setItem("token", token);
-    navigate("/dashboard");
+  const handleSubmit = async (values: typeof initialValues) => {
+    try {
+      setLoading(true);
+      const res = await loginUser({
+        password: values.password,
+      });
+      toast.success(res.message);
+      const token = res.data.token;
+      const expiresIn = res.data.expires_in;
 
-  } catch (err: any) {
-    toast.error(err.message || "Invalid Password");
-  } finally {
-    setLoading(false);
-  }
-};
+      dispatch(setToken({ token, expiresIn }));
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast.error(err.message || "Invalid Password");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AuthLayout>

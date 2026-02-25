@@ -3,6 +3,7 @@ import walletReducer from "../walletSlice";
 import activeWalletReducer from "../activeWalletSlice";
 import transactionReducer from "../transactionSlice";
 import currencyReducer from "../currencySlice";
+import authReducer from "../authSlice";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
@@ -15,33 +16,22 @@ import {
   REGISTER,
 } from "redux-persist";
 
-/**
- * Root reducer
- */
 const rootReducer = combineReducers({
+    auth: authReducer, 
   wallet: walletReducer,
   activeWallet: activeWalletReducer,
   transaction: transactionReducer,
   currency: currencyReducer,
 });
 
-/**
- * Persist config
- */
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["wallet", "activeWallet"],
+  whitelist: ["auth", "wallet", "activeWallet"],
 };
 
-/**
- * Persisted reducer
- */
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-/**
- * Store
- */
 export const store = configureStore({
   reducer: persistedReducer,
 
