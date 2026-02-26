@@ -50,8 +50,6 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
       const res = await getWallets();
       if (res.success) {
         setWallets(res.data);
-
-        // active wallet sync
         if (activeWallet) {
           const updated = res.data.find((w) => w.id === activeWallet.id);
           if (updated) {

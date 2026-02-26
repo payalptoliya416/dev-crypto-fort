@@ -12,9 +12,8 @@ function ExistingWalletPopup({
   return (
      <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-      onClick={onClose} // outside click closes modal
+      onClick={onClose} 
     >
-      {/* ✅ Modal content */}
       <div onClick={(e) => e.stopPropagation()}>
         <ExistingWalletUI
           onSeedPhrase={onSeedNext}

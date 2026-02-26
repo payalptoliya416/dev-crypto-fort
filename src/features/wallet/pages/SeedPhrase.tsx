@@ -29,7 +29,7 @@ function SeedPhrase() {
 
       const res = await importWallet(
         { type: "phrase", data: input.trim() },
-        false // ❌ No token
+        false
       );
 
       toast.success(res.message);

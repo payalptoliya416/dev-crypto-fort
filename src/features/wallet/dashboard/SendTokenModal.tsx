@@ -85,6 +85,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
 
   //   setShowQR(true);
   // };
+
   const handleSend = () => {
     if (!validate()) return;
 
@@ -100,7 +101,6 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       }),
     );
 
-    // ✅ move to confirm modal
     onClose();
     onNext();
   };

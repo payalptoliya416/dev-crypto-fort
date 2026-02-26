@@ -28,7 +28,7 @@ function PrivateKeyPopup({
           type: "key",
           data: privateKey.trim(),
         },
-        true, // ✅ Token required (popup)
+        true, 
       );
 
       toast.success(res.message);
@@ -44,7 +44,7 @@ function PrivateKeyPopup({
     <>
       <div
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-        onClick={onClose} // 👈 outside click closes popup
+        onClick={onClose} 
       >
         {/* ================= MODAL CONTENT ================= */}
         <div onClick={(e) => e.stopPropagation()}>

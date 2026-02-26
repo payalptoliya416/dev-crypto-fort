@@ -16,8 +16,6 @@ function RecoveryPhrase() {
   if (!wallet) return <p>No wallet found</p>;
 
   const words = wallet.phrase.split(" ");
-
-  // ✅ Copy Handler
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(wallet.phrase);
@@ -27,7 +25,6 @@ function RecoveryPhrase() {
     }
   };
 
-  // ✅ Confirm → Navigate
   const handleConfirm = () => {
     setConfirmLoading(true);
 
