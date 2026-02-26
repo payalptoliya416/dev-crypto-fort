@@ -60,38 +60,6 @@ function Balance() {
 
         const balances = balanceRes.data.balance;
 
-        // const assetList: Asset[] = [
-        //   {
-        //     name: "Ethereum",
-        //     symbol: "ETH",
-        //     balance: balances.eth,
-        //     price: `$${priceRes.ethereum.usd}`,
-        //     change: `${priceRes.ethereum.usd_24h_change.toFixed(2)}%`,
-        //     up: priceRes.ethereum.usd_24h_change >= 0,
-        //     icon: d1,
-        //   },
-        //   {
-        //     name: "Bitcoin",
-        //     symbol: "BTC",
-        //     balance: balances.btc,
-        //     price: `$${priceRes.bitcoin.usd}`,
-        //     change: `${priceRes.bitcoin.usd_24h_change.toFixed(2)}%`,
-        //     up: priceRes.bitcoin.usd_24h_change >= 0,
-        //     icon: d2,
-        //   },
-        //   {
-        //     name: "Tether",
-        //     symbol: "USDT",
-        //     balance: balances.usdt,
-        //     price: `$${priceRes.tether.usd}`,
-        //     change: `${priceRes.tether.usd_24h_change.toFixed(2)}%`,
-        //     up: priceRes.tether.usd_24h_change >= 0,
-        //     icon: d5,
-        //   },
-        // ];
-       
-        // ===========================
-        
         const assetList: Asset[] = priceRes.map((coin: any) => ({
           name: coin.name,
           symbol: coin.symbol.toUpperCase(),
@@ -149,9 +117,32 @@ function Balance() {
       key: "price",
       align: "right",
       width: "13%",
-      render: (row) => (
-        <p className="text-[#7A7D83] text-base font-normal">{row.price}</p>
-      ),
+      render: (row) => {
+        const rawValue = row?.price;
+
+        if (!rawValue) {
+          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+        }
+
+        // remove $ and commas if already formatted
+        const cleaned = String(rawValue).replace(/[$,]/g, "");
+
+        const price = Number(cleaned);
+
+        if (isNaN(price)) {
+          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+        }
+
+        return (
+          <p className="text-[#7A7D83] text-base font-normal">
+            $
+            {price.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        );
+      },
     },
     {
       header: "Change",
