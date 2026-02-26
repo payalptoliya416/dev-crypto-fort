@@ -108,7 +108,6 @@ function Balance() {
         const res = await getLivePrices();
         priceRes = Array.isArray(res) ? res : [];
       } catch (error) {
-        console.log("Price API failed");
         priceRes = [];
       }
 

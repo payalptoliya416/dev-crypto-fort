@@ -52,8 +52,23 @@ export interface ExportTransactionsResponse {
   success: boolean;
   message: string;
   data?: {
-    file_url: string;
-    file_name: string;
+    wallet: {
+      id: number;
+      address: string;
+      btc_address?: string;
+    };
+    transactions: {
+      currency: string;
+      hash: string;
+      from_address: string;
+      to_address: string;
+      amount: string;
+      gas_price: string;
+      gas_used: string;
+      transaction_type: string;
+      timestamp: string;
+      created_at: string;
+    }[];
   };
 }
 

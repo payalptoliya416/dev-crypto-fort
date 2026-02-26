@@ -8,6 +8,10 @@ import {
 } from "../../../api/walletApi";
 import { useState } from "react";
 import { setCurrency } from "../../../redux/currencySlice";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
@@ -23,73 +27,10 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [language, setLanguage] = useState(
-  localStorage.getItem("lang") || "en");
+    localStorage.getItem("lang") || "en",
+  );
   const [translating, setTranslating] = useState(false);
 
-  // const downloadFile = async (
-  //   url: string,
-  //   filename: string,
-  //   mimeType?: string,
-  // ) => {
-  //   try {
-  //     const res = await fetch(url, {
-  //       method: "GET",
-  //       credentials: "include",
-  //       headers: { Accept: "*/*" },
-  //     });
-
-  //     if (!res.ok) throw new Error("Download failed");
-
-  //     const blob = await res.blob();
-  //     const finalBlob = mimeType ? new Blob([blob], { type: mimeType }) : blob;
-
-  //     const blobUrl = URL.createObjectURL(finalBlob);
-  //     const a = document.createElement("a");
-  //     a.href = blobUrl;
-  //     a.download = filename;
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     document.body.removeChild(a);
-  //     URL.revokeObjectURL(blobUrl);
-  //   } catch (e) {
-  //     toast.error("Download blocked by browser");
-  //   }
-  // };
-
-  // const handleExportTxHash = async () => {
-  //   if (!activeWallet?.id) {
-  //     toast.error("Wallet not found");
-  //     return;
-  //   }
-
-  //   try {
-  //     setExporting("backup");
-  //     const res = await downloadWalletBackup({
-  //       wallet_id: activeWallet.id,
-  //     });
-
-  //     const filePath = res?.data?.file_path;
-
-  //     if (!filePath) {
-  //       toast.error("File not available");
-  //       return;
-  //     }
-
-  //     toast.success("Downloading...");
-
-  //     let fileName = filePath.split("/").pop() || "txhash_report";
-  //     if (!fileName.includes(".")) {
-  //       fileName += ".txt";
-  //     }
-
-  //     await downloadFile(filePath, fileName, "text/plain");
-  //   } catch (err: any) {
-  //     toast.error(err?.message || "Download failed");
-  //   } finally {
-  //     setExporting(null);
-  //   }
-  // };
- 
   const handleExportTxHash = async () => {
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
@@ -116,7 +57,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       const link = document.createElement("a");
       link.href = filePath;
-      link.download = fileName; 
+      link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -142,40 +83,150 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       const res = await exportTransactions({
         wallet_id: activeWallet.id,
-        format: format,
+        format,
         type: exportType,
       });
 
       toast.dismiss();
 
-      const fileUrl = res?.data?.file_url;
-      let fileName = res?.data?.file_name;
-      if (!fileUrl) {
-        toast.error("File not available");
+      if (!res.success || !res.data?.transactions?.length) {
+        toast.error("No transactions found");
         return;
       }
 
-      toast.success("Downloading...");
+      const { wallet, transactions } = res.data;
 
-      const extension = format === "excel" ? "xlsx" : "pdf";
+      const formattedData = transactions.map((tx) => ({
+        Currency: tx.currency,
+        Hash: tx.hash,
+        From: tx.from_address,
+        To: tx.to_address,
+        Amount: Number(tx.amount),
+        GasFee: Number(tx.gas_price) * Number(tx.gas_used),
+        Type: tx.transaction_type,
+        Date: new Date(tx.timestamp).toLocaleString(),
+      }));
 
-      if (!fileName) {
-        fileName = `transactions.${extension}`;
-      } else if (!fileName.includes(".")) {
-        fileName += `.${extension}`;
+      /* ================= EXCEL ================= */
+
+    if (format === "excel") {
+  /* ================= WALLET SHEET ================= */
+
+  const walletSheet = XLSX.utils.json_to_sheet([
+    {
+      WalletID: wallet.id,
+      ETH_Address: wallet.address,
+      BTC_Address: wallet.btc_address,
+    },
+  ]);
+
+  /* ================= TRANSACTION SHEET ================= */
+
+  const transactionSheet = XLSX.utils.json_to_sheet(formattedData);
+
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, walletSheet, "Wallet Info");
+  XLSX.utils.book_append_sheet(workbook, transactionSheet, "Transactions");
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const blob = new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(blob, `transactions_${wallet.address}.xlsx`);
+  toast.success("Excel downloaded");
+}
+      /* ================= PDF ================= */
+
+      if (format === "pdf") {
+        const doc = new jsPDF({
+          orientation: "landscape",
+          unit: "mm",
+          format: "a4",
+        });
+
+        doc.setFontSize(14);
+        doc.text("Transaction Report", 14, 12);
+
+        doc.setFontSize(9);
+         doc.text(`Wallet ID: ${wallet.id}`, 14, 18);
+      doc.text(`ETH Address: ${wallet.address}`, 14, 23);
+      doc.text(`BTC Address: ${wallet.btc_address}`, 14, 28);
+
+        autoTable(doc, {
+          startY: 24,
+
+          head: [
+            [
+              "Currency",
+              "Hash",
+              "From",
+              "To",
+              "Amount",
+              "Gas Fee",
+              "Type",
+              "Date",
+            ],
+          ],
+
+          body: transactions.map((tx) => [
+            tx.currency,
+            tx.hash, // 👈 FULL hash
+            tx.from_address, // 👈 FULL address
+            tx.to_address,
+            Number(tx.amount).toFixed(6),
+            (Number(tx.gas_price) * Number(tx.gas_used)).toFixed(6),
+            tx.transaction_type,
+            new Date(tx.timestamp).toLocaleString(),
+          ]),
+
+          styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            overflow: "linebreak", // 👈 wrap text instead of cut
+            valign: "middle",
+          },
+
+          headStyles: {
+            fillColor: [52, 152, 219],
+            textColor: 255,
+            fontStyle: "bold",
+            halign: "center",
+          },
+
+          columnStyles: {
+            0: { cellWidth: 20 },
+            1: { cellWidth: 45 }, // Hash wider
+            2: { cellWidth: 45 }, // From wider
+            3: { cellWidth: 45 }, // To wider
+            4: { cellWidth: 20 },
+            5: { cellWidth: 25 },
+            6: { cellWidth: 20 },
+            7: { cellWidth: 30 },
+          },
+
+          alternateRowStyles: {
+            fillColor: [245, 245, 245],
+          },
+
+          didDrawPage: (data) => {
+            doc.setFontSize(8);
+            doc.text(
+              `Page ${doc.getNumberOfPages()}`,
+              data.settings.margin.left,
+              doc.internal.pageSize.height - 5,
+            );
+          },
+        });
+
+        doc.save(`transactions_${wallet.address}.pdf`);
+        toast.success("PDF downloaded");
       }
-
-      // const mimeType =
-      //   format === "excel"
-      //     ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      //     : "application/pdf";
-
-      const link = document.createElement("a");
-      link.href = fileUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     } catch (err: any) {
       toast.dismiss();
       toast.error(err?.message || "Export failed");
@@ -185,40 +236,40 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   };
 
   const waitForGoogle = () => {
-  return new Promise<HTMLSelectElement>((resolve) => {
-    const check = () => {
-      const select = document.querySelector(
-        ".goog-te-combo"
-      ) as HTMLSelectElement | null;
+    return new Promise<HTMLSelectElement>((resolve) => {
+      const check = () => {
+        const select = document.querySelector(
+          ".goog-te-combo",
+        ) as HTMLSelectElement | null;
 
-      if (select) {
-        resolve(select);
-      } else {
-        setTimeout(check, 200);
-      }
-    };
-    check();
-  });
+        if (select) {
+          resolve(select);
+        } else {
+          setTimeout(check, 200);
+        }
+      };
+      check();
+    });
   };
 
-const changeLanguage = async (lang: string) => {
-  setTranslating(true);
-  setLanguage(lang);
-  localStorage.setItem("lang", lang);
+  const changeLanguage = async (lang: string) => {
+    setTranslating(true);
+    setLanguage(lang);
+    localStorage.setItem("lang", lang);
 
-  try {
-    const select = await waitForGoogle();
+    try {
+      const select = await waitForGoogle();
 
-    select.value = lang;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
+      select.value = lang;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
 
-    setTimeout(() => {
+      setTimeout(() => {
+        setTranslating(false);
+      }, 1200);
+    } catch {
       setTranslating(false);
-    }, 1200);
-  } catch {
-    setTranslating(false);
-  }
-};
+    }
+  };
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
@@ -226,12 +277,12 @@ const changeLanguage = async (lang: string) => {
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
       />
       {translating && (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
-    <div className="bg-[#161F37] px-6 py-4 rounded-xl text-white animate-pulse">
-      Changing language...
-    </div>
-  </div>
-)}
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
+          <div className="bg-[#161F37] px-6 py-4 rounded-xl text-white animate-pulse">
+            Changing language...
+          </div>
+        </div>
+      )}
       <div className="relative w-full max-w-[760px]">
         {/* Close Button */}
         <div className="flex justify-end">
@@ -333,8 +384,8 @@ const changeLanguage = async (lang: string) => {
           <div
             onClick={exporting ? undefined : () => setShowExportOptions(true)}
             className={`relative w-full border border-[#3C3D47] rounded-xl p-3 sm:p-5
-  bg-[#202A43]/40 transition
-  ${exporting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#202A43]/70"}`}
+            bg-[#202A43]/40 transition
+            ${exporting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#202A43]/70"}`}
           >
             {exporting === "report" && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#161F37]/70 rounded-xl">

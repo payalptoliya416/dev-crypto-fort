@@ -11,6 +11,7 @@ import Balance from "./features/wallet/balance/Balance";
 import Transaction from "./features/wallet/transaction/Transaction";
 import Login from "./features/wallet/pages/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import NotFound from "./routes/NotFound";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="/balance" element={<Balance />} />
             <Route path="/transaction" element={<Transaction />} />
           </Route>
+         <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </>

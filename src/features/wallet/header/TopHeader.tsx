@@ -16,7 +16,7 @@ import ExistingWalletPopup from "../popup/ExistingWalletPopup";
 import SeedPhrasePopup from "../popup/SeedPhrasePopup";
 import PrivateKeyPopup from "../popup/PrivateKeyPopup";
 import { logoutUser } from "../../../api/authApi";
-import { HiOutlineBars3 } from "react-icons/hi2";
+// import { HiOutlineBars3 } from "react-icons/hi2";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../redux/authSlice";
 import { resetActiveWallet } from "../../../redux/activeWalletSlice";
@@ -154,12 +154,12 @@ useEffect(() => {
                 </div>
               )}
             </div>
-            <button
+            {/* <button
               onClick={() => setSidebarOpen(true)}
               className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47] rounded-[10px] flex justify-center items-center cursor-pointer"
             >
               <HiOutlineBars3 size={20} className="text-[#7A7D83]" />
-            </button>
+            </button> */}
           </div>
         </div>
         <div className="relative block sm:hidden mt-4">

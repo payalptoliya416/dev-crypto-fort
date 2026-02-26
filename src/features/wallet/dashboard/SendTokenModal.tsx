@@ -32,6 +32,17 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
   const totalCost = Number(amount || 0) + gasFeeInEth;
 
+useEffect(() => {
+  if (!open) {
+    setToAddress("");
+    setAmount("");
+    setSelectedToken("");
+    setErrors({});
+    setGasFee(null);
+    setShowQR(false);
+  }
+}, [open]);
+
   //   useEffect(() => {
   //   if (!open) return;
 
