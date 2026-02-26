@@ -8,21 +8,24 @@ import { PersistGate } from "redux-persist/integration/react";
 
 function GoogleDefaultLanguage() {
   useEffect(() => {
-    const savedLang = localStorage.getItem("lang") || "en";
+    const savedLang = localStorage.getItem("lang");
 
-    const interval = setInterval(() => {
+    if (!savedLang || savedLang === "en") return;
+
+    const waitForGoogle = () => {
       const select = document.querySelector(
         ".goog-te-combo"
-      ) as HTMLSelectElement;
+      ) as HTMLSelectElement | null;
 
       if (select) {
         select.value = savedLang;
-        select.dispatchEvent(new Event("change"));
-        clearInterval(interval);
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      } else {
+        setTimeout(waitForGoogle, 300);
       }
-    }, 300);
+    };
 
-    return () => clearInterval(interval);
+    waitForGoogle();
   }, []);
 
   return null;

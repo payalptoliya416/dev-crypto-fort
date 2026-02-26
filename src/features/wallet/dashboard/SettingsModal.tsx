@@ -23,8 +23,9 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [language, setLanguage] = useState(
-  localStorage.getItem("lang") || "en"
-);
+  localStorage.getItem("lang") || "en");
+  const [translating, setTranslating] = useState(false);
+
   // const downloadFile = async (
   //   url: string,
   //   filename: string,
@@ -88,6 +89,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   //     setExporting(null);
   //   }
   // };
+ 
   const handleExportTxHash = async () => {
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
@@ -124,6 +126,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setExporting(null);
     }
   };
+
   const handleExportTxReport = async (
     format: "excel" | "pdf",
     exportType: "all" | "eth" | "btc" | "usdt" = "all",
@@ -180,29 +183,55 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setExporting(null);
     }
   };
-const changeLanguage = (lang: string) => {
+
+  const waitForGoogle = () => {
+  return new Promise<HTMLSelectElement>((resolve) => {
+    const check = () => {
+      const select = document.querySelector(
+        ".goog-te-combo"
+      ) as HTMLSelectElement | null;
+
+      if (select) {
+        resolve(select);
+      } else {
+        setTimeout(check, 200);
+      }
+    };
+    check();
+  });
+  };
+
+const changeLanguage = async (lang: string) => {
+  setTranslating(true);
   setLanguage(lang);
   localStorage.setItem("lang", lang);
 
-  const interval = setInterval(() => {
-    const select = document.querySelector(
-      ".goog-te-combo"
-    ) as HTMLSelectElement;
+  try {
+    const select = await waitForGoogle();
 
-    if (select) {
-      select.value = lang;
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-      clearInterval(interval);
-    }
-  }, 300);
+    select.value = lang;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+
+    setTimeout(() => {
+      setTranslating(false);
+    }, 1200);
+  } catch {
+    setTranslating(false);
+  }
 };
-
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
         onClick={onClose}
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
       />
+      {translating && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
+    <div className="bg-[#161F37] px-6 py-4 rounded-xl text-white animate-pulse">
+      Changing language...
+    </div>
+  </div>
+)}
       <div className="relative w-full max-w-[760px]">
         {/* Close Button */}
         <div className="flex justify-end">

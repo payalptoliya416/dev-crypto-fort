@@ -34,60 +34,129 @@ function Balance() {
     (state: RootState) => state.activeWallet.wallet,
   );
 
+  // useEffect(() => {
+  //   if (!activeWallet?.id) return;
+
+  //   let intervalId: ReturnType<typeof setInterval>;
+
+  //   const fetchBalanceAndPrice = async () => {
+  //     try {
+  //       const balanceRes = await getBalance({
+  //         wallet_id: activeWallet.id,
+  //         type: "all",
+  //       });
+
+  //       let priceRes;
+
+  //       try {
+  //         priceRes = await getLivePrices();
+  //       } catch {
+  //         priceRes = {
+  //           ethereum: { usd: 0, usd_24h_change: 0 },
+  //           bitcoin: { usd: 0, usd_24h_change: 0 },
+  //           tether: { usd: 0, usd_24h_change: 0 },
+  //         };
+  //       }
+
+  //       const balances = balanceRes.data.balance;
+
+  //       const assetList: Asset[] = priceRes.map((coin: any) => ({
+  //         name: coin.name,
+  //         symbol: coin.symbol.toUpperCase(),
+  //         balance:
+  //           coin.id === "ethereum"
+  //             ? balances.eth
+  //             : coin.id === "bitcoin"
+  //               ? balances.btc
+  //               : balances.usdt,
+  //         price: `$${coin.current_price}`,
+  //         change: `${coin.price_change_percentage_1h_in_currency?.toFixed(2)}%`,
+  //         up: coin.price_change_percentage_1h_in_currency >= 0,
+  //         icon: coin.id === "ethereum" ? d1 : coin.id === "bitcoin" ? d2 : d5,
+  //       }));
+
+  //       setAssets(assetList);
+  //     } catch (err: any) {
+  //       toast.error(err?.message || "Failed to load balance");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchBalanceAndPrice();
+  //   intervalId = setInterval(fetchBalanceAndPrice, 30000);
+
+  //   return () => clearInterval(intervalId);
+  // }, [activeWallet?.id]);
+  
   useEffect(() => {
-    if (!activeWallet?.id) return;
+  if (!activeWallet?.id) return;
 
-    let intervalId: ReturnType<typeof setInterval>;
+  let isMounted = true;
+  let timeoutId: ReturnType<typeof setTimeout>;
 
-    const fetchBalanceAndPrice = async () => {
+  const fetchBalanceAndPrice = async () => {
+    try {
+      const balanceRes = await getBalance({
+        wallet_id: activeWallet.id,
+        type: "all",
+      });
+
+      let priceRes: any[] = [];
+
       try {
-        const balanceRes = await getBalance({
-          wallet_id: activeWallet.id,
-          type: "all",
-        });
-
-        let priceRes;
-
-        try {
-          priceRes = await getLivePrices();
-        } catch {
-          priceRes = {
-            ethereum: { usd: 0, usd_24h_change: 0 },
-            bitcoin: { usd: 0, usd_24h_change: 0 },
-            tether: { usd: 0, usd_24h_change: 0 },
-          };
-        }
-
-        const balances = balanceRes.data.balance;
-
-        const assetList: Asset[] = priceRes.map((coin: any) => ({
-          name: coin.name,
-          symbol: coin.symbol.toUpperCase(),
-          balance:
-            coin.id === "ethereum"
-              ? balances.eth
-              : coin.id === "bitcoin"
-                ? balances.btc
-                : balances.usdt,
-          price: `$${coin.current_price}`,
-          change: `${coin.price_change_percentage_1h_in_currency?.toFixed(2)}%`,
-          up: coin.price_change_percentage_1h_in_currency >= 0,
-          icon: coin.id === "ethereum" ? d1 : coin.id === "bitcoin" ? d2 : d5,
-        }));
-
-        setAssets(assetList);
-      } catch (err: any) {
-        toast.error(err?.message || "Failed to load balance");
-      } finally {
-        setLoading(false);
+        const res = await getLivePrices();
+        priceRes = Array.isArray(res) ? res : [];
+      } catch (error) {
+        console.log("Price API failed");
+        priceRes = [];
       }
-    };
 
-    fetchBalanceAndPrice();
-    intervalId = setInterval(fetchBalanceAndPrice, 30000);
+      if (!isMounted) return;
 
-    return () => clearInterval(intervalId);
-  }, [activeWallet?.id]);
+      const balances = balanceRes?.data?.balance || {};
+
+      const assetList: Asset[] = priceRes.map((coin: any) => ({
+        name: coin.name,
+        symbol: coin.symbol?.toUpperCase() || "",
+        balance:
+          coin.id === "ethereum"
+            ? balances.eth
+            : coin.id === "bitcoin"
+            ? balances.btc
+            : balances.usdt,
+        price: `$${coin.current_price ?? 0}`,
+        change: `${
+          coin.price_change_percentage_1h_in_currency?.toFixed(2) ?? "0.00"
+        }%`,
+        up: coin.price_change_percentage_1h_in_currency >= 0,
+        icon:
+          coin.id === "ethereum"
+            ? d1
+            : coin.id === "bitcoin"
+            ? d2
+            : d5,
+      }));
+
+      setAssets(assetList);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to load balance");
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+        timeoutId = setTimeout(fetchBalanceAndPrice, 30000);
+      }
+    }
+  };
+
+  fetchBalanceAndPrice();
+
+  return () => {
+    isMounted = false;
+    clearTimeout(timeoutId);
+  };
+}, [activeWallet?.id]);
+
   const columns: Column<Asset>[] = [
     {
       header: "Name",
