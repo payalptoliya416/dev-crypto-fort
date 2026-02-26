@@ -17,7 +17,7 @@ import {
 } from "redux-persist";
 
 const rootReducer = combineReducers({
-    auth: authReducer, 
+  auth: authReducer,
   wallet: walletReducer,
   activeWallet: activeWalletReducer,
   transaction: transactionReducer,

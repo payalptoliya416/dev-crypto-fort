@@ -4,10 +4,12 @@ type LogoutResponse = {
   success: boolean;
   message: string;
 };
-export const logoutUser = (useToken: boolean = true) => {
-  if (useToken) {
-    return privateApi<LogoutResponse>("/logout", {
+export const logoutUser = async () => {
+  try {
+    return await privateApi<LogoutResponse>("/logout", {
       method: "POST",
     });
+  } catch (error) {
+    return null;
   }
 };

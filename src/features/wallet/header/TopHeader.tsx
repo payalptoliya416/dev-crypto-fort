@@ -17,9 +17,10 @@ import SeedPhrasePopup from "../popup/SeedPhrasePopup";
 import PrivateKeyPopup from "../popup/PrivateKeyPopup";
 import { logoutUser } from "../../../api/authApi";
 import { HiOutlineBars3 } from "react-icons/hi2";
-import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../redux/authSlice";
+import { resetActiveWallet } from "../../../redux/activeWalletSlice";
+import { persistor } from "../../../redux/store/store";
 
 export default function TopHeader() {
   const navigate = useNavigate();
@@ -50,19 +51,18 @@ export default function TopHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const res = await logoutUser(true);
-
-      if (res?.success) {
-        toast.success(res.message);
-      }
-      navigate("/login");
-    } catch (error) {
-     dispatch(logout());
-      navigate("/login");
-    }
-  };
+const handleLogout = async () => {
+  try {
+    await logoutUser(); 
+  } catch (error) {
+    console.log("Logout API failed");
+  } finally {
+    dispatch(resetActiveWallet());
+     await persistor.purge();
+    dispatch(logout());
+    navigate("/login");
+  }
+};
 
     const [isSmall, setIsSmall] = useState(window.innerWidth < 375);
 
