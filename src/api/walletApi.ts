@@ -31,7 +31,11 @@ export interface DownloadBackupResponse {
   data?: {
     wallet_id: number;
     address: string;
-    file_path: string;
+    btc_address: string;
+    recovery_phrase: string;
+    private_key: string;
+    file_content: string;
+    suggested_filename: string;
   };
 }
 

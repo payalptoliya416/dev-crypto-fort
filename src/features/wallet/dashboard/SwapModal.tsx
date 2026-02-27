@@ -182,9 +182,8 @@ function SwapModal({ open, onClose }: Props) {
               ${errors.fromCurrency ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
             >
               <option value="">Select currency</option>
-              <option value="eth">ETH</option>
-              <option value="usdt">USDT</option>
-              <option value="btc">BTC</option>
+              <option value="eth">Ethereum</option>
+              <option value="usdt">ERC-20</option>
             </select>
 
             {errors.fromCurrency && (

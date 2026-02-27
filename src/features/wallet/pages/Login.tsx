@@ -6,7 +6,7 @@ import * as Yup from "yup";
 import { useEffect, useState } from "react";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../../api/login";
 import { useDispatch, useSelector } from "react-redux";
 import { setToken } from "../../../redux/authSlice";
@@ -149,6 +149,15 @@ function Login() {
             </Form>
           )}
         </Formik>
+        <p className="text-[#7A7D83] text-sm sm:text-base mt-4">
+          Don’t have a wallet?{" "}
+          <Link
+            to="/"
+            className="text-[#25C866] font-semibold hover:underline cursor-pointer transition-all duration-500"
+          >
+            Register
+          </Link>
+        </p>
       </div>
     </AuthLayout>
   );

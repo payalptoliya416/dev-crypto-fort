@@ -24,10 +24,10 @@ const authSlice = createSlice({
     token: getValidToken(),
   },
   reducers: {
-    setToken: (state, action) => {
-      const { token, expiresIn } = action.payload;
+   setToken: (state, action) => {
+      const { token } = action.payload;
 
-      const expiryTime = Date.now() + expiresIn * 1000;
+      const expiryTime = Date.now() + 24 * 60 * 60 * 1000; 
 
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(EXPIRY_KEY, expiryTime.toString());
@@ -38,6 +38,7 @@ const authSlice = createSlice({
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(EXPIRY_KEY);
       state.token = null;
+      localStorage.clear() 
     },
   },
 });

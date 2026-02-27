@@ -44,23 +44,31 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
         wallet_id: activeWallet.id,
       });
 
-      const filePath = res?.data?.file_path;
-
-      if (!filePath) {
-        toast.error("File not available");
+      if (!res?.data?.file_content) {
+        toast.error("Backup data not available");
         return;
       }
 
       toast.success("Downloading...");
 
-      const fileName = filePath.split("/").pop() || "backup.txt";
+      const fileContent = res.data.file_content;
+      const fileName = res.data.suggested_filename || "backup-wallet.txt";
+
+      const blob = new Blob([fileContent], {
+        type: "text/plain;charset=utf-8;",
+      });
+
+      const url = window.URL.createObjectURL(blob);
 
       const link = document.createElement("a");
-      link.href = filePath;
+      link.href = url;
       link.download = fileName;
+
       document.body.appendChild(link);
       link.click();
+
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (err: any) {
       toast.error(err?.message || "Download failed");
     } finally {
@@ -109,38 +117,42 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
       /* ================= EXCEL ================= */
 
-    if (format === "excel") {
-  /* ================= WALLET SHEET ================= */
+      if (format === "excel") {
+        /* ================= WALLET SHEET ================= */
 
-  const walletSheet = XLSX.utils.json_to_sheet([
-    {
-      WalletID: wallet.id,
-      ETH_Address: wallet.address,
-      BTC_Address: wallet.btc_address,
-    },
-  ]);
+        const walletSheet = XLSX.utils.json_to_sheet([
+          {
+            WalletID: wallet.id,
+            ETH_Address: wallet.address,
+            BTC_Address: wallet.btc_address,
+          },
+        ]);
 
-  /* ================= TRANSACTION SHEET ================= */
+        /* ================= TRANSACTION SHEET ================= */
 
-  const transactionSheet = XLSX.utils.json_to_sheet(formattedData);
+        const transactionSheet = XLSX.utils.json_to_sheet(formattedData);
 
-  const workbook = XLSX.utils.book_new();
+        const workbook = XLSX.utils.book_new();
 
-  XLSX.utils.book_append_sheet(workbook, walletSheet, "Wallet Info");
-  XLSX.utils.book_append_sheet(workbook, transactionSheet, "Transactions");
+        XLSX.utils.book_append_sheet(workbook, walletSheet, "Wallet Info");
+        XLSX.utils.book_append_sheet(
+          workbook,
+          transactionSheet,
+          "Transactions",
+        );
 
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "array",
-  });
+        const excelBuffer = XLSX.write(workbook, {
+          bookType: "xlsx",
+          type: "array",
+        });
 
-  const blob = new Blob([excelBuffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
+        const blob = new Blob([excelBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
 
-  saveAs(blob, `transactions_${wallet.address}.xlsx`);
-  toast.success("Excel downloaded");
-}
+        saveAs(blob, `transactions_${wallet.address}.xlsx`);
+        toast.success("Excel downloaded");
+      }
       /* ================= PDF ================= */
 
       if (format === "pdf") {
@@ -154,9 +166,9 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
         doc.text("Transaction Report", 14, 12);
 
         doc.setFontSize(9);
-         doc.text(`Wallet ID: ${wallet.id}`, 14, 18);
-      doc.text(`ETH Address: ${wallet.address}`, 14, 23);
-      doc.text(`BTC Address: ${wallet.btc_address}`, 14, 28);
+        doc.text(`Wallet ID: ${wallet.id}`, 14, 18);
+        doc.text(`ETH Address: ${wallet.address}`, 14, 23);
+        doc.text(`BTC Address: ${wallet.btc_address}`, 14, 28);
 
         autoTable(doc, {
           startY: 24,
@@ -298,7 +310,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
         <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] max-h-[90vh] overflow-y-auto">
           <h3 className="text-[#25C866] font-medium text-lg mb-[15px]">
-            Send Token
+            Settings
           </h3>
 
           <div className="mb-[30px]">
@@ -411,7 +423,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                   handleExportTxReport("excel", "all");
                 }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
-      bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]"
+      bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]  cursor-pointer"
               >
                 Export as Excel
               </button>
@@ -423,7 +435,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                   handleExportTxReport("pdf", "all");
                 }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
-      bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]"
+      bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556] cursor-pointer"
               >
                 Export as PDF
               </button>

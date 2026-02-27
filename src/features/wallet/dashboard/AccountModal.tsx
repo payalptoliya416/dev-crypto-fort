@@ -114,12 +114,12 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
           </div>
           <div
             className="
-  rounded-2xl bg-[#161F37] border border-[#3C3D47]
-  p-4 sm:p-5
-  z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]
-  max-h-[85vh] sm:max-h-[90vh]
-  flex flex-col
-"
+                  rounded-2xl bg-[#161F37] border border-[#3C3D47]
+                  p-4 sm:p-5
+                  z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]
+                  max-h-[85vh] sm:max-h-[90vh]
+                  flex flex-col
+                "
           >
             <h3 className="text-[#25C866] font-medium text-base sm:text-lg mb-[15px]">
               Account
@@ -137,14 +137,14 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
                     key={wallet.id}
                     onClick={() => dispatch(setActiveWallet(wallet))}
                     className={`
-    border rounded-xl cursor-pointer
-    p-4 sm:p-5
-    ${
-      activeWallet?.id === wallet.id
-        ? "border-[#25C866] bg-[#25C86614]"
-        : "border-[#25C8661A]"
-    }
-  `}
+                border rounded-xl cursor-pointer
+                p-4 sm:p-5
+                ${
+                  activeWallet?.id === wallet.id
+                    ? "border-[#25C866] bg-[#25C86614]"
+                    : "border-[#25C8661A]"
+                }
+              `}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3">
                       {/* LEFT */}

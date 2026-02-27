@@ -157,15 +157,15 @@ useEffect(() => {
                 </option>
 
                 <option value="eth" className="bg-[#161F37] text-white">
-                  ETH
+                  Ethereum
                 </option>
 
                 <option value="usdt" className="bg-[#161F37] text-white">
-                  USDT
+                  ERC-20
                 </option>
 
                 <option value="btc" className="bg-[#161F37] text-white">
-                  BTC
+                  Bitcoin
                 </option>
               </select>
             </div>

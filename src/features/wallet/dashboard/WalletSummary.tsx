@@ -14,10 +14,12 @@ import type { RootState } from "../../../redux/store/store";
 import { setCurrency } from "../../../redux/currencySlice";
 import { formatBalance } from "../../component/format";
 import SwapModal from "./SwapModal";
+import { getWallets, type Wallet } from "../../../api/walletApi";
+import { setActiveWallet } from "../../../redux/activeWalletSlice";
 
 export default function WalletSummary() {
   const [open, setOpen] = useState(false);
-  const accounts = ["Account 1", "Account 2", "Account 3"];
+  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
@@ -63,7 +65,20 @@ export default function WalletSummary() {
 
     fetchPrice();
   }, [currency]);
+  useEffect(() => {
+    const fetchWallets = async () => {
+      try {
+        const res = await getWallets();
+        if (res.success) {
+          setWallets(res.data);
+        }
+      } catch {
+        console.log("Failed to load wallets");
+      }
+    };
 
+    fetchWallets();
+  }, []);
   const getSymbol = (cur: string) => {
     const symbols: any = {
       USD: "$",
@@ -103,39 +118,32 @@ export default function WalletSummary() {
                             text-[#7A7D83] text-sm leading-[14px]
                             hover:text-white transition cursor-pointer"
                     >
-                      <span>Account 1</span>
+                      <span>
+                        {activeWallet
+                          ? activeWallet.label?.trim()
+                            ? activeWallet.label
+                            : `Account ${wallets.findIndex((w) => w.id === activeWallet.id) + 1}`
+                          : "Select Account"}
+                      </span>
                       <FaChevronDown className="text-[8px]" />
                     </button>
 
                     {/* Dropdown */}
                     {open && (
-                      <div
-                        className="
-                                absolute left-0 mt-2
-                                w-28
-                                rounded-lg
-                                bg-[#131F3A]
-                                border border-[#2A3553]
-                                shadow-lg
-                                z-50
-                            "
-                      >
-                        {accounts.map((acc) => (
+                      <div className="absolute left-0 mt-2 w-40 max-h-60 overflow-y-auto rounded-lg bg-[#131F3A] border border-[#2A3553] shadow-lg z-50">
+                        {wallets.map((wallet, index) => (
                           <button
-                            key={acc}
+                            key={wallet.id}
                             onClick={() => {
+                              dispatch(setActiveWallet(wallet));
                               setOpen(false);
                             }}
-                            className="
-                                    w-full text-left
-                                    px-3 py-2
-                                    text-xs text-[#AEB4C2]
-                                    hover:bg-[#1A2440]
-                                    hover:text-white
-                                    transition
-                                "
+                            className="w-full text-left px-3 py-2 text-xs text-[#AEB4C2] hover:bg-[#1A2440]
+                                    hover:text-white transition cursor-pointer"
                           >
-                            {acc}
+                            {wallet.label?.trim()
+                              ? wallet.label
+                              : `Account ${index + 1}`}
                           </button>
                         ))}
                       </div>
