@@ -62,50 +62,50 @@ function Balance() {
             }
           });
 
-         const createAsset = (
-  name: string,
-  symbol: string,
-  balance: string,
-  icon: string,
-): Asset => {
-  const incomingPrice = priceMap[symbol];
+          const createAsset = (
+            name: string,
+            symbol: string,
+            balance: string,
+            icon: string,
+          ): Asset => {
+            const incomingPrice = priceMap[symbol];
 
-  const previousPrice = previousPrices.current[symbol];
+            const previousPrice = previousPrices.current[symbol];
 
-  let currentPrice =
-    incomingPrice !== undefined ? incomingPrice : previousPrice;
+            let currentPrice =
+              incomingPrice !== undefined ? incomingPrice : previousPrice;
 
-  let change = "0.00%";
-  let up = true;
+            let change = "0.00%";
+            let up = true;
 
-  // Calculate only if previous exists AND new incoming price exists
-  if (
-    previousPrice !== undefined &&
-    incomingPrice !== undefined &&
-    previousPrice !== 0
-  ) {
-    const diff = incomingPrice - previousPrice;
-    const percentChange = (diff / previousPrice) * 100;
+            // Calculate only if previous exists AND new incoming price exists
+            if (
+              previousPrice !== undefined &&
+              incomingPrice !== undefined &&
+              previousPrice !== 0
+            ) {
+              const diff = incomingPrice - previousPrice;
+              const percentChange = (diff / previousPrice) * 100;
 
-    change = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(2)}%`;
-    up = percentChange >= 0;
-  }
+              change = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(2)}%`;
+              up = percentChange >= 0;
+            }
 
-  // IMPORTANT: update previous only if new price came
-  if (incomingPrice !== undefined) {
-    previousPrices.current[symbol] = incomingPrice;
-  }
+            // IMPORTANT: update previous only if new price came
+            if (incomingPrice !== undefined) {
+              previousPrices.current[symbol] = incomingPrice;
+            }
 
-  return {
-    name,
-    symbol,
-    balance,
-    price: currentPrice !== undefined ? `$${currentPrice}` : "",
-    change,
-    up,
-    icon,
-  };
-};
+            return {
+              name,
+              symbol,
+              balance,
+              price: currentPrice !== undefined ? `$${currentPrice}` : "",
+              change,
+              up,
+              icon,
+            };
+          };
 
           const assetList: Asset[] = [
             createAsset("Bitcoin", "BTC", balances.btc, d2),
@@ -160,30 +160,30 @@ function Balance() {
       key: "price",
       align: "right",
       width: "13%",
-     render: (row) => {
-  const rawValue = row?.price;
+      render: (row) => {
+        const rawValue = row?.price;
 
-  if (rawValue === undefined || rawValue === null) {
-    return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-  }
+        if (rawValue === undefined || rawValue === null) {
+          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+        }
 
-  const cleaned = String(rawValue).replace(/[$,]/g, "");
-  const price = Number(cleaned);
+        const cleaned = String(rawValue).replace(/[$,]/g, "");
+        const price = Number(cleaned);
 
-  if (isNaN(price)) {
-    return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-  }
+        if (isNaN(price)) {
+          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+        }
 
-  return (
-    <p className="text-[#7A7D83] text-base font-normal">
-      $
-      {price.toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}
-    </p>
-  );
-}
+        return (
+          <p className="text-[#7A7D83] text-base font-normal">
+            $
+            {price.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        );
+      },
     },
     {
       header: "Change",
