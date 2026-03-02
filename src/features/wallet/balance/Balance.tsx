@@ -6,13 +6,14 @@ import CommonTable, { type Column } from "../../component/CommonTable";
 import Loader from "../../component/Loader";
 import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
-import { getBalance, getLivePrices } from "../../../api/walletApi";
+import { getBalance } from "../../../api/walletApi";
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
 import d5 from "@/assets/d5.png";
 import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
-
+import { io, Socket } from "socket.io-client";
+import { useRef } from "react";
 interface Asset {
   name: string;
   symbol: string;
@@ -33,128 +34,102 @@ function Balance() {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
+  const previousPrices = useRef<Record<string, number>>({});
 
-  // useEffect(() => {
-  //   if (!activeWallet?.id) return;
-
-  //   let intervalId: ReturnType<typeof setInterval>;
-
-  //   const fetchBalanceAndPrice = async () => {
-  //     try {
-  //       const balanceRes = await getBalance({
-  //         wallet_id: activeWallet.id,
-  //         type: "all",
-  //       });
-
-  //       let priceRes;
-
-  //       try {
-  //         priceRes = await getLivePrices();
-  //       } catch {
-  //         priceRes = {
-  //           ethereum: { usd: 0, usd_24h_change: 0 },
-  //           bitcoin: { usd: 0, usd_24h_change: 0 },
-  //           tether: { usd: 0, usd_24h_change: 0 },
-  //         };
-  //       }
-
-  //       const balances = balanceRes.data.balance;
-
-  //       const assetList: Asset[] = priceRes.map((coin: any) => ({
-  //         name: coin.name,
-  //         symbol: coin.symbol.toUpperCase(),
-  //         balance:
-  //           coin.id === "ethereum"
-  //             ? balances.eth
-  //             : coin.id === "bitcoin"
-  //               ? balances.btc
-  //               : balances.usdt,
-  //         price: `$${coin.current_price}`,
-  //         change: `${coin.price_change_percentage_1h_in_currency?.toFixed(2)}%`,
-  //         up: coin.price_change_percentage_1h_in_currency >= 0,
-  //         icon: coin.id === "ethereum" ? d1 : coin.id === "bitcoin" ? d2 : d5,
-  //       }));
-
-  //       setAssets(assetList);
-  //     } catch (err: any) {
-  //       toast.error(err?.message || "Failed to load balance");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchBalanceAndPrice();
-  //   intervalId = setInterval(fetchBalanceAndPrice, 30000);
-
-  //   return () => clearInterval(intervalId);
-  // }, [activeWallet?.id]);
-  
   useEffect(() => {
-  if (!activeWallet?.id) return;
+    if (!activeWallet?.id) return;
 
-  let isMounted = true;
-  let timeoutId: ReturnType<typeof setTimeout>;
+    let socket: Socket;
 
-  const fetchBalanceAndPrice = async () => {
-    try {
-      const balanceRes = await getBalance({
-        wallet_id: activeWallet.id,
-        type: "all",
-      });
-
-      let priceRes: any[] = [];
-
+    const init = async () => {
       try {
-        const res = await getLivePrices();
-        priceRes = Array.isArray(res) ? res : [];
-      } catch (error) {
-        priceRes = [];
-      }
+        const balanceRes = await getBalance({
+          wallet_id: activeWallet.id,
+          type: "all",
+        });
 
-      if (!isMounted) return;
+        const balances = balanceRes?.data?.balance || {};
 
-      const balances = balanceRes?.data?.balance || {};
+        socket = io("http://192.168.29.134:3001", {
+          transports: ["websocket"],
+        });
+        socket.on("priceUpdate", (data: any) => {
+          const priceMap: Record<string, number> = {};
 
-      const assetList: Asset[] = priceRes.map((coin: any) => ({
-        name: coin.name,
-        symbol: coin.symbol?.toUpperCase() || "",
-        balance:
-          coin.id === "ethereum"
-            ? balances.eth
-            : coin.id === "bitcoin"
-            ? balances.btc
-            : balances.usdt,
-        price: `$${coin.current_price ?? 0}`,
-        change: `${
-          coin.price_change_percentage_1h_in_currency?.toFixed(2) ?? "0.00"
-        }%`,
-        up: coin.price_change_percentage_1h_in_currency >= 0,
-        icon:
-          coin.id === "ethereum"
-            ? d1
-            : coin.id === "bitcoin"
-            ? d2
-            : d5,
-      }));
+          data?.prices?.forEach((item: any) => {
+            if (item?.symbol && item?.price !== undefined) {
+              priceMap[item.symbol] = Number(item.price);
+            }
+          });
 
-      setAssets(assetList);
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to load balance");
-    } finally {
-      if (isMounted) {
+         const createAsset = (
+  name: string,
+  symbol: string,
+  balance: string,
+  icon: string,
+): Asset => {
+  const incomingPrice = priceMap[symbol];
+
+  const previousPrice = previousPrices.current[symbol];
+
+  let currentPrice =
+    incomingPrice !== undefined ? incomingPrice : previousPrice;
+
+  let change = "0.00%";
+  let up = true;
+
+  // Calculate only if previous exists AND new incoming price exists
+  if (
+    previousPrice !== undefined &&
+    incomingPrice !== undefined &&
+    previousPrice !== 0
+  ) {
+    const diff = incomingPrice - previousPrice;
+    const percentChange = (diff / previousPrice) * 100;
+
+    change = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(2)}%`;
+    up = percentChange >= 0;
+  }
+
+  // IMPORTANT: update previous only if new price came
+  if (incomingPrice !== undefined) {
+    previousPrices.current[symbol] = incomingPrice;
+  }
+
+  return {
+    name,
+    symbol,
+    balance,
+    price: currentPrice !== undefined ? `$${currentPrice}` : "",
+    change,
+    up,
+    icon,
+  };
+};
+
+          const assetList: Asset[] = [
+            createAsset("Bitcoin", "BTC", balances.btc, d2),
+            createAsset("Ethereum", "ETH", balances.eth, d1),
+            createAsset("Tether", "USDT", balances.usdt, d5),
+          ];
+
+          setAssets(assetList);
+          setLoading(false);
+        });
+      } catch (err: any) {
+        toast.error(err?.message || "Failed to load balance");
         setLoading(false);
-        timeoutId = setTimeout(fetchBalanceAndPrice, 30000);
       }
-    }
-  };
+    };
 
-  fetchBalanceAndPrice();
+    init();
 
-  return () => {
-    isMounted = false;
-    clearTimeout(timeoutId);
-  };
-}, [activeWallet?.id]);
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, [activeWallet?.id]);
 
   const columns: Column<Asset>[] = [
     {
@@ -185,32 +160,30 @@ function Balance() {
       key: "price",
       align: "right",
       width: "13%",
-      render: (row) => {
-        const rawValue = row?.price;
+     render: (row) => {
+  const rawValue = row?.price;
 
-        if (!rawValue) {
-          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-        }
+  if (rawValue === undefined || rawValue === null) {
+    return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+  }
 
-        // remove $ and commas if already formatted
-        const cleaned = String(rawValue).replace(/[$,]/g, "");
+  const cleaned = String(rawValue).replace(/[$,]/g, "");
+  const price = Number(cleaned);
 
-        const price = Number(cleaned);
+  if (isNaN(price)) {
+    return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+  }
 
-        if (isNaN(price)) {
-          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-        }
-
-        return (
-          <p className="text-[#7A7D83] text-base font-normal">
-            $
-            {price.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </p>
-        );
-      },
+  return (
+    <p className="text-[#7A7D83] text-base font-normal">
+      $
+      {price.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}
+    </p>
+  );
+}
     },
     {
       header: "Change",
