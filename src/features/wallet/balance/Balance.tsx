@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import DashboardLayout from "../../layout/DashboardLayout";
-import CommonTabs from "../../component/CommonTabs";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import Loader from "../../component/Loader";
 import toast from "react-hot-toast";
@@ -12,8 +11,6 @@ import d2 from "@/assets/d2.png";
 import d5 from "@/assets/d5.png";
 import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
-import { io, Socket } from "socket.io-client";
-import { useRef } from "react";
 interface Asset {
   name: string;
   symbol: string;
@@ -25,24 +22,19 @@ interface Asset {
 }
 
 function Balance() {
-  const tabs = ["Favorites", "Top", "Popular", "Token price", "New token"];
-  const [activeTab, setActiveTab] = useState("Favorites");
-
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
 
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
-  const previousPrices = useRef<Record<string, number>>({});
 
   useEffect(() => {
     if (!activeWallet?.id) return;
 
-    let socket: Socket;
-
-    const init = async () => {
+    const fetchBalance = async () => {
       try {
+        setLoading(true);
         const balanceRes = await getBalance({
           wallet_id: activeWallet.id,
           type: "all",
@@ -50,85 +42,45 @@ function Balance() {
 
         const balances = balanceRes?.data?.balance || {};
 
-        socket = io("http://192.168.29.134:3001", {
-          transports: ["websocket"],
-        });
-        socket.on("priceUpdate", (data: any) => {
-          const priceMap: Record<string, number> = {};
+        const assetList: Asset[] = [
+          {
+            name: "Bitcoin",
+            symbol: "BTC",
+            balance: balances.btc,
+            price: "",
+            change: "0.00%",
+            up: true,
+            icon: d2,
+          },
+          {
+            name: "Ethereum",
+            symbol: "ETH",
+            balance: balances.eth,
+            price: "",
+            change: "0.00%",
+            up: true,
+            icon: d1,
+          },
+          {
+            name: "Tether",
+            symbol: "USDT",
+            balance: balances.usdt,
+            price: "",
+            change: "0.00%",
+            up: true,
+            icon: d5,
+          },
+        ];
 
-          data?.prices?.forEach((item: any) => {
-            if (item?.symbol && item?.price !== undefined) {
-              priceMap[item.symbol] = Number(item.price);
-            }
-          });
-
-          const createAsset = (
-            name: string,
-            symbol: string,
-            balance: string,
-            icon: string,
-          ): Asset => {
-            const incomingPrice = priceMap[symbol];
-
-            const previousPrice = previousPrices.current[symbol];
-
-            let currentPrice =
-              incomingPrice !== undefined ? incomingPrice : previousPrice;
-
-            let change = "0.00%";
-            let up = true;
-
-            // Calculate only if previous exists AND new incoming price exists
-            if (
-              previousPrice !== undefined &&
-              incomingPrice !== undefined &&
-              previousPrice !== 0
-            ) {
-              const diff = incomingPrice - previousPrice;
-              const percentChange = (diff / previousPrice) * 100;
-
-              change = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(2)}%`;
-              up = percentChange >= 0;
-            }
-
-            // IMPORTANT: update previous only if new price came
-            if (incomingPrice !== undefined) {
-              previousPrices.current[symbol] = incomingPrice;
-            }
-
-            return {
-              name,
-              symbol,
-              balance,
-              price: currentPrice !== undefined ? `$${currentPrice}` : "",
-              change,
-              up,
-              icon,
-            };
-          };
-
-          const assetList: Asset[] = [
-            createAsset("Bitcoin", "BTC", balances.btc, d2),
-            createAsset("Ethereum", "ETH", balances.eth, d1),
-            createAsset("Tether", "USDT", balances.usdt, d5),
-          ];
-
-          setAssets(assetList);
-          setLoading(false);
-        });
+        setAssets(assetList);
+        setLoading(false);
       } catch (err: any) {
         toast.error(err?.message || "Failed to load balance");
         setLoading(false);
       }
     };
 
-    init();
-
-    return () => {
-      if (socket) {
-        socket.disconnect();
-      }
-    };
+    fetchBalance();
   }, [activeWallet?.id]);
 
   const columns: Column<Asset>[] = [
@@ -214,11 +166,11 @@ function Balance() {
             Balance
           </h3>
 
-          <CommonTabs
+          {/* <CommonTabs
             tabs={tabs}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-          />
+          /> */}
         </div>
 
         {loading ? (

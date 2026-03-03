@@ -6,8 +6,9 @@ export interface Wallet {
   label: string | null;
   status: string;
   created_at: string;
-  balance: string;
-eth_balance?: string;
+  eth_balance: string;
+  btc_balance: string;
+  usdt_balance: string;
 }
 
 export interface WalletListResponse {

@@ -7,9 +7,12 @@ import AppLogo from "../../component/AppLogo";
 import PrivateKeyUI from "../components/PrivateKeyUI";
 
 import { importWallet } from "../../../api/importWallet";
+import { useDispatch } from "react-redux";
+import { setToken } from "../../../redux/authSlice";
 
 function PrivateKey() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [showModal, setShowModal] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -31,7 +34,16 @@ function PrivateKey() {
       );
 
       toast.success(res.message);
-      setShowModal(true);
+      
+      if (res.data?.token) {
+        dispatch(setToken({ 
+          token: res.data.token, 
+          expiresIn: res.data.expires_in! 
+        }));
+        navigate("/dashboard");
+      } else {
+        setShowModal(true);
+      }
     } catch (err: any) {
       setApiError(err.message || "Something went wrong");
     } finally {

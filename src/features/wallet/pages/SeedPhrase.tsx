@@ -7,9 +7,12 @@ import CommonSuccessModal from "../../component/CommonSuccessModal";
 import SeedPhraseUI from "../components/SeedPhraseUI";
 
 import { importWallet } from "../../../api/importWallet";
+import { useDispatch } from "react-redux";
+import { setToken } from "../../../redux/authSlice";
 
 function SeedPhrase() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
@@ -33,7 +36,16 @@ function SeedPhrase() {
       );
 
       toast.success(res.message);
-      setShowModal(true);
+      
+      if (res.data?.token) {
+        dispatch(setToken({ 
+          token: res.data.token, 
+          expiresIn: res.data.expires_in! 
+        }));
+        navigate("/dashboard");
+      } else {
+        setShowModal(true);
+      }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {

@@ -13,6 +13,8 @@ type ImportResponse = {
     wallet_id: number;
     address: string;
     phrase?: string;
+    token?: string;
+    expires_in?: number;
   };
 };
 

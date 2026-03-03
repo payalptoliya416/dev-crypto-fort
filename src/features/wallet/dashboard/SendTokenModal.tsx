@@ -28,6 +28,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   const [errors, setErrors] = useState<{
     toAddress?: string;
     amount?: string;
+    selectedToken?: string;
   }>({});
   const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
   const totalCost = Number(amount || 0) + gasFeeInEth;
@@ -75,6 +76,10 @@ useEffect(() => {
   const validate = () => {
     const newErrors: typeof errors = {};
 
+    if (!selectedToken) {
+      newErrors.selectedToken = "Token selection is required";
+    }
+
     if (!toAddress.trim()) {
       newErrors.toAddress = "Recipient address is required";
     }
@@ -109,6 +114,7 @@ useEffect(() => {
         amount,
         gasFee: gasFee || "0",
         totalCost: totalCost.toString(),
+        selectedToken,
       }),
     );
 
@@ -168,6 +174,9 @@ useEffect(() => {
                   Bitcoin
                 </option>
               </select>
+              {errors.selectedToken && (
+                <p className="text-[#ef4343] text-sm mt-1">{errors.selectedToken}</p>
+              )}
             </div>
 
             <div className="mb-5">
@@ -241,7 +250,7 @@ useEffect(() => {
                     <Loader />
                   </div>
                 ) : (
-                  <p> {gasFee ? `${formatBalance(gasFee)} ETH` : "--"}</p>
+                  <p> {gasFee ? `${formatBalance(gasFee)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : "--"}</p>
                 )}
               </div>
 
@@ -249,8 +258,8 @@ useEffect(() => {
                 <p>Total Cost</p>
                 <p>
                   {amount && gasFee
-                    ? `${formatBalance(totalCost)} ETH`
-                    : "0.00 ETH"}
+                    ? `${formatBalance(totalCost)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`
+                    : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
                 </p>
               </div>
             </div>

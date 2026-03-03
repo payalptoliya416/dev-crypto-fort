@@ -1,4 +1,3 @@
-import { useState } from "react";
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
 import d3 from "@/assets/d3.png";
@@ -8,7 +7,6 @@ import d6 from "@/assets/d6.png";
 import d7 from "@/assets/d7.png";
 import d8 from "@/assets/d8.png";
 import up from "@/assets/up.svg";
-import CommonTabs from "../../component/CommonTabs";
 import CommonTable, { type Column } from "../../component/CommonTable";
 
 interface Asset {
@@ -32,9 +30,7 @@ const assets = [
 ];
 
 function AssetsTab() {
-  const tabs = ["Favorites", "Top", "Popular", "Token price", "New token"];
-  const [activeTab, setActiveTab] = useState("Favorites");
-
+  
  const columns: Column<Asset>[] = [
     {
       header: "Name",
@@ -104,11 +100,11 @@ function AssetsTab() {
             </button>
           ))}
         </div> */}
-          <CommonTabs
+          {/* <CommonTabs
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-        />
+        /> */}
       </div>
     <CommonTable data={assets} columns={columns} />
     </div>

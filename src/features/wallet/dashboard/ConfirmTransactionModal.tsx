@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
 import { useState } from "react";
 import { sendTransaction } from "../../../api/transactionApi";
+import { formatBalance } from "../../component/format";
 
 function shortenAddress(address: string) {
   if (!address) return "--";
@@ -21,7 +22,7 @@ function ConfirmTransactionModal({
   onClose,
 }: ConfirmTransactionModalProps) {
   // gasFee
-  const { toAddress, amount, totalCost } = useSelector(
+  const { toAddress, amount, totalCost, selectedToken } = useSelector(
     (state: RootState) => state.transaction,
   );
   const activeWallet = useSelector(
@@ -51,7 +52,7 @@ function ConfirmTransactionModal({
         wallet_id: activeWallet.id,
         to_address: toAddress,
         amount: amount,
-        type: "eth", 
+        type: selectedToken as any, 
       });
 
       if (res.success) {
@@ -107,7 +108,7 @@ function ConfirmTransactionModal({
             {/* Token */}
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
               <p className="text-white text-base sm:text-lg font-medium">Token:</p>
-              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">ETH</p>
+              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">{selectedToken ? selectedToken.toUpperCase() : "ETH"}</p>
             </div>
 
             {/* From (static wallet for now) */}
@@ -138,14 +139,14 @@ function ConfirmTransactionModal({
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
               <p className="text-white text-base sm:text-lg font-medium">Amount:</p>
               <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
-                {amount || "0"} ETH
+                {amount ? `${formatBalance(amount)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
               </p>
             </div>
 
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
               <p className="text-white text-base sm:text-lg font-medium">Total:</p>
               <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
-                {totalCost || "0"} ETH
+                {totalCost ? `${formatBalance(totalCost)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
               </p>
             </div>
           </div>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import DashboardLayout from "../../layout/DashboardLayout";
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
@@ -9,7 +8,7 @@ import d6 from "@/assets/d6.png";
 import d7 from "@/assets/d7.png";
 import d8 from "@/assets/d8.png";
 import up from "@/assets/up.svg";
-import CommonTabs from "../../component/CommonTabs";
+
 import CommonTable, { type Column } from "../../component/CommonTable";
 
 interface Asset {
@@ -98,8 +97,8 @@ const assets = [
 ];
 
 function Balance() {
-  const tabs = ["Favorites", "Top", "Popular", "Token price", "New token"];
-  const [activeTab, setActiveTab] = useState("Favorites");
+  // const tabs = ["Favorites", "Top", "Popular", "Token price", "New token"];
+  // const [activeTab, setActiveTab] = useState("Favorites");
 
   const columns: Column<Asset>[] = [
     {
@@ -162,11 +161,11 @@ function Balance() {
           <h3 className="tet-xl text-[#25C866] font-semibold mb-[15px]">
             Balance
           </h3>
-          <CommonTabs
+          {/* <CommonTabs
             tabs={tabs}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-          />
+          /> */}
         </div>
         <CommonTable data={assets} columns={columns} />
       </div>
