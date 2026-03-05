@@ -12,6 +12,11 @@ import Transaction from "./features/wallet/transaction/Transaction";
 import Login from "./features/wallet/pages/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import NotFound from "./routes/NotFound";
+import AdminLogin from "./admin/pages/AdminLogin";
+import AdminProtectedRoute from "./routes/AdminProtectedRoute";
+import AdminDashboard from "./admin/pages/dashboard/AdminDashboard";
+import AdminLayout from "./admin/components/AdminLayout";
+import AdminUsers from "./admin/pages/dashboard/AdminUsers";
 
 function App() {
   return (
@@ -42,7 +47,17 @@ function App() {
             <Route path="/balance" element={<Balance />} />
             <Route path="/transaction" element={<Transaction />} />
           </Route>
-         <Route path="*" element={<NotFound />} />
+
+          <Route path="/admin" element={<AdminLogin />} />
+
+          <Route path="/admin" element={<AdminProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </>

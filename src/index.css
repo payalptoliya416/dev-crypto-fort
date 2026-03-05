@@ -62,6 +62,69 @@ body{
    font-family: 'Nunito Sans';
    background-color: #13192B;
 }
+
+@theme {
+  --color-primary: #121212;
+  --color-secondary: #2a2a2a;
+  --color-purple: #6c24e0;
+  --color-whitelight: #ffffff;
+  --color-graytext: #717171;
+  --color-darkgray: #848484;
+  --color-bordercolor: #e7e7e7;
+  --color-accetgray: #414141;
+  --color-yellow: #f0b91f;
+  --color-lightgray: #f3f3f3;
+  --color-darkblack: #000000;
+  --color-paragray: #595959;
+  --color-tablehead: #f8f4fd;
+  --color-completed: #1DA145;
+  --color-listbg: #f9f9f9;
+  --color-blue: #3b5af5;
+  --color-afterline: #d0d0d0;
+  --color-bodybg: #f8f4fd;
+  --color-linkgray: #888888;
+  --color-red: #f0381f;
+  --color-grayicon: #4f4f51;
+  --color-bgview: #f5f6fa;
+  --color-disable : #f3f4f6; 
+}
+
+.dark {
+  --color-primary: #ffffff;
+  --color-secondary: #afafaf;
+  --color-purple: #6c24e0;
+  --color-whitelight: #1a1a1a;
+  --color-graytext: #b5b5b5;
+  --color-darkgray: #d0d0d0;
+  --color-bordercolor: #414141;
+  --color-accetgray: #9c9c9c;
+  --color-yellow: #f0b91f;
+  --color-lightgray: #2a2a2a;
+  --color-darkblack: #ffffff;
+  --color-paragray: #cccccc;
+  --color-tablehead: #222222;
+  --color-completed: #1DA145;
+  --color-listbg: #181818;
+  --color-blue: #3b5af5;
+  --color-afterline: #3a3a3a;
+  --color-bodybg: #121212;
+  --color-linkgray: #aaaaaa;
+  --color-red: #f0381f;
+  --color-grayicon: #c2c2c2;
+  --color-bgview: #1f1f1f;
+  --color-disable : #f3f4f65b; 
+}
+
+@layer theme {
+  html.dark {
+    color-scheme: dark;
+  }
+}
+
+.user-layout{
+   background-color: #13192B;
+   min-height: 100vh;
+}
 .font-noto{
     font-family: "Noto Sans", sans-serif;
 }
@@ -146,4 +209,35 @@ body {
 .VIpgJd-ZVi9od-ORHb-OEVmcd{
   visibility: hidden !important;
   height: 0 !important;
+}
+
+/* ---------------------------------admin ----------------------- */
+
+.input {
+  @apply w-full border border-bordercolor px-[15px] py-2 rounded text-base focus:outline-none;
+}
+.submit-form {
+  @apply w-full py-2 text-white bg-purple text-lg font-medium rounded cursor-pointer 
+         transition-all duration-300 ease-in-out shadow-md;
+}
+.submit-form:hover {
+  @apply shadow-xl;
+}
+
+.submit-form:active {
+  @apply shadow-sm;
+}
+.thead-th {
+  @apply px-[19px] py-[14px] text-sm font-semibold text-primary border border-bordercolor whitespace-nowrap;
+}
+.tbody-tr {
+  @apply px-[19px] py-4 md:py-[21px] text-sm text-paragray font-medium border border-bordercolor whitespace-nowrap;
+}
+.thead-th-dark {
+  @apply px-[19px] py-[14px] text-sm font-semibold text-white 
+         border border-[#24324D] whitespace-nowrap bg-[#1B263B];
+}
+.tbody-tr-dark {
+  @apply px-[19px] py-4 md:py-[21px] text-sm text-gray-300 font-medium 
+         border border-[#24324D] whitespace-nowrap bg-[#16233A];
 }
