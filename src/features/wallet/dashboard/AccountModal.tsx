@@ -163,7 +163,7 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
                       {/* RIGHT */}
                       <div className="flex items-center justify-between sm:justify-end gap-3">
                         <p className="text-white text-base sm:text-lg whitespace-nowrap">
-                          {formatBalance(wallet.balance)} ETH
+                          {formatBalance(wallet.eth_balance)} ETH
                         </p>
 
                         <div className="relative">

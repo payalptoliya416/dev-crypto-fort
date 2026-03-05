@@ -53,3 +53,27 @@ export async function publicApi<T>(
 
   return data as T;
 }
+
+export interface GetPricesRequest {
+  symbols: string;
+  base: string;
+}
+
+export interface PriceData {
+  symbol: string;
+  base: string;
+  price: string;
+}
+
+export interface GetPricesResponse {
+  success: boolean;
+  base: string;
+  prices: PriceData[];
+}
+
+export async function getPrices(request: GetPricesRequest): Promise<GetPricesResponse> {
+  return publicApi<GetPricesResponse>("/get-prices", {
+    method: "POST",
+    body: request,
+  });
+}

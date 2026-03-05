@@ -11,7 +11,6 @@ import SendTokenModal from "../dashboard/SendTokenModal";
 import ConfirmTransactionModal from "../dashboard/ConfirmTransactionModal";
 import CreateWalletPopup from "../popup/CreateWalletPopup";
 import RecoveryPhrasePopup from "../popup/RecoveryPhrasePopup";
-import SecureWalletPopup from "../popup/SecureWalletPopup";
 import ExistingWalletPopup from "../popup/ExistingWalletPopup";
 import SeedPhrasePopup from "../popup/SeedPhrasePopup";
 import PrivateKeyPopup from "../popup/PrivateKeyPopup";
@@ -314,14 +313,7 @@ export default function TopHeader() {
 
             {walletFlowStep === "recovery" && (
               <RecoveryPhrasePopup
-                onNext={() => setWalletFlowStep("password")}
-                onClose={() => setWalletFlowStep(null)}
-              />
-            )}
-
-            {walletFlowStep === "password" && (
-              <SecureWalletPopup
-                onFinish={() => setWalletFlowStep(null)}
+                onNext={() => setWalletFlowStep(null)}
                 onClose={() => setWalletFlowStep(null)}
               />
             )}

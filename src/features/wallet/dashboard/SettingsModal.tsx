@@ -4,7 +4,7 @@ import type { RootState } from "../../../redux/store/store";
 import toast from "react-hot-toast";
 import {
   downloadWalletBackup,
-  exportTransactions,
+  getTransactions,
 } from "../../../api/walletApi";
 import { useState } from "react";
 import { setCurrency } from "../../../redux/currencySlice";
@@ -89,57 +89,61 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setExporting("report");
       toast.loading("Generating export...");
 
-      const res = await exportTransactions({
+      const res = await getTransactions({
         wallet_id: activeWallet.id,
-        format,
         type: exportType,
       });
 
       toast.dismiss();
 
-      if (!res.success || !res.data?.transactions?.length) {
+      if (!res.success || !res.data?.length) {
         toast.error("No transactions found");
         return;
       }
 
-      const { wallet, transactions } = res.data;
+      const transactions = res.data;
 
       const formattedData = transactions.map((tx) => ({
-        Currency: tx.currency,
+        Date: new Date(tx.timestamp || Date.now()).toLocaleString(),
+        Type: tx.transaction_type,
+        Currency: tx.currency?.toUpperCase() || "ETH",
+        Amount: Number(tx.amount).toFixed(6),
+        Status: tx.txreceipt_status,
         Hash: tx.hash,
         From: tx.from_address,
         To: tx.to_address,
-        Amount: Number(tx.amount),
-        GasFee: Number(tx.gas_price) * Number(tx.gas_used),
-        Type: tx.transaction_type,
-        Date: new Date(tx.timestamp).toLocaleString(),
       }));
 
       /* ================= EXCEL ================= */
 
       if (format === "excel") {
-        /* ================= WALLET SHEET ================= */
+        const wsData = [
+          ["Transaction History Report"],
+          [],
+          [`ETH Address:`, activeWallet.address],
+          [`BTC Address:`, (activeWallet as any).btc_address || "N/A"],
+          [],
+          ["Date", "Type", "Currency", "Amount", "Status", "Hash", "From", "To"],
+          ...formattedData.map(tx => [
+            tx.Date, tx.Type, tx.Currency, tx.Amount, tx.Status, tx.Hash, tx.From, tx.To
+          ])
+        ];
 
-        const walletSheet = XLSX.utils.json_to_sheet([
-          {
-            WalletID: wallet.id,
-            ETH_Address: wallet.address,
-            BTC_Address: wallet.btc_address,
-          },
-        ]);
+        const sheet = XLSX.utils.aoa_to_sheet(wsData);
 
-        /* ================= TRANSACTION SHEET ================= */
-
-        const transactionSheet = XLSX.utils.json_to_sheet(formattedData);
+        sheet["!cols"] = [
+          { wch: 22 }, // Date
+          { wch: 45 }, // Type / Values
+          { wch: 10 }, // Currency
+          { wch: 15 }, // Amount
+          { wch: 12 }, // Status
+          { wch: 68 }, // Hash
+          { wch: 45 }, // From
+          { wch: 45 }, // To
+        ];
 
         const workbook = XLSX.utils.book_new();
-
-        XLSX.utils.book_append_sheet(workbook, walletSheet, "Wallet Info");
-        XLSX.utils.book_append_sheet(
-          workbook,
-          transactionSheet,
-          "Transactions",
-        );
+        XLSX.utils.book_append_sheet(workbook, sheet, "Transactions");
 
         const excelBuffer = XLSX.write(workbook, {
           bookType: "xlsx",
@@ -150,7 +154,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
 
-        saveAs(blob, `transactions_${wallet.address}.xlsx`);
+        saveAs(blob, `transactions_${activeWallet.address}.xlsx`);
         toast.success("Excel downloaded");
       }
       /* ================= PDF ================= */
@@ -162,81 +166,85 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           format: "a4",
         });
 
-        doc.setFontSize(14);
-        doc.text("Transaction Report", 14, 12);
+        doc.setFontSize(22);
+        doc.setTextColor(37, 200, 102); // #25C866 color
+        doc.text("Transaction History Report", 14, 20);
 
-        doc.setFontSize(9);
-        doc.text(`Wallet ID: ${wallet.id}`, 14, 18);
-        doc.text(`ETH Address: ${wallet.address}`, 14, 23);
-        doc.text(`BTC Address: ${wallet.btc_address}`, 14, 28);
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Wallet ID: ${activeWallet.id}`, 14, 30);
+        doc.text(`ETH Address: ${activeWallet.address}`, 14, 36);
+        doc.text(`BTC Address: ${(activeWallet as any).btc_address || "N/A"}`, 14, 42);
 
         autoTable(doc, {
-          startY: 24,
+          startY: 50,
 
           head: [
             [
+              "Date",
+              "Type",
               "Currency",
+              "Amount",
+              "Status",
               "Hash",
               "From",
-              "To",
-              "Amount",
-              "Gas Fee",
-              "Type",
-              "Date",
+              "To"
             ],
           ],
 
-          body: transactions.map((tx) => [
-            tx.currency,
-            tx.hash, // 👈 FULL hash
-            tx.from_address, // 👈 FULL address
-            tx.to_address,
-            Number(tx.amount).toFixed(6),
-            (Number(tx.gas_price) * Number(tx.gas_used)).toFixed(6),
-            tx.transaction_type,
-            new Date(tx.timestamp).toLocaleString(),
+          body: formattedData.map((tx) => [
+            tx.Date,
+            tx.Type,
+            tx.Currency,
+            tx.Amount,
+            tx.Status,
+            tx.Hash,
+            tx.From,
+            tx.To,
           ]),
 
           styles: {
             fontSize: 7,
-            cellPadding: 2,
-            overflow: "linebreak", // 👈 wrap text instead of cut
+            cellPadding: 3,
+            overflow: "linebreak",
             valign: "middle",
           },
 
           headStyles: {
-            fillColor: [52, 152, 219],
+            fillColor: [37, 200, 102], // Match #25C866
             textColor: 255,
             fontStyle: "bold",
             halign: "center",
           },
 
           columnStyles: {
-            0: { cellWidth: 20 },
-            1: { cellWidth: 45 }, // Hash wider
-            2: { cellWidth: 45 }, // From wider
-            3: { cellWidth: 45 }, // To wider
-            4: { cellWidth: 20 },
-            5: { cellWidth: 25 },
-            6: { cellWidth: 20 },
-            7: { cellWidth: 30 },
+            0: { cellWidth: 25 },
+            1: { cellWidth: 15, halign: "center" },
+            2: { cellWidth: 15, halign: "center" },
+            3: { cellWidth: 20, halign: "right" },
+            4: { cellWidth: 15, halign: "center" },
+            5: { cellWidth: 60 }, // Hash wider
+            6: { cellWidth: 60 }, // From wider
+            7: { cellWidth: 60 }, // To wider
           },
 
           alternateRowStyles: {
-            fillColor: [245, 245, 245],
+            fillColor: [248, 249, 250],
           },
 
           didDrawPage: (data) => {
             doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            const str = `Page ${doc.getNumberOfPages()} - Crypto Fort Wallet`;
             doc.text(
-              `Page ${doc.getNumberOfPages()}`,
+              str,
               data.settings.margin.left,
-              doc.internal.pageSize.height - 5,
+              doc.internal.pageSize.height - 10,
             );
           },
         });
 
-        doc.save(`transactions_${wallet.address}.pdf`);
+        doc.save(`transactions_${activeWallet.address}.pdf`);
         toast.success("PDF downloaded");
       }
     } catch (err: any) {

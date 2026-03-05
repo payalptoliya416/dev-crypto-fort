@@ -6,5 +6,11 @@ export const formatBalance = (
     return "0.00";
   }
 
-  return Number(balance).toFixed(2);
+  const num = Number(balance);
+  
+  if (num < 0.01 && num > 0) {
+    return num.toFixed(8).replace(/\.?0+$/, '');
+  }
+  
+  return num.toFixed(2);
 };
