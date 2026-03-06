@@ -11,6 +11,7 @@ import d2 from "@/assets/d2.png";
 import d5 from "@/assets/d5.png";
 import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
+import { io } from "socket.io-client";
 interface Asset {
   name: string;
   symbol: string;
@@ -24,15 +25,96 @@ interface Asset {
 function Balance() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [socketLoaded, setSocketLoaded] = useState(false);
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
+  const hasValidPrices = () => {
+    const saved = localStorage.getItem("crypto_balance_prices");
+    if (!saved) return false;
+
+    const prices = JSON.parse(saved);
+
+    return Object.values(prices).some(
+      (p: any) => p?.price && Number(p.price) > 0,
+    );
+  };
+  useEffect(() => {
+    const socket = io("https://socket.cryptosfort.com", {
+      transports: ["websocket"],
+    });
+
+    socket.onAny((_, data) => {
+      if (!data?.prices) return;
+
+      const saved = localStorage.getItem("crypto_balance_prices");
+      const storedPrices = saved ? JSON.parse(saved) : {};
+
+      setSocketLoaded(true);
+
+      setAssets((prevAssets) => {
+        const updated = prevAssets.map((asset) => {
+          const match = data.prices.find((p: any) => p.symbol === asset.symbol);
+          if (!match) return asset;
+
+          const newPrice = Number(match.price);
+
+          const previousPrice = Number(
+            storedPrices?.[asset.symbol]?.price || asset.price || 0,
+          );
+          let changePercent = asset.change;
+          let isUp = asset.up;
+
+          if (previousPrice > 0) {
+            const diff = ((newPrice - previousPrice) / previousPrice) * 100;
+            changePercent = `${diff.toFixed(2)}%`;
+            isUp = diff >= 0;
+          }
+
+          return {
+            ...asset,
+            price: newPrice.toString(),
+            change: changePercent,
+            up: isUp,
+          };
+        });
+
+        if (updated.length > 0) {
+          const priceMap: any = {};
+
+          updated.forEach((a) => {
+            const prevStored = storedPrices?.[a.symbol];
+
+            priceMap[a.symbol] = {
+              price: a.price,
+              prevPrice: prevStored?.price || a.price,
+              change: a.change,
+              up: a.up,
+            };
+          });
+
+          localStorage.setItem(
+            "crypto_balance_prices",
+            JSON.stringify(priceMap),
+          );
+        }
+
+        return updated;
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!activeWallet?.id) return;
 
     const fetchBalance = async () => {
+      if (hasValidPrices()) {
+        setSocketLoaded(true);
+      }
       try {
         setLoading(true);
         const balanceRes = await getBalance({
@@ -41,36 +123,38 @@ function Balance() {
         });
 
         const balances = balanceRes?.data?.balance || {};
+        const savedPrices = localStorage.getItem("crypto_balance_prices");
+        const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
 
-        const assetList: Asset[] = [
-          {
-            name: "Bitcoin",
-            symbol: "BTC",
-            balance: balances.btc,
-            price: "",
-            change: "0.00%",
-            up: true,
-            icon: d2,
-          },
-          {
-            name: "Ethereum",
-            symbol: "ETH",
-            balance: balances.eth,
-            price: "",
-            change: "0.00%",
-            up: true,
-            icon: d1,
-          },
-          {
-            name: "Tether",
-            symbol: "USDT",
-            balance: balances.usdt,
-            price: "",
-            change: "0.00%",
-            up: true,
-            icon: d5,
-          },
-        ];
+     const assetList: Asset[] = [
+  {
+    name: "Bitcoin",
+    symbol: "BTC",
+    balance: balances.btc,
+    price: priceMap.BTC?.price || "",
+    change: priceMap.BTC?.change ?? "",
+    up: priceMap.BTC?.up ?? true,
+    icon: d2,
+  },
+  {
+    name: "Ethereum",
+    symbol: "ETH",
+    balance: balances.eth,
+    price: priceMap.ETH?.price || "",
+    change: priceMap.ETH?.change ?? "",
+    up: priceMap.ETH?.up ?? true,
+    icon: d1,
+  },
+  {
+    name: "Tether",
+    symbol: "USDT",
+    balance: balances.usdt,
+    price: priceMap.USDT?.price || "",
+    change: priceMap.USDT?.change ?? "",
+    up: priceMap.USDT?.up ?? true,
+    icon: d5,
+  },
+];
 
         setAssets(assetList);
         setLoading(false);
@@ -107,54 +191,101 @@ function Balance() {
         </p>
       ),
     },
-    {
-      header: "Last Price",
-      key: "price",
-      align: "right",
-      width: "13%",
-      render: (row) => {
-        const rawValue = row?.price;
+    // {
+    //   header: "Last Price",
+    //   key: "price",
+    //   align: "right",
+    //   width: "13%",
+    //   render: (row) => {
+    //     const rawValue = row?.price;
 
-        if (rawValue === undefined || rawValue === null) {
-          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-        }
+    //     if (rawValue === undefined || rawValue === null) {
+    //       return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+    //     }
 
-        const cleaned = String(rawValue).replace(/[$,]/g, "");
-        const price = Number(cleaned);
+    //     const cleaned = String(rawValue).replace(/[$,]/g, "");
+    //     const price = Number(cleaned);
 
-        if (isNaN(price)) {
-          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-        }
+    //     if (isNaN(price)) {
+    //       return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+    //     }
 
-        return (
-          <p className="text-[#7A7D83] text-base font-normal">
-            $
-            {price.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </p>
-        );
-      },
-    },
+    //     return (
+    //       <p className="text-[#7A7D83] text-base font-normal">
+    //         $
+    //         {price.toLocaleString("en-US", {
+    //           minimumFractionDigits: 2,
+    //           maximumFractionDigits: 2,
+    //         })}
+    //       </p>
+    //     );
+    //   },
+    // },
+   {
+  header: "Last Price",
+  key: "price",
+  align: "right",
+  width: "13%",
+  render: (row) => {
+    const balance = Number(row.balance || 0);
+
+    // socket price na aave tya sudhi loader
+    if (!row.price) {
+      return (
+        <div className="flex justify-end">
+          <Loader />
+        </div>
+      );
+    }
+
+    const cleaned = String(row.price).replace(/[$,]/g, "");
+    const price = Number(cleaned);
+
+    if (isNaN(price)) {
+      return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+    }
+
+    const total = balance * price;
+
+    return (
+      <p className="text-[#7A7D83] text-base font-normal">
+        $
+        {total.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </p>
+    );
+  },
+},
     {
       header: "Change",
       key: "change",
       align: "right",
       width: "13%",
-      render: (row) => (
-        <span
-          className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
-          ${row.up ? "bg-[#25C866]" : "bg-[#C82525]"} text-white`}
-        >
-          <img
-            src={up}
-            alt="icon"
-            className={`${row.up ? "" : "rotate-180"}`}
-          />
-          {row.change}
-        </span>
-      ),
+     render: (row) => {
+  if (!row.change) {
+    return (
+      <div className="flex justify-end">
+        <Loader />
+      </div>
+    );
+  }
+
+  return (
+    <span
+      className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
+      ${row.up ? "bg-[#25C866]" : "bg-[#C82525]"} text-white`}
+    >
+      <img
+        src={up}
+        alt="icon"
+        className={`${row.up ? "" : "rotate-180"}`}
+      />
+      {row.change}
+    </span>
+  );
+},
     },
   ];
 
@@ -173,7 +304,7 @@ function Balance() {
           /> */}
         </div>
 
-        {loading ? (
+        {loading || !socketLoaded ? (
           <div className="flex justify-center items-center py-20">
             <Loader />
           </div>

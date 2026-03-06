@@ -1,14 +1,11 @@
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
-import d3 from "@/assets/d3.png";
-import d4 from "@/assets/d4.png";
 import d5 from "@/assets/d5.png";
-import d6 from "@/assets/d6.png";
-import d7 from "@/assets/d7.png";
-import d8 from "@/assets/d8.png";
 import up from "@/assets/up.svg";
 import CommonTable, { type Column } from "../../component/CommonTable";
-
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import Loader from "../../component/Loader";
 interface Asset {
   name: string;
   symbol: string;
@@ -18,26 +15,121 @@ interface Asset {
   icon: string;
 }
 
-const assets = [
-  { name: "Ethereum", symbol: "ETH", price: "$2,435.20", change: "+2.5%", up: true, icon: d1 },
-  { name: "Bitcoin", symbol: "BTC", price: "$62,880.00", change: "+1.2%", up: true, icon: d2 },
-  { name: "Binance", symbol: "BNB", price: "$320.00", change: "-0.8%", up: false, icon: d3 },
-  { name: "Solana", symbol: "SOL", price: "$143.20", change: "+4.5%", up: true, icon: d4 },
-  { name: "Tether", symbol: "USDT", price: "$1.0", change: "+1.8%", up: true, icon: d5 },
-  { name: "Arbitrum One", symbol: "ARB", price: "$1.08", change: "1.6%", up: true, icon: d6 },
-  { name: "XRP Ledger", symbol: "XRP", price: "$0.56", change: "0.3%", up: true, icon: d7 },
-  { name: "Dogecoin", symbol: "DOGE", price: "$0.08", change: "1.1%", up: true, icon: d8 },
-];
-
 function AssetsTab() {
-  
- const columns: Column<Asset>[] = [
+  const [loading, setLoading] = useState(true);
+  const [socketLoaded, setSocketLoaded] = useState(false);
+  const [assets, setAssets] = useState<Asset[]>([]);
+
+  useEffect(() => {
+    const socket = io("https://socket.cryptosfort.com", {
+      transports: ["websocket"],
+    });
+
+ socket.onAny((_, data) => {
+  if (!data?.prices) return;
+
+  const saved = localStorage.getItem("crypto_prices");
+  const storedPrices = saved ? JSON.parse(saved) : {};
+
+  setAssets((prevAssets) => {
+    const updated = prevAssets.map((asset) => {
+      const match = data.prices.find((p: any) => p.symbol === asset.symbol);
+      if (!match) return asset;
+
+      const newPrice = Number(match.price);
+
+      const prevPrice = Number(
+        storedPrices?.[asset.symbol]?.price || newPrice
+      );
+
+      let diff = 0;
+      let changePercent = asset.change;
+      let isUp = asset.up;
+
+      if (prevPrice > 0 && prevPrice !== newPrice) {
+        diff = ((newPrice - prevPrice) / prevPrice) * 100;
+        changePercent = `${diff.toFixed(2)}%`;
+        isUp = diff >= 0;
+      }
+
+      return {
+        ...asset,
+        price: newPrice.toString(),
+        change: changePercent,
+        up: isUp,
+      };
+    });
+
+    // store new + prev price
+    const priceMap: any = {};
+
+    updated.forEach((a) => {
+      const old = storedPrices?.[a.symbol];
+
+      priceMap[a.symbol] = {
+        price: a.price,
+        prevPrice: old?.price || a.price,
+        change: a.change,
+        up: a.up,
+      };
+    });
+
+    localStorage.setItem("crypto_prices", JSON.stringify(priceMap));
+
+    return updated;
+  });
+
+  setSocketLoaded(true);
+  setLoading(false);
+});
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const savedPrices = localStorage.getItem("crypto_prices");
+    const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
+
+    const assetList: Asset[] = [
+      {
+        name: "Bitcoin",
+        symbol: "BTC",
+        price: priceMap.BTC?.price || "",
+        change: priceMap.BTC?.change ?? "0.00%",
+        up: priceMap.BTC?.up ?? true,
+        icon: d2,
+      },
+      {
+        name: "Ethereum",
+        symbol: "ETH",
+        price: priceMap.ETH?.price || "",
+        change: priceMap.ETH?.change ?? "0.00%",
+        up: priceMap.ETH?.up ?? true,
+        icon: d1,
+      },
+      {
+        name: "Tether",
+        symbol: "USDT",
+        price: priceMap.USDT?.price || "",
+        change: priceMap.USDT?.change ?? "0.00%",
+        up: priceMap.USDT?.up ?? true,
+        icon: d5,
+      },
+    ];
+
+    setAssets(assetList);
+    setLoading(false);
+  }, []);
+
+  const columns: Column<Asset>[] = [
     {
       header: "Name",
       key: "name",
-      render: (row: any) => (
+      render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" />
+          <img src={row.icon} alt="icon" className="w-8 h-8" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
             <p className="text-xs text-[#7A7D83]">{row.symbol}</p>
@@ -49,18 +141,40 @@ function AssetsTab() {
       header: "Last Price",
       key: "price",
       align: "right",
-      render: (row: any) => (
-        <p className="text-[#7A7D83]  text-base font-normal">{row.price}</p>
-      ),
+      width: "13%",
+      render: (row) => {
+        const rawValue = row?.price;
+
+        if (rawValue === undefined || rawValue === null) {
+          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+        }
+
+        const cleaned = String(rawValue).replace(/[$,]/g, "");
+        const price = Number(cleaned);
+
+        if (isNaN(price)) {
+          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+        }
+
+        return (
+          <p className="text-[#7A7D83] text-base font-normal">
+            $
+            {price.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        );
+      },
     },
     {
       header: "Change",
       key: "change",
       align: "right",
-      width: '13%',
-      render: (row: any) => (
+      width: "13%",
+      render: (row) => (
         <span
-          className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px] w-full max-w-[65px]
+          className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
           ${row.up ? "bg-[#25C866]" : "bg-[#C82525]"} text-white`}
         >
           <img
@@ -80,33 +194,14 @@ function AssetsTab() {
         <h3 className="tet-xl text-[#25C866] font-semibold mb-[15px]">
           Assets
         </h3>
-        {/* <div
-          className="flex gap-6 mt-4 border-b border-[#3C3D47] overflow-x-auto whitespace-nowrap scrollbar-hide
-           sm:overflow-visible"
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`shrink-0 pb-[15px] text-base transition  cursor-pointer
-                ${
-                  activeTab === tab
-                    ? "text-white border-b-2 border-white  font-semibold"
-                    : "text-[#7A7D83] hover:text-white font-normal"
-                }
-                `}
-            >
-              {tab}
-            </button>
-          ))}
-        </div> */}
-          {/* <CommonTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        /> */}
       </div>
-    <CommonTable data={assets} columns={columns} />
+      {loading || !socketLoaded ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader />
+        </div>
+      ) : (
+        <CommonTable data={assets} columns={columns} />
+      )}
     </div>
   );
 }

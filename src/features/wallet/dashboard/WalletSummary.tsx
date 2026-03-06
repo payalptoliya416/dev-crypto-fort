@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import CurrencyDropdown from "./CurrencyDropdown";
 import vector from "@/assets/vector.png";
-import { FaArrowTrendUp } from "react-icons/fa6";
 import { FiUpload } from "react-icons/fi";
 import { HiOutlineDownload } from "react-icons/hi";
 import { LuArrowLeftRight } from "react-icons/lu";
@@ -22,6 +21,7 @@ import Loader from "../../component/Loader";
 export default function WalletSummary() {
   const [open, setOpen] = useState(false);
   const [wallets, setWallets] = useState<Wallet[]>([]);
+  
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
@@ -43,8 +43,8 @@ export default function WalletSummary() {
   const formattedTotal = formatBalance(totalValue);
 
   useEffect(() => {
-    // Check if prices are already stored in sessionStorage
-    const cachedPrices = sessionStorage.getItem(`ethPricesByCurrency`);
+    // Check if prices are already stored in localStorage
+    const cachedPrices = localStorage.getItem(`ethPricesByCurrency`);
     
     if (cachedPrices) {
       try {
@@ -68,13 +68,13 @@ export default function WalletSummary() {
         });
 
         if (response.success && response.prices && Array.isArray(response.prices)) {
-          // Store all prices in sessionStorage
+          // Store all prices in localStorage
           const allPrices: Record<string, any> = {};
           response.prices.forEach((priceObj: { symbol: string; base: string; price: string }) => {
             allPrices[priceObj.base] = priceObj;
           });
           
-          sessionStorage.setItem(`ethPricesByCurrency`, JSON.stringify(allPrices));
+          localStorage.setItem(`ethPricesByCurrency`, JSON.stringify(allPrices));
           
           // Set the price for the current currency
           const currentCurrencyPrice = allPrices[currency]?.price || 0;
@@ -134,11 +134,8 @@ export default function WalletSummary() {
             <div>
               <div className="flex justify-between items-start mb-[15px]">
                 <div>
-                  <p className="text-[#25C866] text-lg leading-[18px] font-medium mb-[6px]">
-                    My Wallet
-                  </p>
                   <div className="relative inline-block">
-                    {/* Trigger */}
+                  
                     <button
                       onClick={() => setOpen(!open)}
                       className="flex items-center gap-[5px]
@@ -155,7 +152,6 @@ export default function WalletSummary() {
                       <FaChevronDown className="text-[8px]" />
                     </button>
 
-                    {/* Dropdown */}
                     {open && (
                       <div className="absolute left-0 mt-2 w-40 max-h-60 overflow-y-auto rounded-lg bg-[#131F3A] border border-[#2A3553] shadow-lg z-50">
                         {wallets.map((wallet, index) => (
@@ -199,9 +195,7 @@ export default function WalletSummary() {
                       <img src={vector} alt="vector" />
                       <span>{formattedBalance} ETH</span>
                     </div>
-                    <div className="bg-[#25C8660D] rounded-lg py-[6px] px-[10px] flex items-center gap-[5px] text-[#25C866] text-xs">
-                      <FaArrowTrendUp className="" /> +79.79 (2.85%)
-                    </div>
+                   
                   </div>
                 </>
               )}
