@@ -53,7 +53,7 @@ function App() {
 
           <Route path="/admin" element={<AdminProtectedRoute />}>
             <Route element={<AdminLayout />}>
-              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="transaction" element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="users/user-details" element={<InnerUsers />} />
             </Route>

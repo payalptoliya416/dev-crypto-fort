@@ -145,9 +145,9 @@ function AdminLogin() {
                     "
                     >
                       {showPassword ? (
-                        <IoEyeOffOutline size={22} />
+                        <IoEyeOffOutline size={20} />
                       ) : (
-                        <IoEyeOutline size={22} />
+                        <IoEyeOutline size={20} />
                       )}
                     </button>
                   </div>

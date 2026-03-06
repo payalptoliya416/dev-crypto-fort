@@ -204,7 +204,7 @@ function TopNavbar({ toggleSidebar }: Props) {
           ref={modalRef}
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-10 px-4"
         >
-          <div className="w-full max-w-[500px] rounded-2xl bg-[#0B1220] border border-[#1F2A44] p-8 shadow-xl">
+          <div className="w-full max-w-[500px] rounded-2xl bg-[#0B1220] border border-[#1F2A44] p-3 sm:p-5 md:p-8 shadow-xl">
             <h3 className="text-xl text-white font-semibold mb-6 text-center">
               Change Password
             </h3>
@@ -256,6 +256,7 @@ function TopNavbar({ toggleSidebar }: Props) {
                         name="oldPassword"
                         type={showOldPassword ? "text" : "password"}
                         className="w-full rounded-xl bg-[#0F1A2F] px-5 py-3 text-white border border-[#1F2A44] focus:border-[#25C866] outline-none pr-12"
+                          placeholder="Enter old password"
                       />
 
                       <button
@@ -290,6 +291,7 @@ function TopNavbar({ toggleSidebar }: Props) {
                       <Field
                         name="newPassword"
                         type={showNewPassword ? "text" : "password"}
+                          placeholder="Enter new password"
                         className="w-full rounded-xl bg-[#0F1A2F] px-5 py-3 text-white border border-[#1F2A44] focus:border-[#25C866] outline-none pr-12"
                       />
 
@@ -325,6 +327,7 @@ function TopNavbar({ toggleSidebar }: Props) {
                       <Field
                         name="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm password"
                         className="w-full rounded-xl bg-[#0F1A2F] px-5 py-3 text-white border border-[#1F2A44] focus:border-[#25C866] outline-none pr-12"
                       />
 
@@ -360,7 +363,7 @@ function TopNavbar({ toggleSidebar }: Props) {
                         setShowChangePassword(false);
                         resetPasswordVisibility();
                       }}
-                      className="flex-1 py-3 rounded-xl bg-[#374151] hover:bg-[#4B5563] text-white cursor-pointer"
+                      className="flex-1 py-2 sm:py-3 rounded-xl bg-[#374151] hover:bg-[#4B5563] text-white cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -368,7 +371,7 @@ function TopNavbar({ toggleSidebar }: Props) {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex-1 py-3 rounded-xl bg-[#25C866] hover:bg-green-500 text-white font-semibold disabled:opacity-60 cursor-pointer"
+                      className="flex-1 py-2 sm:py-3 rounded-xl bg-[#25C866] hover:bg-green-500 text-white font-semibold disabled:opacity-60 cursor-pointer"
                     >
                       {isSubmitting ? "Updating..." : "Update"}
                     </button>
