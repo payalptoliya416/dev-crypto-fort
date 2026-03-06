@@ -5,6 +5,8 @@ import * as Yup from "yup";
 import { useEffect, useState } from "react";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { adminLogin } from "../adminapi/adminAuthApi";
 
 interface LoginFormValues {
   email: string;
@@ -20,7 +22,7 @@ function AdminLogin() {
     const adminToken = localStorage.getItem("admin_token");
 
     if (adminToken) {
-      navigate("/admin/dashboard");
+      navigate("/admin/users");
     }
   }, [navigate]);
 
@@ -39,26 +41,33 @@ function AdminLogin() {
       .required("Password is required"),
   });
 
-  const handleSubmit = (
-    values: LoginFormValues,
-    { resetForm }: FormikHelpers<LoginFormValues>,
-  ) => {
+ const handleSubmit = async (
+  values: LoginFormValues,
+  { resetForm }: FormikHelpers<LoginFormValues>
+) => {
+
+  try {
     setLoading(true);
 
-    console.log("Form Data:", values);
+    const res = await adminLogin(values);
 
-    setTimeout(() => {
-      setLoading(false);
+    localStorage.setItem("admin_token", res.data.token);
+    localStorage.setItem("admin_name", res.data.name);
 
-      // fake token set
-      localStorage.setItem("admin_token", "admin123");
+    toast.success(res.message);
 
-      // redirect to dashboard
-      navigate("/admin/dashboard");
+    navigate("/admin/users");
 
-      resetForm();
-    }, 1000);
-  };
+    resetForm();
+
+  } catch (error: any) {
+
+    toast.error(error.message || "Login failed");
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>

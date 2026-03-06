@@ -7,12 +7,20 @@ import { useEffect } from "react";
 import { getWallets } from "../../../api/walletApi";
 import { setActiveWallet } from "../../../redux/activeWalletSlice";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
     const dispatch = useDispatch();
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet
   );
+    const navigate = useNavigate();
+  const token = useSelector((state: RootState) => state.auth.token);
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     const initWallet = async () => {

@@ -6,10 +6,10 @@ import TopNavbar from "./TopNavbar";
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const currentYear = new Date().getFullYear();
+  // const currentYear = new Date().getFullYear();
 
   return (
-    <div className="flex min-h-screen bg-[#0f1a2f]">
+    <div className="flex min-h-screen bg-[#0f1a2f] items-stretch">
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
@@ -27,7 +27,7 @@ function AdminLayout() {
           />
 
           {/* Sidebar */}
-          <div className="absolute left-0 top-0 h-full w-64 bg-[#0F1E38] border-r border-[#24324D]">
+          <div className="absolute left-0 top-0 min-h-screen w-64 bg-[#0F1E38] border-r border-[#24324D]">
             <AdminSidebar />
           </div>
 
@@ -46,7 +46,7 @@ function AdminLayout() {
         </main>
 
         {/* Footer */}
-        <footer className="px-6 pb-6">
+        {/* <footer className="px-6 pb-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-gray-400 text-sm">
 
             <p className="text-center md:text-left">
@@ -63,7 +63,7 @@ function AdminLayout() {
             </div>
 
           </div>
-        </footer>
+        </footer> */}
 
       </div>
     </div>

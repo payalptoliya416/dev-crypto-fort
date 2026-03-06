@@ -16,7 +16,8 @@ import AdminLogin from "./admin/pages/AdminLogin";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
 import AdminDashboard from "./admin/pages/dashboard/AdminDashboard";
 import AdminLayout from "./admin/components/AdminLayout";
-import AdminUsers from "./admin/pages/dashboard/AdminUsers";
+import AdminUsers from "./admin/pages/users/AdminUsers";
+import InnerUsers from "./admin/pages/users/InnerUsers";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
             <Route element={<AdminLayout />}>
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="users/user-details" element={<InnerUsers />} />
             </Route>
           </Route>
 

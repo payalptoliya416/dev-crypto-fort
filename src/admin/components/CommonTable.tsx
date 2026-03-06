@@ -1,4 +1,10 @@
 import React from "react";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiChevronsLeft,
+  FiChevronsRight,
+} from "react-icons/fi";
 
 export interface Column<T> {
   header: string;
@@ -9,16 +15,21 @@ interface CommonTableProps<T> {
   columns: Column<T>[];
   data: T[];
   loading?: boolean;
+  page?: number;
+  lastPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 function CommonTable<T extends { id: number | string }>({
   columns,
   data,
   loading = false,
+  page = 1,
+  lastPage = 1,
+  onPageChange,
 }: CommonTableProps<T>) {
   return (
     <div className="w-full">
-
       {/* Desktop Table (તમારો existing code same) */}
       <div className="hidden md:grid grid-cols-12">
         <div className="col-span-12">
@@ -37,13 +48,19 @@ function CommonTable<T extends { id: number | string }>({
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={columns.length} className="text-center py-6 text-gray-400">
+                    <td
+                      colSpan={columns.length}
+                      className="text-center py-6 text-gray-400"
+                    >
                       Loading...
                     </td>
                   </tr>
                 ) : data.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length} className="text-center py-6 text-gray-400">
+                    <td
+                      colSpan={columns.length}
+                      className="text-center py-6 text-gray-400"
+                    >
                       No data found
                     </td>
                   </tr>
@@ -97,6 +114,51 @@ function CommonTable<T extends { id: number | string }>({
         )}
       </div>
 
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-[#24324D] bg-[#161F37]">
+        {/* Page Info */}
+        <span className="text-sm text-gray-400 text-center sm:text-left">
+          Page {page} of {lastPage}
+        </span>
+
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-center gap-1 flex-wrap">
+          <button
+            disabled={page === 1}
+            onClick={() => onPageChange?.(1)}
+            className="p-2 text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <FiChevronsLeft size={18} />
+          </button>
+
+          <button
+            disabled={page === 1}
+            onClick={() => onPageChange?.(page - 1)}
+            className="p-2 text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <FiChevronLeft size={18} />
+          </button>
+
+          <span className="px-2 text-white text-sm">
+            {page} / {lastPage}
+          </span>
+
+          <button
+            disabled={page === lastPage}
+            onClick={() => onPageChange?.(page + 1)}
+            className="p-2 text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <FiChevronRight size={18} />
+          </button>
+
+          <button
+            disabled={page === lastPage}
+            onClick={() => onPageChange?.(lastPage)}
+            className="p-2 text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <FiChevronsRight size={18} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
