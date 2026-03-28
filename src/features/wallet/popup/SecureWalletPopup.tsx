@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import CommonSuccessModal from "../../component/CommonSuccessModal";
 import SecureWalletUI from "../components/SecureWalletUI";
 import type { RootState } from "../../../redux/store/store";
 import { setWalletPassword } from "../../../api/setWalletPassword";
+import { setToken } from "../../../redux/authSlice";
 
 function SecureWalletPopup({
   onFinish,
@@ -14,6 +15,7 @@ function SecureWalletPopup({
   onClose: () => void;
 }) {
   const wallet = useSelector((state: RootState) => state.wallet.wallet);
+  const dispatch = useDispatch();
 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,13 +34,22 @@ function SecureWalletPopup({
 
       const payload = {
         wallet_id: wallet.wallet_id,
-        address: wallet.address,
+        eth_address: wallet.eth_address,
         password: values.password,
         password_confirmation: values.confirmPassword,
         acknowledge_password_loss: values.acknowledge_password_loss,
       };
 
       const res = await setWalletPassword(payload, true);
+
+      if (res.data?.token) {
+        dispatch(
+          setToken({
+            token: res.data.token,
+            expiresIn: res.data.expires_in ?? 24 * 60 * 60,
+          })
+        );
+      }
 
       toast.success(res.message);
       setShowModal(true);

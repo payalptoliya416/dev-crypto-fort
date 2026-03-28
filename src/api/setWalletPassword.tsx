@@ -3,7 +3,7 @@ import { privateApi } from "./privateApi";
 
 type SetPasswordPayload = {
   wallet_id: number;
-  address: string;
+  eth_address: string;
   password: string;
   password_confirmation: string;
   acknowledge_password_loss?: boolean;
@@ -15,6 +15,8 @@ type SetPasswordResponse = {
   data: {
     user_id: number;
     wallet_id: number;
+    token?: string;
+    expires_in?: number;
   };
 };
 

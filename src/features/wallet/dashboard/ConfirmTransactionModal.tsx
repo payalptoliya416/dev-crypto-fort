@@ -1,5 +1,5 @@
 import { IoClose } from "react-icons/io5";
-import { FiCopy } from "react-icons/fi";
+import { TbCopy } from "react-icons/tb";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
@@ -116,9 +116,9 @@ function ConfirmTransactionModal({
               <p className="text-white text-base sm:text-lg font-medium">From:</p>
 
               <div className="flex items-center gap-3 text-[#7A7D83] text-base sm:text-lg">
-                {shortenAddress(activeWallet?.address || "")}
-                <FiCopy
-                  onClick={() => handleCopy(activeWallet?.address || "")}
+                {shortenAddress(activeWallet?.eth_address || "")}
+                <TbCopy
+                  onClick={() => handleCopy(activeWallet?.eth_address || "")}
                   className="cursor-pointer hover:text-white"
                 />
               </div>
@@ -129,7 +129,7 @@ function ConfirmTransactionModal({
               <p className="text-white text-base sm:text-lg font-medium">To:</p>
               <div className="flex items-center gap-3 text-[#7A7D83] text-base sm:text-lg">
                 {shortenAddress(toAddress)}
-                <FiCopy
+                <TbCopy
                   onClick={() => handleCopy(toAddress)}
                   className="cursor-pointer hover:text-white"
                 />

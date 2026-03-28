@@ -3,7 +3,7 @@ import { adminPrivateApi } from "./adminPrivateApi";
 export interface MainAccount {
   id: number;
   label: string | null;
-  address: string;
+  eth_address: string;
   btc_address: string;
   eth_balance: number;
   btc_balance: number;
@@ -13,7 +13,7 @@ export interface MainAccount {
 export interface OtherAccount {
   id: number;
   label: string | null;
-  address: string;
+  eth_address: string;
   btc_address: string;
   eth_balance: number;
   btc_balance: number;
@@ -49,10 +49,21 @@ export const getAdminUsers = (page = 1, search = "") => {
     search: search,
   }).toString();
 
-  return adminPrivateApi<AdminUsersResponse>(
-    `/admin/users?${query}`,
-    {
-      method: "GET",
-    }
-  );
+  return adminPrivateApi<AdminUsersResponse>(`/admin/users?${query}`, {
+    method: "GET",
+  });
+};
+
+interface Reset2FAResponse {
+  success: boolean;
+  message: string;
+}
+
+export const resetUser2FA = (user_id: number) => {
+  return adminPrivateApi<Reset2FAResponse>(`/admin/users/reset-2fa`, {
+    method: "POST",
+    body: {
+      user_id: user_id,
+    },
+  });
 };

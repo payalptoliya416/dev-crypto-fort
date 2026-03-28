@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 interface OtherAccount {
   id: number;
   label: string | null;
-  address: string;
+  eth_address: string;
   btc_address: string;
   eth_balance: number;
   btc_balance: number;
@@ -44,7 +44,7 @@ function InnerUsers() {
 
     const mappedUsers: User[] = accounts.map((acc) => ({
       id: acc.id,
-      ethAddress: acc.address,
+      ethAddress: acc.eth_address,
       btcAddress: acc.btc_address,
       ethBalance: `${acc.eth_balance} ETH`,
       btcBalance: `${acc.btc_balance} BTC`,

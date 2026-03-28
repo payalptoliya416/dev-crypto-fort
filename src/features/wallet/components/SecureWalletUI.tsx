@@ -45,7 +45,6 @@ function SecureWalletUI({
   ),
 });
 
-
   return (
     <div
       className="

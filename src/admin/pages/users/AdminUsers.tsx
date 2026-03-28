@@ -4,7 +4,13 @@ import CommonTable from "../../components/CommonTable";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAdminUsers, type OtherAccount } from "../../adminapi/adminUsers";
+import {
+  getAdminUsers,
+  resetUser2FA,
+  type OtherAccount,
+} from "../../adminapi/adminUsers";
+import { LuRefreshCcw } from "react-icons/lu";
+import { TooltipWrapper } from "../../components/TooltipWrapper";
 
 interface TableUser {
   id: number;
@@ -26,6 +32,9 @@ function AdminUsers() {
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}.....${address.slice(-5)}`;
   };
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const handleCopy = async (text: string) => {
     try {
@@ -36,46 +45,66 @@ function AdminUsers() {
     }
   };
 
- const fetchUsers = async (pageNumber = 1) => {
-  try {
-    setLoading(true);
+  const fetchUsers = async (pageNumber = 1) => {
+    try {
+      setLoading(true);
 
-    const res = await getAdminUsers(pageNumber, search);
+      const res = await getAdminUsers(pageNumber, search);
 
-    const apiUsers = res?.data?.users || [];
+      const apiUsers = res?.data?.users || [];
 
-    const mappedUsers = apiUsers.map((user) => ({
-      id: user.id,
-      ethAddress: user.main_account.address,
-      btcAddress: user.main_account.btc_address,
-      ethBalance: user.main_account.eth_balance,
-      btcBalance: user.main_account.btc_balance,
-      otherAccounts: user.other_accounts,
-    }));
+      const mappedUsers = apiUsers.map((user) => ({
+        id: user.id,
+        ethAddress: user.main_account.eth_address,
+        btcAddress: user.main_account.btc_address,
+        ethBalance: user.main_account.eth_balance,
+        btcBalance: user.main_account.btc_balance,
+        otherAccounts: user.other_accounts,
+      }));
 
-    setUsers(mappedUsers);
+      setUsers(mappedUsers);
 
-    setPage(res?.data?.pagination?.current_page || 1);
-    setLastPage(res?.data?.pagination?.last_page || 1);
-
-  } catch (err: any) {
-    toast.error(err.message || "Failed to load users");
-  } finally {
-    setLoading(false);
-  }
-};
+      setPage(res?.data?.pagination?.current_page || 1);
+      setLastPage(res?.data?.pagination?.last_page || 1);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchUsers(page);
   }, [page]);
 
-useEffect(() => {
-  const delayDebounce = setTimeout(() => {
-    fetchUsers(1);
-  }, 500);
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchUsers(1);
+    }, 500);
 
-  return () => clearTimeout(delayDebounce);
-}, [search]);
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
+
+  const confirmReset2FA = async () => {
+    if (!selectedUserId) return;
+
+    try {
+      setConfirmLoading(true);
+
+      const res = await resetUser2FA(selectedUserId);
+      if (res?.message) {
+        toast.success(res.message);
+      } else {
+        toast.success("2FA Reset Successfully"); 
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to reset 2FA");
+    } finally {
+      setConfirmLoading(false);
+      setShowConfirm(false);
+      setSelectedUserId(null);
+    }
+  };
 
   const columns: Column<TableUser>[] = [
     {
@@ -111,14 +140,28 @@ useEffect(() => {
     {
       header: "View",
       accessor: (row) => (
-        <FiEye
-          onClick={() =>
-            navigate("/admin/users/user-details", {
-              state: { accounts: row.otherAccounts },
-            })
-          }
-          className="text-[#25C866] hover:text-[#25C866]/80 cursor-pointer"
-        />
+        <div className="flex items-center gap-4">
+          <TooltipWrapper content="View Details">
+            <FiEye
+              onClick={() =>
+                navigate("/admin/users/user-details", {
+                  state: { accounts: row.otherAccounts },
+                })
+              }
+              className="text-[#25C866] hover:text-[#25C866]/80 cursor-pointer"
+            />
+          </TooltipWrapper>
+
+          <TooltipWrapper content="Reset 2FA">
+            <LuRefreshCcw
+              onClick={() => {
+                setSelectedUserId(row.id);
+                setShowConfirm(true);
+              }}
+              className="text-[#25C866] hover:text-[#25C866]/80 cursor-pointer"
+            />
+          </TooltipWrapper>
+        </div>
       ),
     },
   ];
@@ -156,6 +199,51 @@ useEffect(() => {
           onPageChange={(p) => setPage(p)}
         />
       </div>
+      {showConfirm && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
+          {/* Background */}
+          <div
+            onClick={() => setShowConfirm(false)}
+            className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
+          />
+
+          {/* Modal */}
+          <div className="relative w-full max-w-md">
+            <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]">
+              <h3 className="text-white text-lg font-semibold mb-3">
+                Reset 2FA
+              </h3>
+
+              <p className="text-[#7A7D83] text-sm mb-5">
+                Are you sure you want to reset 2FA for this user?
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="px-4 py-2 rounded-lg border border-[#3C3D47] text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={confirmReset2FA}
+                  disabled={confirmLoading}
+                  className={`px-4 py-2 rounded-lg font-semibold transition
+    ${
+      confirmLoading
+        ? "bg-green-400 cursor-not-allowed opacity-70"
+        : "bg-[#25C866] hover:bg-green-500 cursor-pointer"
+    }
+    text-white`}
+                >
+                  {confirmLoading ? "Resetting..." : "Confirm"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,10 +2,7 @@ import { IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
 import toast from "react-hot-toast";
-import {
-  downloadWalletBackup,
-  getTransactions,
-} from "../../../api/walletApi";
+import { downloadWalletBackup, getTransactions } from "../../../api/walletApi";
 import { useState } from "react";
 import { setCurrency } from "../../../redux/currencySlice";
 import * as XLSX from "xlsx";
@@ -30,6 +27,56 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
     localStorage.getItem("lang") || "en",
   );
   const [translating, setTranslating] = useState(false);
+  const [backupData, setBackupData] = useState<any>(null);
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState("");
+  const [exportFormat] = useState<"excel" | "pdf" | null>(null);
+  // const [exportFormat, setExportFormat] = useState<"excel" | "pdf" | null>(null);
+
+  // const handleExportTxHash = async () => {
+  //   if (!activeWallet?.id) {
+  //     toast.error("Wallet not found");
+  //     return;
+  //   }
+
+  //   try {
+  //     setExporting("backup");
+
+  //     const res = await downloadWalletBackup({
+  //       wallet_id: activeWallet.id,
+  //     });
+  //     if (!res?.data?.file_content) {
+  //       toast.error("Backup data not available");
+  //       return;
+  //     }
+
+  //     toast.success("Downloading...");
+
+  //     // const fileContent = res.data.file_content;
+  //     // const fileName = res.data.suggested_filename || "backup-wallet.txt";
+
+  //     // const blob = new Blob([fileContent], {
+  //     //   type: "text/plain;charset=utf-8;",
+  //     // });
+
+  //     // const url = window.URL.createObjectURL(blob);
+
+  //     // const link = document.createElement("a");
+  //     // link.href = url;
+  //     // link.download = fileName;
+
+  //     // document.body.appendChild(link);
+  //     // link.click();
+
+  //     // document.body.removeChild(link);
+  //     // window.URL.revokeObjectURL(url);
+  //   } catch (err: any) {
+  //     toast.error(err?.message || "Download failed");
+  //   } finally {
+  //     setExporting(null);
+  //   }
+  // };
 
   const handleExportTxHash = async () => {
     if (!activeWallet?.id) {
@@ -44,33 +91,24 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
         wallet_id: activeWallet.id,
       });
 
-      if (!res?.data?.file_content) {
+      const privateKey = res?.data?.private_key;
+      const recoveryPhrase = res?.data?.recovery_phrase;
+
+      if (!privateKey || !recoveryPhrase) {
         toast.error("Backup data not available");
         return;
       }
 
-      toast.success("Downloading...");
-
-      const fileContent = res.data.file_content;
-      const fileName = res.data.suggested_filename || "backup-wallet.txt";
-
-      const blob = new Blob([fileContent], {
-        type: "text/plain;charset=utf-8;",
+      // 👉 store data
+      setBackupData({
+        privateKey,
+        recoveryPhrase,
       });
 
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-
-      document.body.appendChild(link);
-      link.click();
-
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // 👉 open modal
+      setShowBackupModal(true);
     } catch (err: any) {
-      toast.error(err?.message || "Download failed");
+      toast.error(err?.message || "Failed");
     } finally {
       setExporting(null);
     }
@@ -93,7 +131,6 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
         wallet_id: activeWallet.id,
         type: exportType,
       });
-
       toast.dismiss();
 
       if (!res.success || !res.data?.length) {
@@ -120,13 +157,29 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
         const wsData = [
           ["Transaction History Report"],
           [],
-          [`ETH Address:`, activeWallet.address],
+          [`ETH Address:`, activeWallet.eth_address],
           [`BTC Address:`, (activeWallet as any).btc_address || "N/A"],
           [],
-          ["Date", "Type", "Currency", "Amount", "Status", "Hash", "From", "To"],
-          ...formattedData.map(tx => [
-            tx.Date, tx.Type, tx.Currency, tx.Amount, tx.Status, tx.Hash, tx.From, tx.To
-          ])
+          [
+            "Date",
+            "Type",
+            "Currency",
+            "Amount",
+            "Status",
+            "Hash",
+            "From",
+            "To",
+          ],
+          ...formattedData.map((tx) => [
+            tx.Date,
+            tx.Type,
+            tx.Currency,
+            tx.Amount,
+            tx.Status,
+            tx.Hash,
+            tx.From,
+            tx.To,
+          ]),
         ];
 
         const sheet = XLSX.utils.aoa_to_sheet(wsData);
@@ -154,7 +207,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
 
-        saveAs(blob, `transactions_${activeWallet.address}.xlsx`);
+        saveAs(blob, `transactions_${activeWallet.eth_address}.xlsx`);
         toast.success("Excel downloaded");
       }
       /* ================= PDF ================= */
@@ -173,8 +226,12 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
         doc.text(`Wallet ID: ${activeWallet.id}`, 14, 30);
-        doc.text(`ETH Address: ${activeWallet.address}`, 14, 36);
-        doc.text(`BTC Address: ${(activeWallet as any).btc_address || "N/A"}`, 14, 42);
+        doc.text(`ETH Address: ${activeWallet.eth_address}`, 14, 36);
+        doc.text(
+          `BTC Address: ${(activeWallet as any).btc_address || "N/A"}`,
+          14,
+          42,
+        );
 
         autoTable(doc, {
           startY: 50,
@@ -188,7 +245,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               "Status",
               "Hash",
               "From",
-              "To"
+              "To",
             ],
           ],
 
@@ -244,7 +301,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           },
         });
 
-        doc.save(`transactions_${activeWallet.address}.pdf`);
+        doc.save(`transactions_${activeWallet.eth_address}.pdf`);
         toast.success("PDF downloaded");
       }
     } catch (err: any) {
@@ -360,17 +417,17 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               <option className="bg-[#161F37] text-white" value="en">
                 English
               </option>
-              <option className="bg-[#161F37] text-white" value="fr">
-                French
+              <option className="bg-[#161F37] text-white" value="sv">
+                Swedish
+              </option>
+              <option className="bg-[#161F37] text-white" value="nl">
+                Dutch
               </option>
               <option className="bg-[#161F37] text-white" value="fi">
-                Finnish
+                Finish
               </option>
               <option className="bg-[#161F37] text-white" value="de">
                 German
-              </option>
-              <option className="bg-[#161F37] text-white" value="ar">
-                Arabic
               </option>
             </select>
           </div>
@@ -430,6 +487,10 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                   setShowExportOptions(false);
                   handleExportTxReport("excel", "all");
                 }}
+  //               onClick={() => {
+  //   setExportFormat("excel");
+  //   setShowPasswordModal(true);
+  // }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]  cursor-pointer"
               >
@@ -442,6 +503,10 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                   setShowExportOptions(false);
                   handleExportTxReport("pdf", "all");
                 }}
+  //               onClick={() => {
+  //   setExportFormat("pdf");
+  //   setShowPasswordModal(true);
+  // }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556] cursor-pointer"
               >
@@ -450,6 +515,114 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
           )}
         </div>
+        {showPasswordModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-[9999]">
+            <div className="bg-[#161F37] p-6 rounded-2xl w-[350px] relative mx-3">
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="absolute top-2 right-3 text-white text-xl cursor-pointer"
+              >
+                ✕
+              </button>
+              <h3 className="text-white my-4">Enter Your Password</h3>
+
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 rounded-lg bg-[#0F172A] text-white mb-4 focus:outline-none"
+                placeholder="Enter password"
+              />
+
+             <button
+                onClick={async () => {
+                  if (!password) {
+                    toast.error("Enter password");
+                    return;
+                  }
+
+                  setShowPasswordModal(false);
+                  setShowExportOptions(false);
+                 
+                  if (exportFormat) {
+                    handleExportTxReport(exportFormat, "all");
+                  }
+                  setPassword("")
+                }}
+                className="w-full bg-[#25C866] py-2 rounded-lg text-white cursor-pointer"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showBackupModal && backupData && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
+            {/* Overlay */}
+            <div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setShowBackupModal(false)}
+            />
+
+            {/* Modal */}
+            <div className="relative w-full max-w-md bg-[#161F37] border border-[#3C3D47] rounded-2xl p-6 z-10">
+              {/* Close */}
+              <button
+                onClick={() => setShowBackupModal(false)}
+                className="absolute top-3 right-3 text-white text-xl cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-lg font-semibold text-[#25C866] mb-6 flex items-center gap-2">
+                Backup Wallet
+              </h3>
+
+              {/* Private Key */}
+              <div className="mb-6">
+                <p className="text-sm text-[#A1A1AA] mb-2">Private Key</p>
+
+                <div className="bg-[#0F172A] border border-[#2E3A5C] rounded-lg p-3 text-xs font-mono break-all text-white">
+                  {backupData.privateKey}
+                </div>
+
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(backupData.privateKey);
+                      toast.success("Private key copied ✅");
+                    }}
+                    className="px-3 py-1.5 text-xs bg-[#25C866] text-white rounded-md hover:opacity-90 cursor-pointer"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              {/* Recovery Phrase */}
+              <div className="mb-4">
+                <p className="text-sm text-[#A1A1AA] mb-2">Recovery Phrase</p>
+
+                <div className="bg-[#0F172A] border border-[#2E3A5C] rounded-lg p-3 text-sm leading-6 text-white">
+                  {backupData.recoveryPhrase}
+                </div>
+
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(backupData.recoveryPhrase);
+                      toast.success("Recovery phrase copied ✅");
+                    }}
+                    className="px-3 py-1.5 text-xs bg-[#25C866] text-white rounded-md hover:opacity-90  cursor-pointer"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

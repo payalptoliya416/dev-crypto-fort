@@ -9,10 +9,11 @@ import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
 import d5 from "@/assets/d5.png";
 import Loader from "../../component/Loader";
+import { TbCopy } from "react-icons/tb";
 
 interface TransactionRow {
   name: string;
-  address: string;
+  eth_address: string;
   amount: string;
   type: "Sent" | "Received";
   status: "Confirmed" | "Pending" | "Failed";
@@ -63,7 +64,7 @@ function TransactionPage() {
           return {
             name: tokenData.name,
 
-            address:
+            eth_address:
               tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
 
             amount: `${tx.amount} ${symbol}`,
@@ -86,6 +87,16 @@ function TransactionPage() {
     fetchTransactions();
   }, [activeWallet?.id]);
 
+  
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied!");
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
+
   const columns: Column<TransactionRow>[] = [
     {
       header: "Name",
@@ -95,9 +106,17 @@ function TransactionPage() {
           <img src={row.icon} alt="icon" className="w-8 h-8" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
-            <p className="text-xs text-[#7A7D83]">
-              {row.address.slice(0, 6)}...{row.address.slice(-4)}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-[#7A7D83]">
+                {row.eth_address.slice(0, 6)}...{row.eth_address.slice(-4)}
+              </p>
+
+              <TbCopy 
+                className="text-[#7A7D83] cursor-pointer hover:text-white transition"
+                size={16}
+                onClick={() => handleCopy(row.eth_address)}
+              />
+            </div>
           </div>
         </div>
       ),

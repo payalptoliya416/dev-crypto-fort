@@ -155,8 +155,8 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
                             : `Account ${index + 1}`}
                         </p>
                         <p className="text-sm text-[#7A7D83] truncate">
-                          {wallet.address.slice(0, 6)}...
-                          {wallet.address.slice(-4)}
+                          {wallet.eth_address.slice(0, 6)}...
+                          {wallet.eth_address.slice(-4)}
                         </p>
                       </div>
 
@@ -202,7 +202,7 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
                             >
                               <button
                                 onClick={() => {
-                                  handleCopy(wallet.address);
+                                  handleCopy(wallet.eth_address);
                                   setOpenMenuId(null);
                                 }}
                                 className="w-full text-left px-4 py-3 text-sm text-white hover:bg-[#25C8661A] rounded-t-xl cursor-pointer"

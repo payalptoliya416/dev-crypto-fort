@@ -2,7 +2,7 @@ import { privateApi } from "./privateApi";
 
 export interface Wallet {
   id: number;
-  address: string;
+  eth_address: string;
   label: string | null;
   status: string;
   created_at: string;
@@ -31,7 +31,7 @@ export interface DownloadBackupResponse {
   message: string;
   data?: {
     wallet_id: number;
-    address: string;
+    eth_address: string;
     btc_address: string;
     recovery_phrase: string;
     private_key: string;
@@ -59,7 +59,7 @@ export interface ExportTransactionsResponse {
   data?: {
     wallet: {
       id: number;
-      address: string;
+      eth_address: string;
       btc_address?: string;
     };
     transactions: {
@@ -137,7 +137,7 @@ export interface UpdateWalletLabelResponse {
   message: string;
   data?: {
     id: number;
-    address: string;
+    eth_address: string;
     label: string;
   };
 }
@@ -166,7 +166,7 @@ export interface GetBalanceResponse {
   message: string;
   data: {
     wallet_id: number;
-    address: string;
+    eth_address: string;
     btc_address: string;
     type: string;
     balance: CoinBalance;

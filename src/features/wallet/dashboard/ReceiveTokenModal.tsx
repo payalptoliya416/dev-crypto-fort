@@ -1,5 +1,5 @@
 import { IoClose } from "react-icons/io5";
-import { FiCopy } from "react-icons/fi";
+import { TbCopy } from "react-icons/tb";
 import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 import { useSelector } from "react-redux";
@@ -48,7 +48,7 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
     if (!currentWallet) return;
 
     if (selectedToken === "eth") {
-      setSelectedAddress(currentWallet.address || "");
+      setSelectedAddress(currentWallet.eth_address || "");
     } else if (selectedToken === "btc") {
       setSelectedAddress(currentWallet.btc_address || "");
     } else {
@@ -150,7 +150,7 @@ useEffect(() => {
                   {address || "--"}
                 </p>
 
-                <FiCopy
+                <TbCopy
                   onClick={handleCopy}
                   className="shrink-0 cursor-pointer text-[#7A7D83] hover:text-white"
                 />

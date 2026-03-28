@@ -6,7 +6,7 @@ type WalletResponse = {
   message: string;
   data: {
     wallet_id: number;
-    address: string;
+    eth_address: string;
     phrase: string;
   };
 };

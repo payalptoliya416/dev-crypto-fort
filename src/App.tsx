@@ -18,6 +18,9 @@ import AdminDashboard from "./admin/pages/dashboard/AdminDashboard";
 import AdminLayout from "./admin/components/AdminLayout";
 import AdminUsers from "./admin/pages/users/AdminUsers";
 import InnerUsers from "./admin/pages/users/InnerUsers";
+import TwoFactorSetup from "./features/wallet/auth/TwoFactorSetup";
+import Verify2FA from "./features/wallet/auth/Verify2FA";
+import LoginVerify2FA from "./features/wallet/auth/LoginVerify2FA";
 
 function App() {
   return (
@@ -38,6 +41,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/recovery-phrase" element={<RecoveryPhrase />} />
           <Route path="/create-password" element={<SecureWallet />} />
+          <Route path="/setup-2fa" element={<TwoFactorSetup />} />
+          <Route path="/verify-2fa" element={<Verify2FA />} />
+          <Route path="/login-verify-2fa" element={<LoginVerify2FA />} />
 
           <Route path="/existing-wallet" element={<ExistingWallet />} />
           <Route path="/private-key" element={<PrivateKey />} />

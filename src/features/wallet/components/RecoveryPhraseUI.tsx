@@ -86,7 +86,7 @@ function RecoveryPhraseUI({
         <button
           onClick={onConfirm}
           disabled={confirmLoading}
-          className={`block w-full py-3.5 sm:py-4.5 rounded-xl font-semibold transition cursor-pointer
+          className={`block w-full py-3.5 sm:py-4.5 rounded-xl font-semibold t  ransition cursor-pointer
             ${
               confirmLoading
                 ? "bg-green-400 cursor-not-allowed opacity-70"

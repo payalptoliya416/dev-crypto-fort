@@ -47,8 +47,8 @@ useEffect(() => {
   //   useEffect(() => {
   //   if (!open) return;
 
-  //   if (activeWallet?.address) {
-  //     setToAddress(activeWallet.address);
+  //   if (activeWallet?.eth_address) {
+  //     setToAddress(activeWallet.eth_address);
   //   }
   // }, [open, activeWallet]);
 
@@ -155,8 +155,13 @@ useEffect(() => {
 
               <select
                 value={selectedToken}
-                onChange={(e) => setSelectedToken(e.target.value)}
-                className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none"
+                 onChange={(e) => {
+                    setSelectedToken(e.target.value);
+                    if (errors.selectedToken) {
+                      setErrors((prev) => ({ ...prev, selectedToken: undefined }));
+                    }
+                  }}
+                className={`w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none  ${errors.selectedToken ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
               >
                 <option value="" className="bg-[#161F37] text-[#7A7D83]">
                   Select token

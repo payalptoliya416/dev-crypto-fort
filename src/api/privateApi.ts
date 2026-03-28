@@ -23,7 +23,7 @@ export async function privateApi<T>(
   const data = await res.json();
 
  if (!res.ok) {
-    throw data; // 🔥 IMPORTANT
+    throw data;
   }
 
   return data as T;
