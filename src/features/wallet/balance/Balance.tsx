@@ -8,7 +8,9 @@ import type { RootState } from "../../../redux/store/store";
 import { getBalance } from "../../../api/walletApi";
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
+import d3 from "@/assets/d3.png";
 import d5 from "@/assets/d5.png";
+import d9 from "@/assets/d9.png";
 import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
 import { io } from "socket.io-client";
@@ -43,10 +45,9 @@ function Balance() {
     const socket = io("https://socket.cryptosfort.com", {
       transports: ["websocket"],
     });
-
     socket.onAny((_, data) => {
       if (!data?.prices) return;
-
+      console.log("data", data);
       const saved = localStorage.getItem("crypto_balance_prices");
       const storedPrices = saved ? JSON.parse(saved) : {};
 
@@ -55,6 +56,7 @@ function Balance() {
       setAssets((prevAssets) => {
         const updated = prevAssets.map((asset) => {
           const match = data.prices.find((p: any) => p.symbol === asset.symbol);
+
           if (!match) return asset;
 
           const newPrice = Number(match.price);
@@ -108,6 +110,20 @@ function Balance() {
     };
   }, []);
 
+  const COIN_CONFIG: Record<
+    string,
+    { name: string; symbol: string; icon: string }
+  > = {
+    btc: { name: "Bitcoin", symbol: "BTC", icon: d2 },
+    eth: { name: "Ethereum", symbol: "ETH", icon: d1 },
+    usdt: { name: "Tether", symbol: "USDT", icon: d5 },
+    bnb: { name: "BNB", symbol: "BNB", icon: d3 },
+    trx: { name: "TRON", symbol: "TRX", icon: d9 },
+    trc20: { name: "USDT (TRC20)", symbol: "USDT", icon: d5 },
+  };
+
+  const DEFAULT_ICON = d1;
+
   useEffect(() => {
     if (!activeWallet?.id) return;
 
@@ -126,36 +142,51 @@ function Balance() {
         const savedPrices = localStorage.getItem("crypto_balance_prices");
         const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
 
-     const assetList: Asset[] = [
-  {
-    name: "Bitcoin",
-    symbol: "BTC",
-    balance: balances.btc,
-    price: priceMap.BTC?.price || "",
-    change: priceMap.BTC?.change ?? "",
-    up: priceMap.BTC?.up ?? true,
-    icon: d2,
-  },
-  {
-    name: "Ethereum",
-    symbol: "ETH",
-    balance: balances.eth,
-    price: priceMap.ETH?.price || "",
-    change: priceMap.ETH?.change ?? "",
-    up: priceMap.ETH?.up ?? true,
-    icon: d1,
-  },
-  {
-    name: "Tether",
-    symbol: "USDT",
-    balance: balances.usdt,
-    price: priceMap.USDT?.price || "",
-    change: priceMap.USDT?.change ?? "",
-    up: priceMap.USDT?.up ?? true,
-    icon: d5,
-  },
-];
+        //      const assetList: Asset[] = [
+        //   {
+        //     name: "Bitcoin",
+        //     symbol: "BTC",
+        //     balance: balances.btc,
+        //     price: priceMap.BTC?.price || "",
+        //     change: priceMap.BTC?.change ?? "",
+        //     up: priceMap.BTC?.up ?? true,
+        //     icon: d2,
+        //   },
+        //   {
+        //     name: "Ethereum",
+        //     symbol: "ETH",
+        //     balance: balances.eth,
+        //     price: priceMap.ETH?.price || "",
+        //     change: priceMap.ETH?.change ?? "",
+        //     up: priceMap.ETH?.up ?? true,
+        //     icon: d1,
+        //   },
+        //   {
+        //     name: "Tether",
+        //     symbol: "USDT",
+        //     balance: balances.usdt,
+        //     price: priceMap.USDT?.price || "",
+        //     change: priceMap.USDT?.change ?? "",
+        //     up: priceMap.USDT?.up ?? true,
+        //     icon: d5,
+        //   },
+        // ];
+        const assetList: Asset[] = Object.entries(balances)
+          .filter(([_, value]) => value !== undefined)
+          .map(([key, value]) => {
+            const config = COIN_CONFIG[key];
+            const symbol = config?.symbol || key.toUpperCase();
 
+            return {
+              name: config?.name || key.toUpperCase(),
+              symbol,
+              balance: value,
+              price: priceMap[symbol]?.price || "",
+              change: priceMap[symbol]?.change ?? "",
+              up: priceMap[symbol]?.up ?? true,
+              icon: config?.icon || DEFAULT_ICON,
+            };
+          }) as Asset[];
         setAssets(assetList);
         setLoading(false);
       } catch (err: any) {
@@ -191,101 +222,74 @@ function Balance() {
         </p>
       ),
     },
-    // {
-    //   header: "Last Price",
-    //   key: "price",
-    //   align: "right",
-    //   width: "13%",
-    //   render: (row) => {
-    //     const rawValue = row?.price;
 
-    //     if (rawValue === undefined || rawValue === null) {
-    //       return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-    //     }
+    {
+      header: "Last Price",
+      key: "price",
+      align: "right",
+      width: "13%",
+      render: (row) => {
+        const balance = Number(row.balance || 0);
+        if (!row.price) {
+          return (
+            <div className="flex justify-end">
+            <div className="w-10 h-5 overflow-hidden">
+              <Loader />
+            </div>
+            </div>
+          );
+        }
 
-    //     const cleaned = String(rawValue).replace(/[$,]/g, "");
-    //     const price = Number(cleaned);
+        const cleaned = String(row.price).replace(/[$,]/g, "");
+        const price = Number(cleaned);
 
-    //     if (isNaN(price)) {
-    //       return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-    //     }
+        if (isNaN(price)) {
+          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+        }
 
-    //     return (
-    //       <p className="text-[#7A7D83] text-base font-normal">
-    //         $
-    //         {price.toLocaleString("en-US", {
-    //           minimumFractionDigits: 2,
-    //           maximumFractionDigits: 2,
-    //         })}
-    //       </p>
-    //     );
-    //   },
-    // },
-   {
-  header: "Last Price",
-  key: "price",
-  align: "right",
-  width: "13%",
-  render: (row) => {
-    const balance = Number(row.balance || 0);
+        const total = balance * price;
 
-    // socket price na aave tya sudhi loader
-    if (!row.price) {
-      return (
-        <div className="flex justify-end">
-          <Loader />
-        </div>
-      );
-    }
-
-    const cleaned = String(row.price).replace(/[$,]/g, "");
-    const price = Number(cleaned);
-
-    if (isNaN(price)) {
-      return <p className="text-[#7A7D83] text-base font-normal">--</p>;
-    }
-
-    const total = balance * price;
-
-    return (
-      <p className="text-[#7A7D83] text-base font-normal">
-        $
-        {total.toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </p>
-    );
-  },
-},
+        return (
+          <p className="text-[#7A7D83] text-base font-normal">
+            $
+            {total.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        );
+      },
+    },
     {
       header: "Change",
       key: "change",
       align: "right",
       width: "13%",
-     render: (row) => {
-  if (!row.change) {
-    return (
-      <div className="flex justify-end">
-        <Loader />
-      </div>
-    );
-  }
+      render: (row) => {
+        if (!row.change) {
+          return (
+            <div className="flex justify-end">
+            <div className="w-10 h-5 overflow-hidden">
+              <Loader />
+            </div>
+            </div>
+          );
+        }
 
-  return (
-    <span
-      className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
+        return (
+          <span
+            className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
       ${row.up ? "bg-[#25C866]" : "bg-[#C82525]"} text-white`}
-    >
-      <img
-        src={up}
-        alt="icon"
-        className={`${row.up ? "" : "rotate-180"}`}
-      />
-      {row.change}
-    </span>
-  );
-},
+          >
+            <img
+              src={up}
+              alt="icon"
+              className={`${row.up ? "" : "rotate-180"}`}
+            />
+            {row.change}
+          </span>
+        );
+      },
     },
   ];
 
@@ -296,12 +300,6 @@ function Balance() {
           <h3 className="tet-xl text-[#25C866] font-semibold mb-[15px]">
             Balance
           </h3>
-
-          {/* <CommonTabs
-            tabs={tabs}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          /> */}
         </div>
 
         {loading || !socketLoaded ? (

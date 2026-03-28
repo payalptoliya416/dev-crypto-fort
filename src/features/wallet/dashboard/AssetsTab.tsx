@@ -1,6 +1,8 @@
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
 import d5 from "@/assets/d5.png";
+import d3 from "@/assets/d3.png";
+import d9 from "@/assets/d9.png";
 import up from "@/assets/up.svg";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import { useEffect, useState } from "react";
@@ -33,7 +35,9 @@ function AssetsTab() {
 
   setAssets((prevAssets) => {
     const updated = prevAssets.map((asset) => {
-      const match = data.prices.find((p: any) => p.symbol === asset.symbol);
+    const match = data.prices.find(
+  (p: any) => p.symbol.toUpperCase() === asset.symbol.toUpperCase()
+);
       if (!match) return asset;
 
       const newPrice = Number(match.price);
@@ -88,37 +92,53 @@ function AssetsTab() {
     };
   }, []);
 
+  const COIN_CONFIG: Record<string, { name: string; symbol: string; icon: string }> = {
+  btc: { name: "Bitcoin", symbol: "BTC", icon: d2 },
+  eth: { name: "Ethereum", symbol: "ETH", icon: d1 },
+  usdt: { name: "Tether", symbol: "USDT", icon: d5 },
+  bnb: { name: "BNB", symbol: "BNB", icon: d3 },
+  trx: { name: "TRON", symbol: "TRX", icon: d9 },
+   trc20: { name: "USDT (TRC20)", symbol: "TRC20", icon: d5 },
+};
+
   useEffect(() => {
     const savedPrices = localStorage.getItem("crypto_prices");
     const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
 
-    const assetList: Asset[] = [
-      {
-        name: "Bitcoin",
-        symbol: "BTC",
-        price: priceMap.BTC?.price || "",
-        change: priceMap.BTC?.change ?? "0.00%",
-        up: priceMap.BTC?.up ?? true,
-        icon: d2,
-      },
-      {
-        name: "Ethereum",
-        symbol: "ETH",
-        price: priceMap.ETH?.price || "",
-        change: priceMap.ETH?.change ?? "0.00%",
-        up: priceMap.ETH?.up ?? true,
-        icon: d1,
-      },
-      {
-        name: "Tether",
-        symbol: "USDT",
-        price: priceMap.USDT?.price || "",
-        change: priceMap.USDT?.change ?? "0.00%",
-        up: priceMap.USDT?.up ?? true,
-        icon: d5,
-      },
-    ];
-
+    // const assetList: Asset[] = [
+    //   {
+    //     name: "Bitcoin",
+    //     symbol: "BTC",
+    //     price: priceMap.BTC?.price || "",
+    //     change: priceMap.BTC?.change ?? "0.00%",
+    //     up: priceMap.BTC?.up ?? true,
+    //     icon: d2,
+    //   },
+    //   {
+    //     name: "Ethereum",
+    //     symbol: "ETH",
+    //     price: priceMap.ETH?.price || "",
+    //     change: priceMap.ETH?.change ?? "0.00%",
+    //     up: priceMap.ETH?.up ?? true,
+    //     icon: d1,
+    //   },
+    //   {
+    //     name: "Tether",
+    //     symbol: "USDT",
+    //     price: priceMap.USDT?.price || "",
+    //     change: priceMap.USDT?.change ?? "0.00%",
+    //     up: priceMap.USDT?.up ?? true,
+    //     icon: d5,
+    //   },
+    // ];
+const assetList: Asset[] = Object.values(COIN_CONFIG).map((coin) => ({
+  name: coin.name,
+  symbol: coin.symbol,
+  price: priceMap[coin.symbol]?.price || "",
+  change: priceMap[coin.symbol]?.change ?? "0.00%",
+  up: priceMap[coin.symbol]?.up ?? true,
+  icon: coin.icon,
+}));
     setAssets(assetList);
     setLoading(false);
   }, []);

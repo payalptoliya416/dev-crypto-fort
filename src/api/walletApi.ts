@@ -156,9 +156,12 @@ export interface GetBalancePayload {
 
 
 export interface CoinBalance {
-  eth: string;
-  btc: string;
-  usdt: string;
+  eth?: string;
+  btc?: string;
+  usdt?: string;
+  bnb?: string;
+  trx?: string;
+  trc20?: string;
 }
 
 export interface GetBalanceResponse {

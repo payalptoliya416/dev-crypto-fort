@@ -63,7 +63,7 @@ export default function WalletSummary() {
       setIsPriceLoading(true);
       try {
         const response = await getPrices({
-          symbols: "ETH",
+          symbols: "BTC,ETH,USDT,BNB,TRX",
           base: "USD, EUR, GBP, AED, AUD, CAD, NOK, NZD, CHF, BTC"
         });
 
@@ -92,6 +92,7 @@ export default function WalletSummary() {
 
     fetchPrice();
   }, [currency]);
+
   useEffect(() => {
     const fetchWallets = async () => {
       try {

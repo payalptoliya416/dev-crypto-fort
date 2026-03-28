@@ -8,6 +8,7 @@ export interface MainAccount {
   eth_balance: number;
   btc_balance: number;
   usdt_balance: number;
+  is2FAEnabled: boolean;
 }
 
 export interface OtherAccount {
@@ -25,6 +26,7 @@ export interface AdminUser {
   created_at: string;
   main_account: MainAccount;
   other_accounts: OtherAccount[];
+  is_2fa_enabled?: boolean;
 }
 
 export interface UsersPagination {

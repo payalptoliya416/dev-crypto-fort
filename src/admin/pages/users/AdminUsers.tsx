@@ -19,6 +19,7 @@ interface TableUser {
   ethBalance: number;
   btcBalance: number;
   otherAccounts: OtherAccount[];
+   is2FAEnabled: boolean;
 }
 
 function AdminUsers() {
@@ -60,6 +61,7 @@ function AdminUsers() {
         ethBalance: user.main_account.eth_balance,
         btcBalance: user.main_account.btc_balance,
         otherAccounts: user.other_accounts,
+        is2FAEnabled: !!user.is_2fa_enabled,
       }));
 
       setUsers(mappedUsers);

@@ -171,12 +171,20 @@ useEffect(() => {
                   Ethereum
                 </option>
 
+                <option value="trc20" className="bg-[#161F37] text-white">
+                  TRC-20
+                </option>
+                
                 <option value="usdt" className="bg-[#161F37] text-white">
-                  ERC-20
+                   ERC-20
                 </option>
 
                 <option value="btc" className="bg-[#161F37] text-white">
                   Bitcoin
+                </option>
+
+                <option value="bnb" className="bg-[#161F37] text-white">
+                  Binance
                 </option>
               </select>
               {errors.selectedToken && (
