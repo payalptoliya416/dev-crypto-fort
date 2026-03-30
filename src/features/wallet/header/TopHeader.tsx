@@ -1,4 +1,3 @@
-import { BiSearch } from "react-icons/bi";
 import logo from "@/assets/logo.png";
 import logo2 from "@/assets/logo2.png";
 import avtar from "@/assets/avtar.png";
@@ -217,7 +216,7 @@ export default function TopHeader() {
             </div>
           </Tooltip.Provider>
         </div>
-        <div className="relative block sm:hidden mt-4">
+        {/* <div className="relative block sm:hidden mt-4">
           <BiSearch
             size={18}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7D83]"
@@ -228,7 +227,7 @@ export default function TopHeader() {
             className="border border-[#3C3D47] rounded-[10px] bg-[#161F37] py-[13px] pl-[41px] pr-[15px] placeholder:text-[#7A7D83] text-white text-base leading-[16px] focus:outline-none focus:border-[#25C866] h-[42px] w-full
                     "
           />
-        </div>
+        </div> */}
       </div>
       {/* SIDEBAR */}
       {/* <button

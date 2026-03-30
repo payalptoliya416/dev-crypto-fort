@@ -16,28 +16,39 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
-
   const [wallets, setWallets] = useState<any[]>([]);
-
+  const [loadingQR, setLoadingQR] = useState(false);
   const [selectedToken, setSelectedToken] = useState("eth");
-  const [selectedAddress, setSelectedAddress] = useState("eth");
- const address = selectedAddress;
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const address = selectedAddress;
+
   useEffect(() => {
-    if (!open) return;  
+    if (open) {
+      setSelectedToken("eth");
+      setSelectedAddress(activeWallet?.eth_address || ""); 
+    }
+  }, [open, activeWallet]);
+
+  useEffect(() => {
+    if (!open) return;
 
     const fetchWallets = async () => {
       try {
+        setLoadingQR(true);
         const res = await getWallets();
         if (res.success && res.data) {
           setWallets(res.data);
         }
       } catch {
         toast.error("Failed to load wallets");
+      } finally {
+        setLoadingQR(false);
       }
     };
 
     fetchWallets();
   }, [open]);
+
   useEffect(() => {
     if (!wallets.length || !activeWallet?.id) return;
 
@@ -55,11 +66,11 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
       setSelectedAddress("");
     }
   }, [selectedToken, wallets, activeWallet]);
-useEffect(() => {
-  if (open) {
-    setSelectedToken("eth");
-  }
-}, [open]);
+  useEffect(() => {
+    if (open) {
+      setSelectedToken("eth");
+    }
+  }, [open]);
   const handleCopy = async () => {
     if (!address) {
       toast.error("Address not available");
@@ -117,24 +128,29 @@ useEffect(() => {
           </div>
 
           <div className="flex justify-center mb-[30px]">
-            <div className="border border-[#3C3D47] rounded-xl bg-[#202A43] p-4 sm:p-[26px]">
-              {address && (
-                <QRCode
-                  value={address}
-                  bgColor="#202A43"
-                  fgColor="#ffffff"
-                  size={180} // mobile
-                  className="sm:hidden"
-                />
-              )}
-              {address && (
-                <QRCode
-                  value={address}
-                  bgColor="#202A43"
-                  fgColor="#ffffff"
-                  size={220} // desktop
-                  className="hidden sm:block"
-                />
+            <div className="border border-[#3C3D47] rounded-xl bg-[#202A43] p-4 sm:p-[26px] flex items-center justify-center">
+              {loadingQR ? (
+                // 🔄 Loader
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : address ? (
+                <>
+                  <QRCode
+                    value={address}
+                    bgColor="#202A43"
+                    fgColor="#ffffff"
+                    size={180}
+                    className="sm:hidden"
+                  />
+                  <QRCode
+                    value={address}
+                    bgColor="#202A43"
+                    fgColor="#ffffff"
+                    size={220}
+                    className="hidden sm:block"
+                  />
+                </>
+              ) : (
+                <p className="text-gray-400 text-sm">No QR available</p>
               )}
             </div>
           </div>
