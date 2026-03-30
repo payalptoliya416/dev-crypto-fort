@@ -68,7 +68,7 @@ function TwoFactorSetup() {
 
           {/* Info */}
           <p className="text-base text-[#7A7D83] mb-4">
-            Scan this QR code using Google Authenticator or similar app
+            Scan this QR code using Google Authenticator
           </p>
 
           {/* Button */}

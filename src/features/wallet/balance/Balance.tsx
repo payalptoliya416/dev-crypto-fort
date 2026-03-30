@@ -34,7 +34,6 @@ function Balance() {
   const hasValidPrices = () => {
     const saved = localStorage.getItem("crypto_balance_prices");
     if (!saved) return false;
-
     const prices = JSON.parse(saved);
 
     return Object.values(prices).some(
@@ -47,6 +46,7 @@ function Balance() {
     });
     socket.onAny((_, data) => {
       if (!data?.prices) return;
+
       const saved = localStorage.getItem("crypto_balance_prices");
       const storedPrices = saved ? JSON.parse(saved) : {};
 
@@ -54,8 +54,9 @@ function Balance() {
 
       setAssets((prevAssets) => {
         const updated = prevAssets.map((asset) => {
+  
           const match = data.prices.find((p: any) => p.symbol === asset.symbol);
-
+   
           if (!match) return asset;
 
           const newPrice = Number(match.price);

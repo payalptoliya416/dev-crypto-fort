@@ -29,7 +29,6 @@ function AssetsTab() {
 
  socket.onAny((_, data) => {
   if (!data?.prices) return;
-
   const saved = localStorage.getItem("crypto_prices");
   const storedPrices = saved ? JSON.parse(saved) : {};
 

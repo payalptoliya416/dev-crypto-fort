@@ -62,6 +62,8 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
       setSelectedAddress(currentWallet.eth_address || "");
     } else if (selectedToken === "btc") {
       setSelectedAddress(currentWallet.btc_address || "");
+    } else if (selectedToken === "trx") {
+      setSelectedAddress(currentWallet.tron_address || "");
     } else {
       setSelectedAddress("");
     }
@@ -124,6 +126,7 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
             >
               <option value="eth">Ethereum</option>
               <option value="btc">Bitcoin</option>
+              <option value="trx">TRC20</option>
             </select>
           </div>
 
@@ -176,7 +179,9 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
 
           <div className="border border-[#FFDD1D1A] bg-[#FFDD1D05] rounded-[6px] px-[15px] py-3 w-full sm:w-max">
             <p className="text-[#FFDD1D] text-base sm:text-lg font-medium">
-              Only send ETH / ERC-20 tokens to this address.
+              {selectedToken === "eth" && "Only send ETH / ERC-20 tokens to this address."}
+              {selectedToken === "btc" && "Only send BTC to this address."}
+              {selectedToken === "trx" && "Only send TRX / TRC-20 tokens to this address."}
             </p>
           </div>
           {/* <button

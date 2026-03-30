@@ -3,6 +3,8 @@ import { privateApi } from "./privateApi";
 export interface Wallet {
   id: number;
   eth_address: string;
+  btc_address?: string;
+  tron_address?: string;
   label: string | null;
   status: string;
   created_at: string;
