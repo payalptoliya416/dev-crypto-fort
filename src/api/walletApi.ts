@@ -47,6 +47,21 @@ export const downloadWalletBackup = (payload: DownloadBackupPayload) => {
   });
 };
 
+export interface CheckPasswordResponse {
+  success: boolean;
+  match: boolean;
+}
+
+export const checkUserPassword = (payload: {
+  user_id: number;
+  password: string;
+}) => {
+  return privateApi<CheckPasswordResponse>("/check-user-password", {
+    method: "POST",
+    body: payload,
+  });
+};
+
 export interface ExportTransactionsPayload {
   wallet_id: number;
   format: "excel" | "pdf";
@@ -119,6 +134,24 @@ export const getTransactions = (payload: GetTransactionsPayload) => {
   });
 };
 
+export interface GetMeResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    is_2fa_verify: boolean;
+    is_2fa_enabled: boolean;
+    last_login_at: string;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+export const getMe = () => {
+  return privateApi<GetMeResponse>("/me", {
+    method: "GET",
+  });
+};
 // -------------------
 
 export interface CoinPriceResponse {

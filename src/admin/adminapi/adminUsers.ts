@@ -8,7 +8,7 @@ export interface MainAccount {
   eth_balance: number;
   btc_balance: number;
   usdt_balance: number;
-  is2FAEnabled: boolean;
+  is_2fa_enabled: boolean;
 }
 
 export interface OtherAccount {

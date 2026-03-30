@@ -84,6 +84,7 @@ function TopNavbar({ toggleSidebar }: Props) {
 
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_name");
+    localStorage.removeItem("admin_token_expiry");
 
     toast.success("Logged out successfully");
 

@@ -17,11 +17,12 @@ import { getWallets, type Wallet } from "../../../api/walletApi";
 import { getPrices } from "../../../api/publicApi";
 import { setActiveWallet } from "../../../redux/activeWalletSlice";
 import Loader from "../../component/Loader";
+import { useRef } from "react";
 
 export default function WalletSummary() {
   const [open, setOpen] = useState(false);
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  
+
   const [sendOpen, setSendOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
@@ -41,11 +42,11 @@ export default function WalletSummary() {
   const totalValue = ethBalanceNumber * ethPrice;
   const formattedBalance = formatBalance(ethBalanceNumber);
   const formattedTotal = formatBalance(totalValue);
-
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     // Check if prices are already stored in localStorage
     const cachedPrices = localStorage.getItem(`ethPricesByCurrency`);
-    
+
     if (cachedPrices) {
       try {
         const parsedPrices: Record<string, any> = JSON.parse(cachedPrices);
@@ -55,7 +56,7 @@ export default function WalletSummary() {
           return;
         }
       } catch (e) {
-        console.error('Error parsing cached prices:', e);
+        console.error("Error parsing cached prices:", e);
       }
     }
 
@@ -64,18 +65,27 @@ export default function WalletSummary() {
       try {
         const response = await getPrices({
           symbols: "BTC,ETH,USDT,BNB,TRX",
-          base: "USD, EUR, GBP, AED, AUD, CAD, NOK, NZD, CHF, BTC"
+          base: "USD, EUR, GBP, AED, AUD, CAD, NOK, NZD, CHF, BTC",
         });
 
-        if (response.success && response.prices && Array.isArray(response.prices)) {
+        if (
+          response.success &&
+          response.prices &&
+          Array.isArray(response.prices)
+        ) {
           // Store all prices in localStorage
           const allPrices: Record<string, any> = {};
-          response.prices.forEach((priceObj: { symbol: string; base: string; price: string }) => {
-            allPrices[priceObj.base] = priceObj;
-          });
-          
-          localStorage.setItem(`ethPricesByCurrency`, JSON.stringify(allPrices));
-          
+          response.prices.forEach(
+            (priceObj: { symbol: string; base: string; price: string }) => {
+              allPrices[priceObj.base] = priceObj;
+            },
+          );
+
+          localStorage.setItem(
+            `ethPricesByCurrency`,
+            JSON.stringify(allPrices),
+          );
+
           // Set the price for the current currency
           const currentCurrencyPrice = allPrices[currency]?.price || 0;
           setEthPrice(parseFloat(currentCurrencyPrice) || 0);
@@ -83,7 +93,7 @@ export default function WalletSummary() {
           setEthPrice(0);
         }
       } catch (error) {
-        console.error('Error fetching prices');
+        console.error("Error fetching prices");
         setEthPrice(0);
       } finally {
         setIsPriceLoading(false);
@@ -107,6 +117,24 @@ export default function WalletSummary() {
 
     fetchWallets();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const getSymbol = (cur: string) => {
     const symbols: any = {
       USD: "$",
@@ -135,8 +163,7 @@ export default function WalletSummary() {
             <div>
               <div className="flex justify-between items-start mb-[15px]">
                 <div>
-                  <div className="relative inline-block">
-                  
+                  <div className="relative inline-block" ref={dropdownRef}>
                     <button
                       onClick={() => setOpen(!open)}
                       className="flex items-center gap-[5px]
@@ -196,7 +223,6 @@ export default function WalletSummary() {
                       <img src={vector} alt="vector" />
                       <span>{formattedBalance} ETH</span>
                     </div>
-                   
                   </div>
                 </>
               )}

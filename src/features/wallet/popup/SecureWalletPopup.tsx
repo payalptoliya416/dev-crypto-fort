@@ -88,7 +88,7 @@ function SecureWalletPopup({
         buttonText="Done"
         onButtonClick={() => {
           setShowModal(false);
-          onFinish(); // ✅ close flow
+          onFinish(); 
         }}
       />
     </>

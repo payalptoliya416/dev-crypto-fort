@@ -47,7 +47,6 @@ function Balance() {
     });
     socket.onAny((_, data) => {
       if (!data?.prices) return;
-      console.log("data", data);
       const saved = localStorage.getItem("crypto_balance_prices");
       const storedPrices = saved ? JSON.parse(saved) : {};
 

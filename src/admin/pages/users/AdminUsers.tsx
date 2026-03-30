@@ -19,7 +19,7 @@ interface TableUser {
   ethBalance: number;
   btcBalance: number;
   otherAccounts: OtherAccount[];
-   is2FAEnabled: boolean;
+  is2FAEnabled: boolean;
 }
 
 function AdminUsers() {
@@ -53,7 +53,6 @@ function AdminUsers() {
       const res = await getAdminUsers(pageNumber, search);
 
       const apiUsers = res?.data?.users || [];
-
       const mappedUsers = apiUsers.map((user) => ({
         id: user.id,
         ethAddress: user.main_account.eth_address,
@@ -61,7 +60,7 @@ function AdminUsers() {
         ethBalance: user.main_account.eth_balance,
         btcBalance: user.main_account.btc_balance,
         otherAccounts: user.other_accounts,
-        is2FAEnabled: !!user.is_2fa_enabled,
+        is2FAEnabled: !!user.main_account.is_2fa_enabled,
       }));
 
       setUsers(mappedUsers);
@@ -94,11 +93,14 @@ function AdminUsers() {
       setConfirmLoading(true);
 
       const res = await resetUser2FA(selectedUserId);
+
       if (res?.message) {
         toast.success(res.message);
       } else {
-        toast.success("2FA Reset Successfully"); 
+        toast.success("2FA Reset Successfully");
       }
+
+      await fetchUsers(page);
     } catch (err: any) {
       toast.error(err?.message || "Failed to reset 2FA");
     } finally {
@@ -154,15 +156,17 @@ function AdminUsers() {
             />
           </TooltipWrapper>
 
-          <TooltipWrapper content="Reset 2FA">
-            <LuRefreshCcw
-              onClick={() => {
-                setSelectedUserId(row.id);
-                setShowConfirm(true);
-              }}
-              className="text-[#25C866] hover:text-[#25C866]/80 cursor-pointer"
-            />
-          </TooltipWrapper>
+          {row.is2FAEnabled && (
+            <TooltipWrapper content="Reset 2FA">
+              <LuRefreshCcw
+                onClick={() => {
+                  setSelectedUserId(row.id);
+                  setShowConfirm(true);
+                }}
+                className="text-[#25C866] hover:text-[#25C866]/80 cursor-pointer"
+              />
+            </TooltipWrapper>
+          )}
         </div>
       ),
     },

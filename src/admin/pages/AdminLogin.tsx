@@ -20,10 +20,22 @@ function AdminLogin() {
 
   useEffect(() => {
     const adminToken = localStorage.getItem("admin_token");
+    const adminExpiry = localStorage.getItem("admin_token_expiry");
 
-    if (adminToken) {
-      navigate("/admin/users");
+    const expired =
+      !adminToken ||
+      !adminExpiry ||
+      Number.isNaN(Number(adminExpiry)) ||
+      Date.now() >= Number(adminExpiry);
+
+    if (expired) {
+      localStorage.removeItem("admin_token");
+      localStorage.removeItem("admin_token_expiry");
+      localStorage.removeItem("admin_name");
+      return;
     }
+
+    navigate("/admin/users");
   }, [navigate]);
 
   const initialValues: LoginFormValues = {
@@ -51,8 +63,12 @@ function AdminLogin() {
 
     const res = await adminLogin(values);
 
+    const expiresInSec = res.data.expires_in ?? 24 * 60 * 60;
+    const expiryAt = Date.now() + expiresInSec * 1000;
+
     localStorage.setItem("admin_token", res.data.token);
     localStorage.setItem("admin_name", res.data.name);
+    localStorage.setItem("admin_token_expiry", expiryAt.toString());
 
     toast.success(res.message);
 

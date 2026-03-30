@@ -40,7 +40,6 @@ export async function publicApi<T>(
   if (!res.ok) {
     let message = "Something went wrong";
 
-    // ✅ Validation Errors Fix
     if (data?.errors) {
       const firstError = Object.values(data.errors as Record<string, string[]>)[0];
       message = firstError?.[0] || message;

@@ -30,37 +30,51 @@ function Login() {
     seed_phrase: Yup.string().required("Seed phrase is required"),
   });
 
-const handleSubmit = async (values: typeof initialValues) => {
-  try {
-    setLoading(true);
+  const handleSubmit = async (values: typeof initialValues) => {
+    try {
+      setLoading(true);
 
-    const res = await loginUser({
-      seed_phrase: values.seed_phrase,
-    });
+      const res = await loginUser({
+        seed_phrase: values.seed_phrase,
+      });
 
-    if (res.success) {
-      const data = res.data;
-      // Case 1: 2FA required
-      if ("requires_2fa" in data && data.requires_2fa) {
-        dispatch(
-          setToken({
-            token: null,
-            expiresIn: 0,
-            userId: data.user_id,
-          })
-        );
+      if (res.success) {
+        const data = res.data;
 
-        toast.success(res.message || "2FA verification required");
-        navigate("/login-verify-2fa", { replace: true });
-        return;
+        if ("requires_2fa" in data && data.requires_2fa) {
+          dispatch(
+            setToken({
+              token: null,
+              expiresIn: 0,
+              userId: data.user_id,
+            }),
+          );
+
+          toast.success(res.message || "2FA verification required");
+          navigate("/login-verify-2fa", { replace: true });
+          return;
+        }
+
+        if ("token" in data && data.token) {
+          dispatch(
+            setToken({
+              token: data.token,
+              expiresIn: data.expires_in,
+              userId: data.user_id,
+            }),
+          );
+
+          toast.success(res.message || "Login successful");
+          navigate("/dashboard", { replace: true });
+          return;
+        }
       }
+    } catch (err: any) {
+      toast.error(err.message || "Invalid Seed Phrase");
+    } finally {
+      setLoading(false);
     }
-  } catch (err: any) {
-    toast.error(err.message || "Invalid Seed Phrase");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
   return (
     <AuthLayout>
       <div

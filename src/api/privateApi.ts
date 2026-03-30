@@ -22,7 +22,14 @@ export async function privateApi<T>(
 
   const data = await res.json();
 
- if (!res.ok) {
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 419) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("token_expiry");
+      localStorage.removeItem("user_id");
+      window.location.href = "/login";
+    }
+
     throw data;
   }
 

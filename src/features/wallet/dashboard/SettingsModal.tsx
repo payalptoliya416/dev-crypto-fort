@@ -2,13 +2,22 @@ import { IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
 import toast from "react-hot-toast";
-import { downloadWalletBackup, getTransactions } from "../../../api/walletApi";
-import { useState } from "react";
+import {
+  checkUserPassword,
+  downloadWalletBackup,
+  getMe,
+  getTransactions,
+} from "../../../api/walletApi";
+import { useEffect, useState } from "react";
 import { setCurrency } from "../../../redux/currencySlice";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
+import ToggleSwitch from "../../../hooks/ToggleSwitch";
+import { disable2FA } from "../../../api/login";
+import TwoFactorModal from "./TwoFactorModal";
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
@@ -19,6 +28,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
+  const userId = useSelector((state: RootState) => state.auth.userId);
   const dispatch = useDispatch();
   const currency = useSelector((state: RootState) => state.currency.value);
   const [exporting, setExporting] = useState<"backup" | "report" | null>(null);
@@ -31,52 +41,37 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState("");
-  const [exportFormat] = useState<"excel" | "pdf" | null>(null);
-  // const [exportFormat, setExportFormat] = useState<"excel" | "pdf" | null>(null);
+  const [exportFormat, setExportFormat] = useState<"excel" | "pdf" | null>(
+    null,
+  );
+  const [checkingPassword, setCheckingPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loading2FA, setLoading2FA] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
 
-  // const handleExportTxHash = async () => {
-  //   if (!activeWallet?.id) {
-  //     toast.error("Wallet not found");
-  //     return;
-  //   }
+  const fetch2FAStatus = async () => {
+    try {
+      setLoading2FA(true);
 
-  //   try {
-  //     setExporting("backup");
+      const res = await getMe();
 
-  //     const res = await downloadWalletBackup({
-  //       wallet_id: activeWallet.id,
-  //     });
-  //     if (!res?.data?.file_content) {
-  //       toast.error("Backup data not available");
-  //       return;
-  //     }
+      if (res.success) {
+        setTwoFactorEnabled(res.data.is_2fa_enabled);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to fetch 2FA status");
+    } finally {
+      setLoading2FA(false);
+    }
+  };
 
-  //     toast.success("Downloading...");
-
-  //     // const fileContent = res.data.file_content;
-  //     // const fileName = res.data.suggested_filename || "backup-wallet.txt";
-
-  //     // const blob = new Blob([fileContent], {
-  //     //   type: "text/plain;charset=utf-8;",
-  //     // });
-
-  //     // const url = window.URL.createObjectURL(blob);
-
-  //     // const link = document.createElement("a");
-  //     // link.href = url;
-  //     // link.download = fileName;
-
-  //     // document.body.appendChild(link);
-  //     // link.click();
-
-  //     // document.body.removeChild(link);
-  //     // window.URL.revokeObjectURL(url);
-  //   } catch (err: any) {
-  //     toast.error(err?.message || "Download failed");
-  //   } finally {
-  //     setExporting(null);
-  //   }
-  // };
+  useEffect(() => {
+    if (open) {
+      fetch2FAStatus();
+    }
+  }, [open]);
 
   const handleExportTxHash = async () => {
     if (!activeWallet?.id) {
@@ -347,6 +342,42 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       setTranslating(false);
     }
   };
+
+  const handleToggle = async (value: boolean) => {
+    if (!userId) {
+      toast.error("User not found");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (value) {
+        setShow2FAModal(true);
+        return;
+      }
+      if (!value) {
+        const res = await disable2FA({ user_id: userId });
+
+        if (!res.success) {
+          toast.error(res.message || "Failed to disable 2FA");
+          return;
+        }
+
+        toast.success(res.message || "2FA Disabled successfully");
+        setTwoFactorEnabled(false);
+      } else {
+        toast.success("2FA Enabled (UI only)");
+        setTwoFactorEnabled(true);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Something went wrong");
+
+      setTwoFactorEnabled((prev) => !prev);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
@@ -360,6 +391,13 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           </div>
         </div>
       )}
+
+      <TwoFactorModal
+        open={show2FAModal}
+        onClose={() => setShow2FAModal(false)}
+        onSuccess={() => setTwoFactorEnabled(true)}
+      />
+
       <div className="relative w-full max-w-[760px]">
         {/* Close Button */}
         <div className="flex justify-end">
@@ -377,6 +415,17 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           <h3 className="text-[#25C866] font-medium text-lg mb-[15px]">
             Settings
           </h3>
+          <div className="mb-3">
+            <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
+              Two-Factor Authentication
+            </label>
+            <ToggleSwitch
+              checked={twoFactorEnabled}
+              onChange={handleToggle}
+              disabled={loading || loading2FA}
+              loading={loading || loading2FA}
+            />
+          </div>
 
           <div className="mb-[30px]">
             <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
@@ -483,14 +532,14 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             <div className="mt-3 flex gap-3">
               {/* Excel */}
               <button
+                // onClick={() => {
+                //   setShowExportOptions(false);
+                //   handleExportTxReport("excel", "all");
+                // }}
                 onClick={() => {
-                  setShowExportOptions(false);
-                  handleExportTxReport("excel", "all");
+                  setExportFormat("excel");
+                  setShowPasswordModal(true);
                 }}
-  //               onClick={() => {
-  //   setExportFormat("excel");
-  //   setShowPasswordModal(true);
-  // }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]  cursor-pointer"
               >
@@ -499,14 +548,14 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
               {/* PDF */}
               <button
+                // onClick={() => {
+                //   setShowExportOptions(false);
+                //   handleExportTxReport("pdf", "all");
+                // }}
                 onClick={() => {
-                  setShowExportOptions(false);
-                  handleExportTxReport("pdf", "all");
+                  setExportFormat("pdf");
+                  setShowPasswordModal(true);
                 }}
-  //               onClick={() => {
-  //   setExportFormat("pdf");
-  //   setShowPasswordModal(true);
-  // }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556] cursor-pointer"
               >
@@ -526,32 +575,100 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
               </button>
               <h3 className="text-white my-4">Enter Your Password</h3>
 
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 rounded-lg bg-[#0F172A] text-white mb-4 focus:outline-none"
-                placeholder="Enter password"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 pr-10 rounded-lg bg-[#0F172A] text-white focus:outline-none"
+                  placeholder="Enter password"
+                />
 
-             <button
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className=" absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                >
+                  {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+                </span>
+              </div>
+
+              <button
                 onClick={async () => {
                   if (!password) {
                     toast.error("Enter password");
                     return;
                   }
 
-                  setShowPasswordModal(false);
-                  setShowExportOptions(false);
-                 
-                  if (exportFormat) {
-                    handleExportTxReport(exportFormat, "all");
+                  if (!userId) {
+                    toast.error("User not found. Please log in again.");
+                    return;
                   }
-                  setPassword("")
+
+                  try {
+                    setCheckingPassword(true);
+                    const res = await checkUserPassword({
+                      user_id: userId,
+                      password: password,
+                    });
+
+                    if (!res.success) {
+                      const apiError =
+                        (res as any)?.errors?.user_id?.[0] ||
+                        (res as any)?.message ||
+                        "Something went wrong";
+
+                      toast.error(apiError);
+                      return;
+                    }
+
+                    if (!res.match) {
+                      toast.error("Incorrect password");
+                      return;
+                    }
+
+                    setShowPasswordModal(false);
+                    setShowExportOptions(false);
+
+                    if (exportFormat) {
+                      handleExportTxReport(exportFormat, "all");
+                    }
+
+                    setPassword("");
+                  } catch (err: any) {
+                    const apiError =
+                      err?.message ||
+                      err?.data?.message ||
+                      err?.errors?.user_id?.[0] ||
+                      (err?.errors &&
+                        Object.values(err.errors).flat().filter(Boolean)[0]) ||
+                      "Password check failed";
+
+                    toast.error(apiError);
+
+                    const expiredMsg = (apiError as string).toLowerCase();
+                    if (
+                      expiredMsg.includes("expired") ||
+                      expiredMsg.includes("session")
+                    ) {
+                      localStorage.removeItem("token");
+                      localStorage.removeItem("token_expiry");
+                      localStorage.removeItem("user_id");
+                      window.location.href = "/login";
+                    }
+                  } finally {
+                    setCheckingPassword(false);
+                    setPassword("");
+                  }
                 }}
-                className="w-full bg-[#25C866] py-2 rounded-lg text-white cursor-pointer"
+                disabled={checkingPassword}
+                className={`w-full py-2 rounded-lg text-white transition mt-4
+                    ${
+                      checkingPassword
+                        ? "bg-green-400 cursor-not-allowed opacity-70"
+                        : "bg-[#25C866] hover:bg-green-500 cursor-pointer"
+                    }`}
               >
-                Confirm
+                {checkingPassword ? "Checking..." : "Confirm"}
               </button>
             </div>
           </div>
@@ -591,7 +708,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(backupData.privateKey);
-                      toast.success("Private key copied ✅");
+                      toast.success("Private key copied");
                     }}
                     className="px-3 py-1.5 text-xs bg-[#25C866] text-white rounded-md hover:opacity-90 cursor-pointer"
                   >
@@ -612,7 +729,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(backupData.recoveryPhrase);
-                      toast.success("Recovery phrase copied ✅");
+                      toast.success("Recovery phrase copied");
                     }}
                     className="px-3 py-1.5 text-xs bg-[#25C866] text-white rounded-md hover:opacity-90  cursor-pointer"
                   >
