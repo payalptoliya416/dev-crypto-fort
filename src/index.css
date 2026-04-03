@@ -274,7 +274,7 @@ body {
 }
 @media (min-width: 1441px) {
   .container-custom {
-    max-width: 1320px;
+    max-width: 1170px;
   } 
 }
 @media (max-width: 1439px) {
@@ -285,13 +285,13 @@ body {
 }
 @media (min-width: 1600px) {
   .container-custom {
-    max-width: 1400px;
+    max-width: 1170px;
   } 
 }
 
 @media (min-width: 1920px) {
   .container-custom {
-    max-width: 1600px;
+    max-width: 1170px;
   }
 }
 /* ----------------------site---------------end */

@@ -26,11 +26,11 @@ function GetStarted() {
               crypto all in a few simple steps.
             </p>
           </div>
-          <div className="relative grid md:grid-cols-3 gap-12 pt-6 md:pt-[160px] 2xl:pt-[120px]  pb-[0px] lg:pb-[80px] xl:pb-[140px] 2xl:pb-[250px]">
-           <img src={line} alt="" className="absolute top-0 2xl:-top-11 left-0 w-full hidden md:block" />
+          <div className="relative grid md:grid-cols-3 gap-12 pt-6 md:pt-[160px] pb-[0px] lg:pb-[80px] xl:pb-[140px] 2xl:pb-[250px]">
+           <img src={line} alt="" className="absolute top-0 left-0 w-full hidden md:block" />
            
             {/* STEP 1 (BOTTOM) */}
-            <div className="md:-translate-y-3 lg:translate-y-16 xl:translate-y-32 2xl:translate-y-64 md:pl-8 lg:pl-16 xl:pl-20 2xl:pl-24 flex justify-center items-center flex-col md:block text-center md:text-left">
+            <div className="md:-translate-y-3 lg:translate-y-16 xl:translate-y-32 md:pl-8 lg:pl-16 xl:pl-20 2xl:pl-24 flex justify-center items-center flex-col md:block text-center md:text-left">
               <img src={one} className="mb-4 opacity-40" />
 
               <div className="w-[55px] h-[55px] rounded-[15px] flex justify-center items-center bg-[#25C866] mb-[16px]">
@@ -48,7 +48,7 @@ function GetStarted() {
             </div>
 
             {/* STEP 2 (CENTER) */}
-            <div className="md:-translate-y-28 lg:-translate-y-16 xl:-translate-y-7 2xl:translate-y-14 md:pl-2 lg:pl-10 xl:pl-12 flex justify-center items-center flex-col md:block text-center md:text-left">
+            <div className="md:-translate-y-28 lg:-translate-y-16 xl:-translate-y-7 md:pl-2 lg:pl-10 xl:pl-12 flex justify-center items-center flex-col md:block text-center md:text-left">
               <img src={two} className="mb-4 opacity-40" />
 
               <div className="w-[55px] h-[55px] rounded-[15px] flex justify-center items-center bg-[#25C866] mb-[16px]">
@@ -66,7 +66,7 @@ function GetStarted() {
             </div>
 
             {/* STEP 3 (TOP) */}
-            <div className="md:-translate-y-48 lg:-translate-y-40 xl:-translate-y-36 2xl:-translate-y-24 md:pl-2 lg:pl-5 xl:pl-10 flex justify-center items-center flex-col md:block text-center md:text-left">
+            <div className="md:-translate-y-48 lg:-translate-y-40 xl:-translate-y-36 md:pl-2 lg:pl-5 xl:pl-10 flex justify-center items-center flex-col md:block text-center md:text-left">
               <img src={three} className="mb-4 opacity-40" />
 
               <div className="w-[55px] h-[55px] rounded-[15px] flex justify-center items-center bg-[#25C866] mb-[16px]">
