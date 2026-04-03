@@ -81,7 +81,7 @@ export default function FeaturesGridSection() {
               </div>
 
               {/* TITLE */}
-              <h3 className="text-[22px] font-bold text-white mb-[15px]">
+              <h3 className="text-[22px] md:leading-[22px] font-bold text-white mb-[15px]">
                 {item.title}
               </h3>
 

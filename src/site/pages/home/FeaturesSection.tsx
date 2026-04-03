@@ -38,7 +38,7 @@ export default function FeaturesSection() {
                 <img src={item.icon} alt="icon" />
               </div>
 
-              <h3 className="text-[22px] leading-[22px] font-bold text-[#262732] mb-[15px]">
+              <h3 className="text-[22px] md:leading-[22px] font-bold text-[#262732] mb-[15px]">
                 {item.title}
               </h3>
               <p className="text-lg leading-[26px] text-[#52535B] font-medium mb-0">
