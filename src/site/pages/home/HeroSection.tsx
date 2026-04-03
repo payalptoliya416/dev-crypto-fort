@@ -16,7 +16,7 @@ function Home() {
         <div className="container-custom mx-auto relative z-10">
           <div className="grid grid-cols-12">
             <div className="col-span-12 lg:col-span-7 xl:col-span-6 text-white">
-              <h1 className="text-4xl md:text-[56px] font-extrabold leading-[1.2] mb-4
+              <h1 className="text-4xl md:text-[56px] font-extrabold leading-[74px] mb-[15px]
 ">
                 Secure Your Crypto Assets with{" "}
                 <span className="text-[#25C866]">
@@ -32,10 +32,10 @@ function Home() {
               </p>
 
               <div className="flex flex-wrap gap-5">
-                <button className="bg-[#25C866] rounded-xl py-3 px-[22px] text-lg font-semibold">
+                <button className="bg-[#25C866] rounded-xl py-3 px-[22px] text-lg leading-[18px] font-semibold">
                   Launch Web Wallet
                 </button>
-                <button className="bg-[#FFFFFF0F] py-3 px-[22px] rounded-xl text-white text-lg font-semibold">
+                <button className="bg-[#FFFFFF0F] py-3 px-[22px] rounded-xl text-white text-lg leading-[18px] font-semibold">
                   Explore Security
                 </button>
               </div>
