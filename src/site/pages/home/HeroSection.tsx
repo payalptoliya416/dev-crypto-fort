@@ -14,7 +14,7 @@ function Home() {
       {/* HERO */}
       <div className="relative pt-[120px] lg:pt-[200px] pb-[80px] md:pb-[170px]">
         <div className="container-custom mx-auto relative z-10">
-          <div className="grid grid-cols-12">
+          <div className="grid grid-cols-12 text-center lg:text-left">
             <div className="col-span-12 lg:col-span-7 xl:col-span-6 text-white">
               <h1 className="text-4xl md:text-[56px] font-extrabold lg:leading-[74px] mb-[15px]
 ">
@@ -31,7 +31,7 @@ function Home() {
                 third-party access.
               </p>
 
-              <div className="flex flex-wrap gap-5">
+              <div className="flex flex-wrap gap-5 justify-center lg:justify-start">
                 <button className="bg-[#25C866] rounded-xl py-3 px-[22px] text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-auto">
                   Launch Web Wallet
                 </button>
