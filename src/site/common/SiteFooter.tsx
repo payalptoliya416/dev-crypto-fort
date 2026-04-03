@@ -1,6 +1,7 @@
 
 import logo from "@/assets/logo.png";
 import footerlogo from "@/assets/site/footer-logo.png";
+import footerbg from "@/assets/site/footerbg.png";
 import { FaFacebookF, FaPaperPlane, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
@@ -12,8 +13,7 @@ export default function SiteFooter() {
     { icon: <FaPaperPlane size={14} />, link: "https://t.me" },
   ];
   return (
-    <footer className="relative bg-[#0b1f1a] pt-[84px]">
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0b1f1a] via-[#0f2f2a] to-[#0b1f1a]" />
+    <footer className="relative bg-[#13192B] pt-[84px] bg-no-repeat"  style={{ backgroundImage: `url(${footerbg})`, backgroundSize: "100% 100%" }}>
       <div className="absolute -top-10 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[700px] lg:max-w-[800px] xl:max-w-[1030px]">
         <div className="bg-[#25C866] rounded-[40px] py-10 sm:py-[60px] px-6 text-center shadow-lg">
           <h2 className="text-2xl md:text-[38px] font-extrabold text-[#262732] mb-[30px]">
