@@ -38,7 +38,7 @@ export default function BuiltOpenSection() {
             >
               {/* ICON */}
               <div className="shrink-0">
-                <img src={check} alt="" className="w-6 h-6" />
+                <img src={check} alt="" className="" />
               </div>
 
               {/* TEXT */}
