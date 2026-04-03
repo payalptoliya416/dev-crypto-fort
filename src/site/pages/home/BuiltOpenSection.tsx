@@ -23,7 +23,7 @@ export default function BuiltOpenSection() {
           Built
           <span className="text-[#262732]">in the Open</span>
         </h2>
-        <p className="text-[#52535B] max-w-[732px] mx-auto text-lg font-semibold mb-[35px]">
+        <p className="text-[#52535B] max-w-[732px] mx-auto text-lg font-semibold mb-[35px] text-center">
           CryptosFort is fully open-source, allowing anyone to inspect, verify,
           and contribute to the system without hidden logic or centralized
           control.
