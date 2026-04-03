@@ -12,7 +12,7 @@ function Home() {
       <SiteHeader />
 
       {/* HERO */}
-      <div className="relative pt-[120px] lg:pt-[200px] pb-[80px] md:pb-[170px]">
+      <div className="relative pt-[120px] lg:pt-[180px] 2xl:pt-[200px] pb-[80px] md:pb-[170px]">
         <div className="container-custom mx-auto relative z-10">
           <div className="grid grid-cols-12 text-center lg:text-left">
             <div className="col-span-12 lg:col-span-7 xl:col-span-6 text-white">
@@ -43,7 +43,7 @@ function Home() {
           </div>
         </div>
 
-        <div className="flex justify-end pl-10 lg:absolute lg:right-0 lg:top-[55%] lg:-translate-y-1/2 mt-10 lg:mt-0">
+        <div className="flex justify-end pl-10 lg:absolute lg:right-0 lg:top-[52%] lg:-translate-y-1/2 mt-10 lg:mt-0">
           <img
             src={heroright}
             alt="hero"
