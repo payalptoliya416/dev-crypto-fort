@@ -12,7 +12,7 @@ function Home() {
       <SiteHeader />
 
       {/* HERO */}
-      <div className="relative pt-[120px] lg:pt-[250px] pb-[80px] md:pb-[190px]">
+      <div className="relative pt-[120px] lg:pt-[200px] pb-[80px] md:pb-[170px]">
         <div className="container-custom mx-auto relative z-10">
           <div className="grid grid-cols-12">
             <div className="col-span-12 lg:col-span-7 xl:col-span-6 text-white">
