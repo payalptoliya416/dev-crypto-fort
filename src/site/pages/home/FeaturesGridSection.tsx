@@ -86,7 +86,7 @@ export default function FeaturesGridSection() {
               </h3>
 
               {/* DESC */}
-              <p className="text-lg text-[#A8A9AD] font-medium">{item.desc}</p>
+              <p className="text-lg leading-[26px] text-[#A8A9AD] font-medium">{item.desc}</p>
             </div>
           ))}
         </div>

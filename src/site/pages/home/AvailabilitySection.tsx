@@ -27,7 +27,7 @@ export default function AvailabilitySection() {
 
   return (
     <section
-      className="relative py-20 bg-no-repeat overflow-hidden"
+      className="relative py-[60px] bg-no-repeat overflow-hidden"
       style={{ backgroundImage: `url(${wbg})`, backgroundSize: "100% 100%" }}
     >
       <div className="relative container-custom mx-auto">

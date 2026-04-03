@@ -65,7 +65,7 @@ export default function WhyChooseSection() {
                 {item.title}
               </h3>
 
-              <p className="text-lg text-[#52535B] font-medium mx-auto">
+              <p className="text-lg leading-[26px] text-[#52535B] font-medium mx-auto">
                 {item.desc}
               </p>
             </div>
