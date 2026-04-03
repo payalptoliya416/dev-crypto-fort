@@ -68,7 +68,7 @@ export default function AvailabilitySection() {
 
               <button
                 className={`
-                  px-[22px] py-2 sm:py-[12px] rounded-[12px] text-lg leading-[18px] font-semibold transition-all
+                  px-[22px] py-[12px] rounded-[12px] text-lg leading-[18px] font-semibold transition-all
                   ${
                     item.active
                       ? "bg-[#25C866] text-white hover:bg-[#22b35a]"

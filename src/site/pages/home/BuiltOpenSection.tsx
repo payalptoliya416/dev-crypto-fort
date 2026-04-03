@@ -20,7 +20,7 @@ export default function BuiltOpenSection() {
     <section className="bg-white pt-16 md:pt-[110px] pb-[240px] md:pb-[272px]">
       <div className="container-custom mx-auto">
         <h2 className="text-center text-3xl md:text-[40px] leading-[40px] font-extrabold text-[#25C866] mb-[15px]">
-          Built
+          Built{" "}
           <span className="text-[#262732]">in the Open</span>
         </h2>
         <p className="text-[#52535B] max-w-[732px] mx-auto text-lg font-semibold mb-[35px] text-center">

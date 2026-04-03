@@ -69,7 +69,7 @@ export default function SiteFooter() {
             ))}
           </div>
           <p className="text-[#BEBEC2] text-lg font-medium">
-            © 2026 CryptosFort. All rights reserved.
+            © {new Date().getFullYear()} CryptosFort. All rights reserved.
           </p>
         </div>
       </div>
