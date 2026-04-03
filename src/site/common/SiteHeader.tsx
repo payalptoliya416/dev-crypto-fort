@@ -32,7 +32,7 @@ export default function SiteHeader() {
               onClick={() => setActive(item)}
               className={`
                 relative group transition-all duration-300
-                ${active === item ? "text-[#25C866]" : "hover:text-white"}
+                ${active === item ? "text-[#25C866]" : "hover:text-[#25C866] text-[#A8A9AD]"}
             `}
             >
               {item}

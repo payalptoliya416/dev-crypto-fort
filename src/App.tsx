@@ -22,6 +22,7 @@ import Verify2FA from "./features/wallet/auth/Verify2FA";
 import LoginVerify2FA from "./features/wallet/auth/LoginVerify2FA";
 import UserProtectedRoute from "./routes/UserProtectedRoute";
 import SiteRoute from "./routes/SiteRoute";
+import UserAdminLayout from "./routes/UserAdminLayout";
 
 function App() {
   return (
@@ -38,11 +39,9 @@ function App() {
       />
       <BrowserRouter>
         <Routes>
-
-          {/* site */}
           <Route path="/" element={<SiteRoute/>} />
           
-          {/* USER */}
+          <Route element={<UserAdminLayout />}>
           <Route path="/user">
             <Route index element={<CreateWallet />} />
             <Route path="login" element={<Login />} />
@@ -63,10 +62,7 @@ function App() {
             </Route>
           </Route>
 
-          {/* ADMIN LOGIN */}
           <Route path="/admin" element={<AdminLogin />} />
-
-          {/* ADMIN PANEL */}
           <Route path="/admin" element={<AdminProtectedRoute />}>
             <Route element={<AdminLayout />}>
               <Route path="dashboard" element={<AdminDashboard />} />
@@ -75,8 +71,8 @@ function App() {
             </Route>
           </Route>
 
-          {/* NOT FOUND */}
           <Route path="*" element={<NotFound />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </>
