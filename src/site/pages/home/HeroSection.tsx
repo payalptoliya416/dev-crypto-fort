@@ -18,7 +18,7 @@ function Home() {
             <div className="col-span-12 lg:col-span-7 xl:col-span-6 text-white">
               <h1 className="text-4xl md:text-[56px] font-extrabold leading-[1.2] mb-4
 ">
-                Secure Your Crypto Assets with
+                Secure Your Crypto Assets with{" "}
                 <span className="text-[#25C866]">
                   Fortress Level Protection
                 </span>
