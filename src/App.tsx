@@ -41,7 +41,7 @@ function App() {
         <Routes>
           <Route path="/" element={<SiteRoute/>} />
           
-          <Route element={<UserAdminLayout />}>
+          {/* <Route element={<UserAdminLayout />}> */}
           <Route path="/user">
             <Route index element={<CreateWallet />} />
             <Route path="login" element={<Login />} />
@@ -69,7 +69,7 @@ function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="users/user-details" element={<InnerUsers />} />
             </Route>
-          </Route>
+          {/* </Route> */}
 
           <Route path="*" element={<NotFound />} />
           </Route>
