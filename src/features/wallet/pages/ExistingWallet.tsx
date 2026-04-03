@@ -9,10 +9,10 @@ function ExistingWallet() {
     <AuthLayout>
       <ExistingWalletUI
         onSeedPhrase={() =>
-          navigate("/seed-phrase", { state: { type: "phrase" } })
+          navigate("/user/seed-phrase", { state: { type: "phrase" } })
         }
         onPrivateKey={() =>
-          navigate("/private-key", { state: { type: "key" } })
+          navigate("/user/private-key", { state: { type: "key" } })
         }
       />
     </AuthLayout>

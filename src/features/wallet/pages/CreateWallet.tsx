@@ -15,7 +15,7 @@ function CreateWallet() {
 
   useEffect(() => {
     if (token) {
-      navigate("/dashboard", { replace: true });
+      navigate("/user/dashboard", { replace: true });
     }
   }, [token, navigate]);
 
@@ -24,7 +24,7 @@ function CreateWallet() {
       setLoading(true);
       const res = await createWallet(false);
       dispatch(setWallet(res.data));
-      navigate("/recovery-phrase");
+      navigate("/user/recovery-phrase");
     } finally {
       setLoading(false);
     }
@@ -35,8 +35,8 @@ function CreateWallet() {
       <CreateWalletUI
         loading={loading}
         onCreateWallet={handleCreateWallet}
-        onImportWallet={() => navigate("/existing-wallet")}
-        onLogin={() => navigate("/login")}
+        onImportWallet={() => navigate("/user/existing-wallet")}
+        onLogin={() => navigate("/user/login")}
       />
     </AuthLayout>
   );

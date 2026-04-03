@@ -10,7 +10,6 @@ import Dashboard from "./features/wallet/dashboard/Dashboard";
 import Balance from "./features/wallet/balance/Balance";
 import Transaction from "./features/wallet/transaction/Transaction";
 import Login from "./features/wallet/pages/Login";
-import ProtectedRoute from "./routes/ProtectedRoute";
 import NotFound from "./routes/NotFound";
 import AdminLogin from "./admin/pages/AdminLogin";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
@@ -21,6 +20,8 @@ import InnerUsers from "./admin/pages/users/InnerUsers";
 import TwoFactorSetup from "./features/wallet/auth/TwoFactorSetup";
 import Verify2FA from "./features/wallet/auth/Verify2FA";
 import LoginVerify2FA from "./features/wallet/auth/LoginVerify2FA";
+import UserProtectedRoute from "./routes/UserProtectedRoute";
+import SiteRoute from "./routes/SiteRoute";
 
 function App() {
   return (
@@ -37,34 +38,44 @@ function App() {
       />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<CreateWallet />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/recovery-phrase" element={<RecoveryPhrase />} />
-          <Route path="/create-password" element={<SecureWallet />} />
-          <Route path="/setup-2fa" element={<TwoFactorSetup />} />
-          <Route path="/verify-2fa" element={<Verify2FA />} />
-          <Route path="/login-verify-2fa" element={<LoginVerify2FA />} />
 
-          <Route path="/existing-wallet" element={<ExistingWallet />} />
-          <Route path="/private-key" element={<PrivateKey />} />
-          <Route path="/seed-phrase" element={<SeedPhrase />} />
+          {/* site */}
+          <Route path="/" element={<SiteRoute/>} />
+          
+          {/* USER */}
+          <Route path="/user">
+            <Route index element={<CreateWallet />} />
+            <Route path="login" element={<Login />} />
+            <Route path="recovery-phrase" element={<RecoveryPhrase />} />
+            <Route path="create-password" element={<SecureWallet />} />
+            <Route path="setup-2fa" element={<TwoFactorSetup />} />
+            <Route path="verify-2fa" element={<Verify2FA />} />
+            <Route path="login-verify-2fa" element={<LoginVerify2FA />} />
 
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/balance" element={<Balance />} />
-            <Route path="/transaction" element={<Transaction />} />
+            <Route path="existing-wallet" element={<ExistingWallet />} />
+            <Route path="private-key" element={<PrivateKey />} />
+            <Route path="seed-phrase" element={<SeedPhrase />} />
+
+            <Route element={<UserProtectedRoute />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="balance" element={<Balance />} />
+              <Route path="transaction" element={<Transaction />} />
+            </Route>
           </Route>
 
+          {/* ADMIN LOGIN */}
           <Route path="/admin" element={<AdminLogin />} />
 
+          {/* ADMIN PANEL */}
           <Route path="/admin" element={<AdminProtectedRoute />}>
             <Route element={<AdminLayout />}>
-              <Route path="transaction" element={<AdminDashboard />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="users/user-details" element={<InnerUsers />} />
             </Route>
           </Route>
 
+          {/* NOT FOUND */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

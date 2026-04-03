@@ -27,7 +27,7 @@ export async function privateApi<T>(
       localStorage.removeItem("token");
       localStorage.removeItem("token_expiry");
       localStorage.removeItem("user_id");
-      window.location.href = "/login";
+      window.location.href = "/user/login";
     }
 
     throw data;

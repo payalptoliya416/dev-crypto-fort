@@ -38,7 +38,7 @@ function TwoFactorSetup() {
 
     if (res.success) {
       toast.success(res.message);
-      navigate("/dashboard", { replace: true });
+      navigate("/user/dashboard", { replace: true });
     }
   } catch (error: any) {
     toast.error(error.message || "Failed to disable 2FA");
@@ -83,7 +83,7 @@ function TwoFactorSetup() {
 
             {/* Next */}
             <button
-              onClick={() => navigate("/verify-2fa")}
+              onClick={() => navigate("/user/verify-2fa")}
               className="px-6 py-2 rounded-lg bg-[#25C866] text-white hover:opacity-90 transition cursor-pointer"
             >
               Next

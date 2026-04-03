@@ -18,7 +18,7 @@ function Dashboard() {
   const token = useSelector((state: RootState) => state.auth.token);
   useEffect(() => {
     if (token) {
-      navigate("/dashboard", { replace: true });
+      navigate("/user/dashboard", { replace: true });
     }
   }, [token, navigate]);
 
