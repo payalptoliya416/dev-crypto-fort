@@ -27,38 +27,38 @@ export default function SiteRoute() {
       <Home />
 
       {/* SECURITY */}
-      <motion.div id="security" className="scroll-mt-24" {...sectionAnimation}>
+      <motion.div id="security" className="scroll-mt-[100px]" {...sectionAnimation}>
         <FeaturesSection />
         <DefenseSection />
       </motion.div>
 
        {/* FEATURES */}
-      <motion.div id="features" className="scroll-mt-24" {...sectionAnimation}>
+      <motion.div id="features" className="scroll-mt-[100px]" {...sectionAnimation}>
         <FeaturesGridSection />
       </motion.div>
       
       {/* VERIFY */}
-      <motion.div className="scroll-mt-24" {...sectionAnimation}>
+      <motion.div className="scroll-mt-[100px]" {...sectionAnimation}>
         <SecurityVerifySection />
       </motion.div>
 
        {/* HOW IT WORKS */}
-      <motion.div id="howwork" className="scroll-mt-24" {...sectionAnimation}>
+      <motion.div id="howwork" className="scroll-mt-[100px]" {...sectionAnimation}>
         <GetStarted />
       </motion.div>
 
       {/* WHY */}
-      <motion.div className="scroll-mt-24" {...sectionAnimation}>
+      <motion.div className="scroll-mt-[100px]" {...sectionAnimation}>
         <WhyChooseSection />
       </motion.div>
 
       {/* PLATFORM */}
-      <motion.div id="plateform" className="scroll-mt-24" {...sectionAnimation}>
+      <motion.div id="plateform" className="scroll-mt-[100px]" {...sectionAnimation}>
         <AvailabilitySection />
       </motion.div>
 
         {/* OPEN SOURCE */}
-      <motion.div id="openscouce" className="scroll-mt-24" {...sectionAnimation}>
+      <motion.div id="openscouce" className="scroll-mt-[100px]" {...sectionAnimation}>
         <BuiltOpenSection />
       </motion.div>
 

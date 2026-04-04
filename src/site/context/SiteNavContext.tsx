@@ -33,8 +33,8 @@ export function SiteNavProvider({ children }: { children: React.ReactNode }) {
     }
     const el = document.getElementById(id);
     if (el) {
-      const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      const top = el.getBoundingClientRect().top + window.pageYOffset - 100;
+      window.scrollTo({ top, behavior: "smooth" });
     }
   };
 
