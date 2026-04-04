@@ -5,7 +5,7 @@ export default function SecurityVerifySection() {
   return (
     <section className="bg-white py-16 md:py-[110px]">
       <div className="container-custom mx-auto">
-        <div className="grid lg:grid-cols-2 gap-[30px] items-center">
+        <div className="grid lg:grid-cols-2 gap-[30px] items-start">
           <div>
             <h2 className="text-3xl md:text-[40px] leading-[40px] font-extrabold text-[#262732] mb-[15px]">
               Security You <span className="text-[#25C866]">Can Verify</span>

@@ -24,7 +24,7 @@ export default function DefenseSection() {
   return (
     <section className="bg-white pb-[80px] md:pb-[110px]">
       <div className="container-custom mx-auto">
-        <div className="grid lg:grid-cols-2 gap-[30px] items-center">
+        <div className="grid lg:grid-cols-2 gap-[30px] items-start">
           <div className="flex justify-center md:justify-start">
             <img
               src={towerImg}
