@@ -26,7 +26,7 @@ function GetStarted() {
         <div className="container-custom mx-auto relative">
            <img src={p1} alt="" className="absolute top-0 right-0" />
             <img src={p2} alt="" className="absolute top-[20%] left-[20%]" />
-            <img src={p4} alt="" className="absolute bottom-[10%] right-[15%]" />
+            <img src={p4} alt="" className="absolute bottom-[20%] sm:bottom-[10%] right-[15%]" />
           <div className="text-center mb-[35px] mx-auto">
             <h2 className="text-center text-3xl md:text-[40px] leading-[40px] font-extrabold text-white mb-[15px]">
               Get Started in <span className="text-[#25C866]">Minutes</span>
