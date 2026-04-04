@@ -5,7 +5,7 @@ import l1 from "@/assets/site/l1.svg";
 import l2 from "@/assets/site/l2.svg";
 import l3 from "@/assets/site/l3.svg";
 import l4 from "@/assets/site/l4.svg";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 type MenuItem = {
@@ -49,18 +49,6 @@ export default function SiteFooter() {
         window.scrollTo({ top: y, behavior: "smooth" });
       }
     };
-  
-  const [scrolled, setScrolled] = useState(false);
-  
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-  
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-  
 
   return (
     <footer
