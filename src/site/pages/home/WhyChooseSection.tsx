@@ -47,7 +47,7 @@ export default function WhyChooseSection() {
               key={i}
               className="
                 bg-[#F4F4F566] rounded-2xl border border-[#E9E9EB]
-                p-8 text-center
+                py-[40px] px-[30px] text-center
                 transition-all duration-300
                 hover:shadow-lg hover:-translate-y-1
               "
