@@ -67,7 +67,7 @@ export default function SecurityVerifySection() {
             </div>
           </div>
           <div className="flex justify-center md:justify-end">
-            <img src={security} alt="security" className="w-full" />
+            <img src={security} alt="security" className="mx-auto" />
           </div>
         </div>
       </div>
