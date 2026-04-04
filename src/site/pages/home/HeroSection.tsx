@@ -33,10 +33,13 @@ function Home() {
               </p>
 
               <div className="flex flex-wrap gap-5 justify-center lg:justify-start">
-                <Link to="/" className="bg-[#25C866] rounded-xl py-3 px-[22px] text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-auto">
+                <Link to="/" className="bg-[#25C866] rounded-xl py-3 px-[22px] text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-auto
+                  transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[#25C866]/40"
+                >
                   Launch Web Wallet
                 </Link>
-                <Link to="/" className="bg-[#FFFFFF0F] py-3 px-[22px] rounded-xl text-white text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-max">
+                <Link to="/" className="bg-[#FFFFFF0F] py-3 px-[22px] rounded-xl text-white text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-max
+                 transition-all duration-300 ease-in-out border border-transparent hover:bg-white/10 hover:border-white/20 hover:scale-105 hover:shadow-md">
                   Explore Security
                 </Link>
               </div>

@@ -59,14 +59,14 @@ export default function SiteHeader() {
         <div className="hidden xl:flex gap-4">
           <Link to="/"
             className="bg-[#25C866] rounded-xl text-white py-3 px-[22px] text-lg leading-[18px] font-semibold 
-            transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_#25C866] cursor-pointer"
+            transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[#25C866]/40"
           >
             Web Wallet
           </Link>
 
           <Link to="/"
             className="bg-[#FFFFFF0F] rounded-xl text-white py-3 px-[22px] text-lg leading-[18px] font-semibold 
-            transition-all duration-300 hover:bg-white/10 hover:scale-105 cursor-pointer"
+             transition-all duration-300 ease-in-out border border-transparent hover:bg-white/10 hover:border-white/20 hover:scale-105 hover:shadow-md"
           >
             Coming Soon
           </Link>

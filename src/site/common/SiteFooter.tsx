@@ -1,4 +1,3 @@
-
 import logo from "@/assets/logo.png";
 import footerlogo from "@/assets/site/footer-logo.png";
 import footerbg from "@/assets/site/footerbg.png";
@@ -16,7 +15,13 @@ export default function SiteFooter() {
     { icon: l4, link: "https://t.me" },
   ];
   return (
-    <footer className="relative bg-[#13192B] pt-[84px] bg-no-repeat"  style={{ backgroundImage: `url(${footerbg})`, backgroundSize: "100% 100%" }}>
+    <footer
+      className="relative bg-[#13192B] pt-[84px] bg-no-repeat"
+      style={{
+        backgroundImage: `url(${footerbg})`,
+        backgroundSize: "100% 100%",
+      }}
+    >
       <div className="absolute -top-10 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[700px] lg:max-w-[800px] xl:max-w-[1030px]">
         <div className="bg-[#25C866] rounded-[40px] py-10 sm:py-[60px] px-6 text-center shadow-lg">
           <h2 className="text-2xl md:text-[38px] leading-[38px] font-extrabold text-[#262732] mb-[30px]">
@@ -24,10 +29,20 @@ export default function SiteFooter() {
             <span className="text-white">Crypto Today</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
-            <Link to="/" className="bg-[#262732] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-black transition">
+            <Link
+              to="/"
+              className="bg-[#262732] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold  transition-all duration-300 ease-in-out
+      hover:bg-black hover:scale-105 hover:-translate-y-1
+      hover:shadow-lg hover:shadow-black/40"
+            >
               Launch Web Wallet
             </Link>
-            <Link to="/" className="bg-[#FFFFFF26] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold backdrop-blur-md hover:bg-white/30 transition">
+            <Link
+              to="/"
+              className="bg-[#FFFFFF26] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold backdrop-blur-md   transition-all duration-300 ease-in-out
+      hover:bg-white/30 hover:scale-105 hover:-translate-y-1
+      hover:shadow-lg hover:shadow-white/20 border border-transparent hover:border-white/20"
+            >
               View Documentation
             </Link>
           </div>
@@ -36,21 +51,44 @@ export default function SiteFooter() {
       <div className="relative container-custom mx-auto text-center">
         <div className="flex justify-center items-center my-[50px]">
           <a href="/">
-          <img src={footerlogo} className="hidden md:block" />
-          <img src={logo} className="md:hidden" />
+            <img src={footerlogo} className="hidden md:block" />
+            <img src={logo} className="md:hidden" />
           </a>
         </div>
         <div className="flex flex-wrap justify-center gap-5 md:gap-[60px] text-[#E9E9EB] text-xl font-medium mb-[50px]">
-          <Link to="/" className="hover:text-white transition">
+          <Link
+            to="/"
+            className="relative transition-all duration-300 hover:text-white
+    after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0
+    after:bg-[#25C866] after:transition-all after:duration-300 hover:after:w-full"
+          >
             Docs
           </Link>
-          <Link to="/" className="hover:text-white transition">
+
+          <Link
+            to="/"
+            className="relative transition-all duration-300 hover:text-white
+    after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0
+    after:bg-[#25C866] after:transition-all after:duration-300 hover:after:w-full"
+          >
             GitHub
           </Link>
-          <Link to="/" className="hover:text-white transition">
+
+          <Link
+            to="/"
+            className="relative transition-all duration-300 hover:text-white
+    after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0
+    after:bg-[#25C866] after:transition-all after:duration-300 hover:after:w-full"
+          >
             Privacy Policy
           </Link>
-          <Link to="/" className="hover:text-white transition">
+
+          <Link
+            to="/"
+            className="relative transition-all duration-300 hover:text-white
+    after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0
+    after:bg-[#25C866] after:transition-all after:duration-300 hover:after:w-full"
+          >
             Terms of Use
           </Link>
         </div>
@@ -63,7 +101,12 @@ export default function SiteFooter() {
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-[28px] h-[28px] rounded-full bg-[#FFFFFF0D] text-[#E9E8E8] flex items-center justify-center hover:bg-white/20 hover:text-white transition"
+                className="
+        w-[28px] h-[28px] rounded-full bg-[#FFFFFF0D] text-[#E9E8E8]
+        flex items-center justify-center
+        transition-colors duration-200
+        hover:bg-white/20 hover:text-white
+      "
               >
                 <img src={item.icon} alt="" />
               </a>

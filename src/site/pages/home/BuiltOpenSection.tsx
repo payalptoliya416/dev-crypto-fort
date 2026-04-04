@@ -51,7 +51,7 @@ export default function BuiltOpenSection() {
           ))}
         </div>
         <div className="flex justify-center mt-10">
-          <Link to="/" className="bg-[#25C866] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-[#22b35a] transition">
+          <Link to="/" className="bg-[#25C866] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold  transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[#25C866]/40">
             View on GitHub
           </Link>
         </div>
