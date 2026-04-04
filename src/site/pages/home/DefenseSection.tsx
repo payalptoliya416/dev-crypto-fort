@@ -29,7 +29,7 @@ export default function DefenseSection() {
             <img
               src={towerImg}
               alt="defense"
-              className="w-full rounded-[35px]"
+              className="rounded-[35px] mx-auto"
             />
           </div>
           <div>
