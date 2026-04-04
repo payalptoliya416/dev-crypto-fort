@@ -2,6 +2,7 @@ import { useState } from "react";
 import { RiMenu3Fill } from "react-icons/ri";
 import logo from "@/assets/logo.png";
 import { IoIosCloseCircleOutline } from "react-icons/io";
+import { Link } from "react-router-dom";
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -20,15 +21,15 @@ export default function SiteHeader() {
     <header className="absolute top-0 left-0 w-full z-50">
       <div className="container-custom mx-auto py-5 flex items-center justify-between text-white">
         {/* LOGO */}
-        <a href="/">
+        <Link to="/">
           <img src={logo} alt="logo" className="cursor-pointer" />
-        </a>
+        </Link>
 
         <nav className="hidden xl:flex gap-[25px] text-base leading-[16px] font-medium text-[#F4F4F5]">
           {menus.map((item) => (
-            <a
+            <Link
               key={item}
-              href="/"
+              to="/"
               onClick={() => setActive(item)}
               className={`
                 relative group transition-all duration-300
@@ -50,25 +51,25 @@ export default function SiteHeader() {
                     }
                 `}
               ></span>
-            </a>
+            </Link>
           ))}
         </nav>
 
         {/* BUTTONS */}
         <div className="hidden xl:flex gap-4">
-          <button
+          <Link to="/"
             className="bg-[#25C866] rounded-xl text-white py-3 px-[22px] text-lg leading-[18px] font-semibold 
             transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_#25C866] cursor-pointer"
           >
             Web Wallet
-          </button>
+          </Link>
 
-          <button
+          <Link to="/"
             className="bg-[#FFFFFF0F] rounded-xl text-white py-3 px-[22px] text-lg leading-[18px] font-semibold 
             transition-all duration-300 hover:bg-white/10 hover:scale-105 cursor-pointer"
           >
             Coming Soon
-          </button>
+          </Link>
         </div>
 
         {/* MOBILE */}
@@ -97,7 +98,8 @@ export default function SiteHeader() {
         {/* MENU */}
         <nav className="flex flex-col gap-5 px-6 mt-4 text-base">
           {menus.map((item) => (
-            <a
+            <Link
+              to="/"
               key={item}
               onClick={() => {
                 setActive(item);
@@ -109,7 +111,7 @@ export default function SiteHeader() {
               `}
             >
               {item}
-            </a>
+            </Link>
           ))}
         </nav>
 

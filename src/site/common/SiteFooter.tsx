@@ -6,6 +6,7 @@ import l1 from "@/assets/site/l1.svg";
 import l2 from "@/assets/site/l2.svg";
 import l3 from "@/assets/site/l3.svg";
 import l4 from "@/assets/site/l4.svg";
+import { Link } from "react-router-dom";
 
 export default function SiteFooter() {
   const socials = [
@@ -24,34 +25,36 @@ export default function SiteFooter() {
           </h2>
 
           <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
-            <button className="bg-[#262732] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-black transition">
+            <Link to="/" className="bg-[#262732] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-black transition">
               Launch Web Wallet
-            </button>
+            </Link>
 
-            <button className="bg-[#FFFFFF26] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold backdrop-blur-md hover:bg-white/30 transition">
+            <Link to="/" className="bg-[#FFFFFF26] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold backdrop-blur-md hover:bg-white/30 transition">
               View Documentation
-            </button>
+            </Link>
           </div>
         </div>
       </div>
       <div className="relative container-custom mx-auto text-center">
         <div className="flex justify-center items-center my-[50px]">
+          <a href="/">
           <img src={footerlogo} className="hidden md:block" />
           <img src={logo} className="md:hidden" />
+          </a>
         </div>
         <div className="flex flex-wrap justify-center gap-5 md:gap-[60px] text-[#E9E9EB] text-xl font-medium mb-[50px]">
-          <a href="#" className="hover:text-white transition">
+          <Link to="/" className="hover:text-white transition">
             Docs
-          </a>
-          <a href="#" className="hover:text-white transition">
+          </Link>
+          <Link to="/" className="hover:text-white transition">
             GitHub
-          </a>
-          <a href="#" className="hover:text-white transition">
+          </Link>
+          <Link to="/" className="hover:text-white transition">
             Privacy Policy
-          </a>
-          <a href="#" className="hover:text-white transition">
+          </Link>
+          <Link to="/" className="hover:text-white transition">
             Terms of Use
-          </a>
+          </Link>
         </div>
         <div className="h-px bg-[#939399]/20" />
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[#9CA3AF] text-sm py-5">

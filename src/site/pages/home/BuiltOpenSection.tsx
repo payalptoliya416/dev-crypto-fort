@@ -1,4 +1,5 @@
 import check from "@/assets/site/check.png";
+import { Link } from "react-router-dom";
 
 export default function BuiltOpenSection() {
   const data = [
@@ -56,9 +57,9 @@ export default function BuiltOpenSection() {
 
         {/* BUTTON */}
         <div className="flex justify-center mt-10">
-          <button className="bg-[#25C866] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-[#22b35a] transition">
+          <Link to="/" className="bg-[#25C866] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-[#22b35a] transition">
             View on GitHub
-          </button>
+          </Link>
         </div>
       </div>
     </section>
