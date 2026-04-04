@@ -9,6 +9,7 @@ import Home from "../site/pages/home/HeroSection";
 import SecurityVerifySection from "../site/pages/home/SecurityVerifySection";
 import WhyChooseSection from "../site/pages/home/WhyChooseSection";
 import { motion } from "framer-motion";
+import { SiteNavProvider } from "../site/context/SiteNavContext";
 
 const sectionAnimation = {
   initial: { opacity: 0, y: 60 },
@@ -19,6 +20,7 @@ const sectionAnimation = {
 
 export default function SiteRoute() {
   return (
+    <SiteNavProvider>
     <main className="bg-white">
       
       {/* HERO */}
@@ -63,5 +65,6 @@ export default function SiteRoute() {
       {/* FOOTER */}
       <SiteFooter />
     </main>
+    </SiteNavProvider>
   );
 }

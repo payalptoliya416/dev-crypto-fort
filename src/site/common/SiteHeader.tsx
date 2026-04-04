@@ -4,52 +4,38 @@ import logo from "@/assets/logo.png";
 import headerbg from "@/assets/site/header.png";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Link } from "react-router-dom";
+import { useSiteNav } from "../context/SiteNavContext";
 
 type MenuItem = {
   name: string;
   id: string;
 };
+
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("Home");
+  const { active, setActive, scrollToSection } = useSiteNav();
 
-const menus : MenuItem[] = [
-  { name: "Home", id: "top" },
-  { name: "Security", id: "security" },
-  { name: "Features", id: "features" },
-  { name: "How It Works", id: "howwork" },
-  { name: "Platforms", id: "plateform" },
-  { name: "Open Source", id: "openscouce" },
-];
+  const menus: MenuItem[] = [
+    { name: "Home", id: "top" },
+    { name: "Security", id: "security" },
+    { name: "Features", id: "features" },
+    { name: "How It Works", id: "howwork" },
+    { name: "Platforms", id: "plateform" },
+    { name: "Open Source", id: "openscouce" },
+  ];
 
-  const handleScroll = (id: string) => {
-    if (id === "top") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    const element = document.getElementById(id);
-    if (element) {
-      const yOffset = -80; // header height adjust
-      const y =
-        element.getBoundingClientRect().top +
-        window.pageYOffset +
-        yOffset;
-
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
+  const handleScroll = (id: string, name: string) => {
+    setActive(name);
+    scrollToSection(id);
   };
 
-const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-useEffect(() => {
-  const handleScroll = () => {
-    setScrolled(window.scrollY > 50);
-  };
-
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
    <header
@@ -79,10 +65,7 @@ useEffect(() => {
           {menus.map((item) => (
             <Link
              key={item.name}
-              onClick={() => {
-                setActive(item.name);
-                handleScroll(item.id);
-              }}
+              onClick={() => handleScroll(item.id, item.name)}
               to="/"
                 className={`
                 relative group transition-all duration-300
@@ -159,8 +142,7 @@ useEffect(() => {
               to="/"
                key={item.name}
               onClick={() => {
-                setActive(item.name);
-                handleScroll(item.id);
+                handleScroll(item.id, item.name);
                 setOpen(false);
               }}
               className={`

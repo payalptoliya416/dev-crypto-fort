@@ -5,8 +5,8 @@ import l1 from "@/assets/site/l1.svg";
 import l2 from "@/assets/site/l2.svg";
 import l3 from "@/assets/site/l3.svg";
 import l4 from "@/assets/site/l4.svg";
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSiteNav } from "../context/SiteNavContext";
 
 type MenuItem = {
   name: string;
@@ -21,9 +21,9 @@ export default function SiteFooter() {
     { icon: l4, link: "https://t.me" },
   ];
 
-   const [active, setActive] = useState("Home");
-  
-  const menus : MenuItem[] = [
+  const { active, setActive, scrollToSection } = useSiteNav();
+
+  const menus: MenuItem[] = [
     { name: "Home", id: "top" },
     { name: "Security", id: "security" },
     { name: "Features", id: "features" },
@@ -31,24 +31,11 @@ export default function SiteFooter() {
     { name: "Platforms", id: "plateform" },
     { name: "Open Source", id: "openscouce" },
   ];
-  
-    const handleScroll = (id: string) => {
-      if (id === "top") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-  
-      const element = document.getElementById(id);
-      if (element) {
-        const yOffset = -80; // header height adjust
-        const y =
-          element.getBoundingClientRect().top +
-          window.pageYOffset +
-          yOffset;
-  
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    };
+
+  const handleScroll = (id: string, name: string) => {
+    setActive(name);
+    scrollToSection(id);
+  };
 
   return (
     <footer
@@ -96,10 +83,7 @@ export default function SiteFooter() {
           {menus.map((item) => (
             <Link
              key={item.name}
-              onClick={() => {
-                setActive(item.name);
-                handleScroll(item.id);
-              }}
+              onClick={() => handleScroll(item.id, item.name)}
               to="/"
                 className={`
                 relative group transition-all duration-300
