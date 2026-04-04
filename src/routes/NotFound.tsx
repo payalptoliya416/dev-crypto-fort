@@ -22,7 +22,7 @@ const NotFound = () => {
         </p>
 
         <Link
-          to="/user/dashboard"
+          to="/dashboard"
           className="inline-block mt-6 px-6 py-3 bg-[#25C866] hover:bg-[#25C866]/80 transition rounded-lg"
         >
           Go Back Home

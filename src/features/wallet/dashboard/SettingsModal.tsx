@@ -653,7 +653,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                       localStorage.removeItem("token");
                       localStorage.removeItem("token_expiry");
                       localStorage.removeItem("user_id");
-                      window.location.href = "/user/login";
+                      window.location.href = "/login";
                     }
                   } finally {
                     setCheckingPassword(false);

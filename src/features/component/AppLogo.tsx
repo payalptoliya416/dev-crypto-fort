@@ -26,7 +26,7 @@ useEffect(() => {
 }, []);
   return (
     <Link
-        to={token ? "/user/dashboard" : "/user"}
+        to={token ? "/dashboard" : "/"}
       className={`absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 z-10 ${className}`}
     >
       <img

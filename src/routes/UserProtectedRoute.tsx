@@ -5,7 +5,7 @@ import type { RootState } from "../redux/store/store";
 function UserProtectedRoute() {
   const token = useSelector((state: RootState) => state.auth.token);
   if (!token) {
-    return <Navigate to="/user/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;

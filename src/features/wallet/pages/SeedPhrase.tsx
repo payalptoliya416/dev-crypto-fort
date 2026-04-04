@@ -42,7 +42,7 @@ function SeedPhrase() {
           token: res.data.token, 
           expiresIn: res.data.expires_in! 
         }));
-        navigate("/user/dashboard");
+        navigate("/dashboard");
       } else {
         setShowModal(true);
       }
@@ -74,7 +74,7 @@ function SeedPhrase() {
         title="Access Unlocked"
         description="Your funds are now accessible. Continue to your dashboard."
         buttonText="Go to Dashboard"
-        onButtonClick={() => navigate("/user/dashboard")}
+        onButtonClick={() => navigate("/dashboard")}
       />
     </>
   );

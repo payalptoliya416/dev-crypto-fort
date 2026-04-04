@@ -65,7 +65,7 @@ function LoginVerify2FA() {
 
         toast.success(res.message || "Login successful");
 
-        navigate("/user/dashboard", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     } catch (err: any) {
       toast.error(err.message || "Invalid OTP");
@@ -144,7 +144,7 @@ function LoginVerify2FA() {
                   {loading ? "Verifying..." : "Verify"}
                 </button>
                 <Link
-                  to="/user/create-password"
+                  to="/create-password"
                   className="text-[#25C866] text-base font-normal underline"
                 >
                   back to create wallet{" "}

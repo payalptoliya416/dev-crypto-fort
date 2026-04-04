@@ -19,7 +19,7 @@ function Login() {
 
   useEffect(() => {
     if (token) {
-      navigate("/user/dashboard", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [token, navigate]);
 
@@ -51,7 +51,7 @@ function Login() {
           );
 
           toast.success(res.message || "2FA verification required");
-          navigate("/user/login-verify-2fa", { replace: true });
+          navigate("/login-verify-2fa", { replace: true });
           return;
         }
 
@@ -65,7 +65,7 @@ function Login() {
           );
 
           toast.success(res.message || "Login successful");
-          navigate("/user/dashboard", { replace: true });
+          navigate("/dashboard", { replace: true });
           return;
         }
       }
@@ -155,7 +155,7 @@ function Login() {
         <p className="text-[#7A7D83] text-sm sm:text-base mt-4">
           Don’t have a wallet?{" "}
           <Link
-            to="/user"
+            to="/"
             className="text-[#25C866] font-semibold hover:underline cursor-pointer transition-all duration-500"
           >
             Register

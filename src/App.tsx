@@ -39,10 +39,10 @@ function App() {
       />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<SiteRoute/>} />
+          {/* <Route path="/" element={<SiteRoute/>} /> */}
           
           <Route element={<UserAdminLayout />}>
-          <Route path="/user">
+          <Route path="/">
             <Route index element={<CreateWallet />} />
             <Route path="login" element={<Login />} />
             <Route path="recovery-phrase" element={<RecoveryPhrase />} />

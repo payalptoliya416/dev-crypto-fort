@@ -54,7 +54,7 @@ function SecureWallet() {
 
         toast.success(res.message);
 
-        navigate("/user/setup-2fa", { replace: true }); 
+        navigate("/setup-2fa", { replace: true }); 
       }
       // setShowModal(true);
     } catch (error: any) {
@@ -82,7 +82,7 @@ function SecureWallet() {
         title="Password Verified"
         description="Your password has been set. You now have full access to your wallet."
         buttonText="Go to Dashboard"
-        onButtonClick={() => navigate("/user/dashboard")}
+        onButtonClick={() => navigate("/dashboard")}
       />
     </AuthLayout>
   );

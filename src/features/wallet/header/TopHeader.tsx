@@ -63,7 +63,7 @@ export default function TopHeader() {
       dispatch(resetActiveWallet());
       await persistor.purge();
       dispatch(logout());
-      navigate("/user/login");
+      navigate("/login");
     }
   };
 
@@ -100,7 +100,7 @@ export default function TopHeader() {
       <div className="w-full bg-[#0F1A2F] mb-[15px]">
         <div className="flex items-center justify-between rounded-xl bg-[#131F3A] p-4 sm:px-5 sm:py-[19px]  border border-[#3C3D47]">
           <Link
-            to={token ? "/user/dashboard" : "/user"}
+            to={token ? "/dashboard" : "/"}
             className={`flex items-center gap-2 z-10`}
           >
             <img
@@ -130,7 +130,7 @@ export default function TopHeader() {
 
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <Link to="/user/balance"  className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47] rounded-[10px] flex justify-center items-center cursor-pointer">
+                  <Link to="/balance"  className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47] rounded-[10px] flex justify-center items-center cursor-pointer">
                     <MdOutlineAccountBalanceWallet size={20} className="text-[#7A7D83]" />
                   </Link>
                 </Tooltip.Trigger>
@@ -144,7 +144,7 @@ export default function TopHeader() {
 
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <Link to="/user/transaction" className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47] rounded-[10px] flex justify-center items-center cursor-pointer">
+                  <Link to="/transaction" className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47] rounded-[10px] flex justify-center items-center cursor-pointer">
                     <GoHistory size={20} className="text-[#7A7D83]" />
                   </Link>
                 </Tooltip.Trigger>
