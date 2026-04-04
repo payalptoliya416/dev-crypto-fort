@@ -1,42 +1,99 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RiMenu3Fill } from "react-icons/ri";
 import logo from "@/assets/logo.png";
+import headerbg from "@/assets/site/header.png";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Link } from "react-router-dom";
 
+type MenuItem = {
+  name: string;
+  id: string;
+};
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("Home");
 
-  const menus = [
-    "Home",
-    "Security",
-    "Features",
-    "How It Works",
-    "Open Source",
-    "Docs",
-  ];
+const menus : MenuItem[] = [
+  { name: "Home", id: "top" },
+  { name: "Security", id: "security" },
+  { name: "Features", id: "features" },
+  { name: "How It Works", id: "howwork" },
+  { name: "Platforms", id: "plateform" },
+  { name: "Open Source", id: "openscouce" },
+];
+
+  const handleScroll = (id: string) => {
+    if (id === "top") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -80; // header height adjust
+      const y =
+        element.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset;
+
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+const [scrolled, setScrolled] = useState(false);
+
+useEffect(() => {
+  const handleScroll = () => {
+    setScrolled(window.scrollY > 50);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
 
   return (
-    <header className="absolute top-0 left-0 w-full z-50">
+   <header
+  className={`
+    fixed top-0 left-0 w-full z-50
+    transition-all duration-300
+    ${scrolled ? "shadow-lg" : ""}
+  `}
+  style={
+    scrolled
+      ? {
+          backgroundImage: `url(${headerbg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }
+      : {}
+  }
+>
       <div className="container-custom mx-auto py-5 flex items-center justify-between text-white">
         {/* LOGO */}
         <Link to="/">
           <img src={logo} alt="logo" className="cursor-pointer" />
         </Link>
 
-        <nav className="hidden xl:flex gap-[25px] text-base leading-[16px] font-medium text-[#F4F4F5]">
+        <nav className="hidden xl:flex gap-[30px] text-base leading-[16px] font-medium text-[#F4F4F5]">
           {menus.map((item) => (
             <Link
-              key={item}
+             key={item.name}
+              onClick={() => {
+                setActive(item.name);
+                handleScroll(item.id);
+              }}
               to="/"
-              onClick={() => setActive(item)}
-              className={`
+                className={`
                 relative group transition-all duration-300
-                ${active === item ? "text-[#25C866]" : "hover:text-[#25C866] text-[#A8A9AD]"}
-            `}
+                ${
+                  active === item.name
+                    ? "text-[#25C866]"
+                    : "hover:text-[#25C866] text-[#A8A9AD]"
+                }
+              `}
             >
-              {item}
+              {item.name}
 
               {/* UNDERLINE */}
               <span
@@ -45,7 +102,7 @@ export default function SiteHeader() {
                     h-[2px] rounded-full transition-all duration-300
 
                     ${
-                      active === item
+                      active === item.name
                         ? "w-[20px] bg-gradient-to-r from-transparent via-[#25C866] to-transparent blur-[0.5px]"
                         : "w-0 group-hover:w-[60px] bg-gradient-to-r from-transparent via-[#25C866] to-transparent"
                     }
@@ -100,17 +157,18 @@ export default function SiteHeader() {
           {menus.map((item) => (
             <Link
               to="/"
-              key={item}
+               key={item.name}
               onClick={() => {
-                setActive(item);
+                setActive(item.name);
+                handleScroll(item.id);
                 setOpen(false);
               }}
               className={`
                 transition-all duration-200
-                ${active === item ? "text-[#25C866]" : "text-[#E4E4E7]"}
+                ${active === item.name ? "text-[#25C866]" : "text-[#E4E4E7]"}
               `}
             >
-              {item}
+              {item.name}
             </Link>
           ))}
         </nav>

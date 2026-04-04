@@ -5,7 +5,13 @@ import l1 from "@/assets/site/l1.svg";
 import l2 from "@/assets/site/l2.svg";
 import l3 from "@/assets/site/l3.svg";
 import l4 from "@/assets/site/l4.svg";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+
+type MenuItem = {
+  name: string;
+  id: string;
+};
 
 export default function SiteFooter() {
   const socials = [
@@ -14,6 +20,48 @@ export default function SiteFooter() {
     { icon: l3, link: "https://twitter.com" },
     { icon: l4, link: "https://t.me" },
   ];
+
+   const [active, setActive] = useState("Home");
+  
+  const menus : MenuItem[] = [
+    { name: "Home", id: "top" },
+    { name: "Security", id: "security" },
+    { name: "Features", id: "features" },
+    { name: "How It Works", id: "howwork" },
+    { name: "Platforms", id: "plateform" },
+    { name: "Open Source", id: "openscouce" },
+  ];
+  
+    const handleScroll = (id: string) => {
+      if (id === "top") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+  
+      const element = document.getElementById(id);
+      if (element) {
+        const yOffset = -80; // header height adjust
+        const y =
+          element.getBoundingClientRect().top +
+          window.pageYOffset +
+          yOffset;
+  
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    };
+  
+  const [scrolled, setScrolled] = useState(false);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+  
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+  
+
   return (
     <footer
       className="relative bg-[#13192B] pt-[84px] bg-no-repeat"
@@ -55,7 +103,45 @@ export default function SiteFooter() {
             <img src={logo} className="md:hidden" />
           </a>
         </div>
-        <div className="flex flex-wrap justify-center gap-5 md:gap-[60px] text-[#E9E9EB] text-xl font-medium mb-[50px]">
+        
+        <nav className="flex gap-[30px] text-xl leading-[20px] font-medium text-[#fff] flex-wrap justify-center mb-[43px]">
+          {menus.map((item) => (
+            <Link
+             key={item.name}
+              onClick={() => {
+                setActive(item.name);
+                handleScroll(item.id);
+              }}
+              to="/"
+                className={`
+                relative group transition-all duration-300
+                ${
+                  active === item.name
+                    ? "text-[#25C866]"
+                    : "hover:text-[#25C866] text-[#fff]"
+                }
+              `}
+            >
+              {item.name}
+
+              {/* UNDERLINE */}
+              <span
+                className={`
+                    absolute left-1/2 -translate-x-1/2 -bottom-2
+                    h-[2px] rounded-full transition-all duration-300
+
+                    ${
+                      active === item.name
+                        ? "w-[20px] bg-gradient-to-r from-transparent via-[#25C866] to-transparent blur-[0.5px]"
+                        : "w-0 group-hover:w-[60px] bg-gradient-to-r from-transparent via-[#25C866] to-transparent"
+                    }
+                `}
+              ></span>
+            </Link>
+          ))}
+        </nav>
+
+        {/* <div className="flex flex-wrap justify-center gap-5 md:gap-[60px] text-[#E9E9EB] text-xl font-medium mb-[50px]">
           <Link
             to="/"
             className="relative transition-all duration-300 hover:text-white
@@ -91,7 +177,8 @@ export default function SiteFooter() {
           >
             Terms of Use
           </Link>
-        </div>
+        </div> */}
+
         <div className="h-px bg-[#939399]/20" />
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[#9CA3AF] text-sm py-5">
           <div className="flex gap-4">
