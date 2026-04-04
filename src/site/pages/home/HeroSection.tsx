@@ -38,7 +38,7 @@ function Home() {
                 <Link to="/" className="bg-[#25C866] rounded-xl py-3 px-[22px] text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-auto">
                   Launch Web Wallet
                 </Link>
-                <Link to="/" className="bg-[#FFFFFF0F] py-3 px-[22px] rounded-xl text-white text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-auto">
+                <Link to="/" className="bg-[#FFFFFF0F] py-3 px-[22px] rounded-xl text-white text-lg leading-[18px] font-semibold w-full max-w-[208px] sm:max-w-max">
                   Explore Security
                 </Link>
               </div>
