@@ -3,6 +3,7 @@ import w2 from "@/assets/site/w2.png";
 import w3 from "@/assets/site/w3.png";
 import wbg from "@/assets/site/w-bg.png";
 import bg from "@/assets/site/bg.png";
+import { Link } from "react-router-dom";
 
 export default function AvailabilitySection() {
   const data = [
@@ -62,18 +63,18 @@ export default function AvailabilitySection() {
               </h3>
               <div className="relative rounded-[32px] p-[1px] bg-gradient-to-r from-white/0 via-white/20 to-white/0 mb-[30px]" />
 
-              <button
+              <Link to="/"
                 className={`
                   px-[22px] py-[12px] rounded-[12px] text-lg leading-[18px] font-semibold transition-all
                   ${
                     item.active
-                      ? "bg-[#25C866] text-white hover:bg-[#22b35a]"
-                      : "bg-white/10 text-white"
+                      ? "bg-[#25C866] text-white  transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[#25C866]/40"
+                      : "bg-white/10 text-white transition-all duration-300 ease-in-out border border-transparent hover:bg-white/10 hover:border-white/20 hover:scale-105 hover:shadow-md"
                   }
                 `}
               >
                 {item.btn}
-              </button>
+              </Link>
             </div>
           ))}
         </div>
