@@ -1,4 +1,4 @@
-import stepbg from "@/assets/site/step-bg.png";
+import pbg from "@/assets/site/pbg.png";
 import one from "@/assets/site/1.png";
 import two from "@/assets/site/2.png";
 import three from "@/assets/site/3.png";
@@ -6,17 +6,27 @@ import step1 from "@/assets/site/step1.png";
 import step2 from "@/assets/site/step2.png";
 import step3 from "@/assets/site/step3.png";
 import line from "@/assets/site/line.png";
+import p1 from "@/assets/site/p1.png";
+import p2 from "@/assets/site/p2.png";
+import p3 from "@/assets/site/p3.png";
+import p4 from "@/assets/site/p4.png";
 
 function GetStarted() {
   return (
     <>
       <section
-        className="bg-white py-[60px] bg-cover md:bg-[100%_100%]"
+        className="bg-white py-[60px] bg-cover md:bg-[100%_100%] relative"
         style={{
-          backgroundImage: `url(${stepbg})`,
+          backgroundImage: `url(${pbg})`,
         }}
       >
-        <div className="container-custom mx-auto">
+        <div>
+          <img src={p3} alt="" className="absolute bottom-[10%] left-[5%]" />
+        </div>
+        <div className="container-custom mx-auto relative">
+           <img src={p1} alt="" className="absolute top-0 right-0" />
+            <img src={p2} alt="" className="absolute top-[20%] left-[20%]" />
+            <img src={p4} alt="" className="absolute bottom-[10%] right-[15%]" />
           <div className="text-center mb-[35px] mx-auto">
             <h2 className="text-center text-3xl md:text-[40px] leading-[40px] font-extrabold text-white mb-[15px]">
               Get Started in <span className="text-[#25C866]">Minutes</span>
