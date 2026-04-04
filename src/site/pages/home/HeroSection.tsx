@@ -18,9 +18,7 @@ function Home() {
           <div className="grid grid-cols-12 text-center lg:text-left">
             <div className="col-span-12 lg:col-span-7 xl:col-span-6 text-white">
               <h1
-                className="text-4xl md:text-[56px] font-extrabold lg:leading-[74px] mb-[15px]
-"
-              >
+                className="text-4xl md:text-[56px] font-extrabold lg:leading-[74px] mb-[15px]">
                 Secure Your Crypto Assets with{" "}
                 <span className="text-[#25C866]">
                   Fortress Level Protection
@@ -45,18 +43,8 @@ function Home() {
             </div>
           </div>
         </div>
-
         <div className="flex justify-end pl-10 lg:absolute lg:right-0 lg:top-[52%] lg:-translate-y-1/2 mt-10 lg:mt-0">
-          <img
-            src={heroright}
-            alt="hero"
-            className="
-            w-full
-            md:w-[600px]
-              lg:w-[638px]
-              max-w-none
-            "
-          />
+          <img src={heroright} alt="hero" className="w-full md:w-[600px] lg:w-[638px] max-w-none" />
         </div>
       </div>
     </div>

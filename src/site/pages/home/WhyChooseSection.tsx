@@ -30,7 +30,6 @@ export default function WhyChooseSection() {
   return (
     <section className="bg-white py-[90px] md:py-[110px]">
       <div className="container-custom mx-auto">
-        
         <div className="text-center mb-[35px] max-w-[700px] mx-auto">
            <h2 className="text-center text-3xl md:text-[40px] leading-[40px] font-extrabold text-[#262732] mb-[15px]">
            Why Choose{" "}
@@ -40,38 +39,22 @@ export default function WhyChooseSection() {
             Built with a security-first mindset, CryptosFort goes beyond traditional wallets by combining control, transparency, and a defense-driven architecture.
           </p>
         </div>
-
         <div className="grid gap-[30px] md:grid-cols-2">
           {data.map((item, i) => (
-            <div
-              key={i}
-              className="
-                bg-[#F4F4F566] rounded-2xl border border-[#E9E9EB]
-                py-[40px] px-[30px] text-center
-                transition-all duration-300
-                hover:shadow-lg hover:-translate-y-1
-              "
-            >
-              
+            <div key={i} className="bg-[#F4F4F566] rounded-2xl border border-[#E9E9EB] py-[40px] px-[30px] text-center
+                transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
               <div className="w-[84px] h-[84px] mx-auto mb-[30px] rounded-[20px] bg-[#25C866]/10 flex items-center justify-center">
-                <img
-                  src={item.icon}
-                  alt="icon"
-                  className=""
-                />
+                <img src={item.icon} alt="icon"/>
               </div>
-
               <h3 className="text-[22px] lg:leading-[22px] font-bold text-[#262732] mb-[15px]">
                 {item.title}
               </h3>
-
               <p className="text-lg leading-[26px] text-[#52535B] font-medium mx-auto">
                 {item.desc}
               </p>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );

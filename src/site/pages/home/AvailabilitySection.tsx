@@ -45,13 +45,9 @@ export default function AvailabilitySection() {
           {data.map((item, i) => (
             <div
               key={i}
-              className="
-                relative text-center p-10  rounded-[32px]
-                transition-all duration-300 hover:border-[#25C866]/40
-               hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_30px_rgba(37,200,102,0.12)]
-              "
-               style={{ backgroundImage: `url(${bg})`, backgroundSize: "100% 100%" }}
-            >
+              className="relative text-center p-10  rounded-[32px] transition-all duration-300 hover:border-[#25C866]/40
+               hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_30px_rgba(37,200,102,0.12)]"
+               style={{ backgroundImage: `url(${bg})`, backgroundSize: "100% 100%" }}>
               {item.badge && (
                 <div className="absolute -top-4 left-1/2 bg-[#3E5D5B] text-white text-base font-semibold leading-[16px] py-2 px-[15px] rounded-full backdrop-blur-md -translate-x-1/2 z-20">
                   {item.badge}

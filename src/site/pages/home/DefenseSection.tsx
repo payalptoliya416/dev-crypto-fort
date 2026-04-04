@@ -25,7 +25,6 @@ export default function DefenseSection() {
     <section className="bg-white pb-[80px] md:pb-[110px]">
       <div className="container-custom mx-auto">
         <div className="grid lg:grid-cols-2 gap-[30px] items-center">
-          {/* LEFT IMAGE */}
           <div className="flex justify-center md:justify-start">
             <img
               src={towerImg}
@@ -33,7 +32,6 @@ export default function DefenseSection() {
               className="w-full rounded-[35px]"
             />
           </div>
-
           <div>
             <h2 className="text-3xl md:text-[40px] leading-[40px] font-extrabold text-[#13192B] mb-[15px]">
               Built Like a{" "}
@@ -57,9 +55,7 @@ export default function DefenseSection() {
                       <h4 className="text-[#262732E] text-xl lg:text-[22px] md:leading-[22px] font-bold mb-[10px]">
                         {item.title}
                       </h4>
-                      <p
-                        className={`text-lg md:leading-[18px] text-[#52535B] ${i !== points.length - 1 ? "mb-5 lg:mb-[30px] " : ""}`}
-                      >
+                      <p className={`text-lg md:leading-[18px] text-[#52535B] ${i !== points.length - 1 ? "mb-5 lg:mb-[30px] " : ""}`} >
                         {item.desc}
                       </p>
                     </div>

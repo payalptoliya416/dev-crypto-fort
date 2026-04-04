@@ -30,19 +30,15 @@ export default function BuiltOpenSection() {
           control.
         </p>
 
-        {/* CARDS */}
         <div className="grid gap-[30px] md:grid-cols-2">
           {data.map((item, i) => (
             <div
               key={i}
               className="border border-[#E9E9EB] rounded-[20px] py-[15px] px-[15px] sm:px-[25px] flex items-start gap-[15px]"
             >
-              {/* ICON */}
               <div className="shrink-0">
                 <img src={check} alt="" className="" />
               </div>
-
-              {/* TEXT */}
               <div>
                 <h3 className="text-xl font-bold mb-[10px] text-[#262732]">
                   {item.title}
@@ -54,8 +50,6 @@ export default function BuiltOpenSection() {
             </div>
           ))}
         </div>
-
-        {/* BUTTON */}
         <div className="flex justify-center mt-10">
           <Link to="/" className="bg-[#25C866] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-[#22b35a] transition">
             View on GitHub

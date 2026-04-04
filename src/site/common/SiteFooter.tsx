@@ -23,12 +23,10 @@ export default function SiteFooter() {
             Take Control of Your{" "}
             <span className="text-white">Crypto Today</span>
           </h2>
-
           <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
             <Link to="/" className="bg-[#262732] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold hover:bg-black transition">
               Launch Web Wallet
             </Link>
-
             <Link to="/" className="bg-[#FFFFFF26] text-white px-[22px] py-3 rounded-[12px] text-lg leading-[18px] font-semibold backdrop-blur-md hover:bg-white/30 transition">
               View Documentation
             </Link>

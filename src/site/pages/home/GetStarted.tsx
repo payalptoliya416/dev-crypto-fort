@@ -16,13 +16,8 @@ function GetStarted() {
     <>
       <section
         className="bg-white py-[60px] bg-cover md:bg-[100%_100%] relative"
-        style={{
-          backgroundImage: `url(${pbg})`,
-        }}
-      >
-        <div>
-          <img src={p3} alt="" className="absolute bottom-[10%] left-[5%]" />
-        </div>
+        style={{backgroundImage: `url(${pbg})`}}>
+        <div><img src={p3} alt="" className="absolute bottom-[10%] left-[5%]" /></div>
         <div className="container-custom mx-auto relative">
            <img src={p1} alt="" className="absolute top-0 right-0" />
             <img src={p2} alt="" className="absolute top-[20%] left-[20%]" />
@@ -38,8 +33,6 @@ function GetStarted() {
           </div>
           <div className="relative grid md:grid-cols-3 gap-12 pt-6 md:pt-[160px] pb-[0px] lg:pb-[80px] xl:pb-[140px]">
            <img src={line} alt="" className="absolute top-0 left-0 w-full hidden md:block" />
-           
-            {/* STEP 1 (BOTTOM) */}
             <div className="md:-translate-y-3 lg:translate-y-16 xl:translate-y-32 md:pl-8 lg:pl-16 xl:pl-20 flex justify-center items-center flex-col md:block text-center md:text-left">
               <img src={one} className="mb-4 opacity-40" />
 
@@ -56,8 +49,6 @@ function GetStarted() {
                 process.
               </p>
             </div>
-
-            {/* STEP 2 (CENTER) */}
             <div className="md:-translate-y-28 lg:-translate-y-16 xl:-translate-y-7 md:pl-2 lg:pl-10 xl:pl-12 flex justify-center items-center flex-col md:block text-center md:text-left">
               <img src={two} className="mb-4 opacity-40" />
 
@@ -74,8 +65,6 @@ function GetStarted() {
                 control and ownership.
               </p>
             </div>
-
-            {/* STEP 3 (TOP) */}
             <div className="md:-translate-y-48 lg:-translate-y-40 xl:-translate-y-36 md:pl-2 lg:pl-5 xl:pl-10 flex justify-center items-center flex-col md:block text-center md:text-left">
               <img src={three} className="mb-4 opacity-40" />
 

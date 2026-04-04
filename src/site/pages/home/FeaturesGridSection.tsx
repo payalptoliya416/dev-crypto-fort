@@ -42,10 +42,8 @@ export default function FeaturesGridSection() {
   ];
 
   return (
-    <section
-      className="relative py-[60px] overflow-hidden bg-[#0b1f1a]  bg-no-repeat"
-      style={{ backgroundImage: `url(${debg})`, backgroundSize: "100% 100%" }}
-    >
+    <section className="relative py-[60px] overflow-hidden bg-[#0b1f1a]  bg-no-repeat"
+      style={{ backgroundImage: `url(${debg})`, backgroundSize: "100% 100%" }} >
       <div className="relative container-custom mx-auto">
         <div className="text-center mb-[35px]">
           <h2 className="text-center text-3xl md:text-[40px] leading-[40px] font-extrabold text-[#25C866] mb-[15px]">
@@ -57,35 +55,20 @@ export default function FeaturesGridSection() {
             unnecessary complexity.
           </p>
         </div>
-
-        {/* GRID */}
         <div className="grid gap-[30px] sm:grid-cols-2 lg:grid-cols-3">
           {features.map((item, i) => (
             <div
               key={i}
-              className="
-                relative py-5 md:py-[40px] px-5 md:px-[28px] text-center rounded-[30px]
-                transition-all duration-300 hover:border-[#25C866]/40
-                hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_30px_rgba(37,200,102,0.12)] 
-                bg-no-repeat
-              "
-                 style={{ backgroundImage: `url(${bg})`, backgroundSize: "100% 100%" }}
-            >
-              {/* ICON BOX */}
+              className="relative py-5 md:py-[40px] px-5 md:px-[28px] text-center rounded-[30px]
+                transition-all duration-300 hover:border-[#25C866]/40 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_30px_rgba(37,200,102,0.12)] 
+                bg-no-repeat"
+                 style={{ backgroundImage: `url(${bg})`, backgroundSize: "100% 100%" }} >
               <div className="w-[84px] h-[84px] mx-auto mb-6 rounded-[20px] bg-[#25C8661A] backdrop-blur-sm flex items-center justify-center">
-                <img
-                  src={item.icon}
-                  alt="icon"
-                  className=""
-                />
+                <img src={item.icon} alt="icon" className="" />
               </div>
-
-              {/* TITLE */}
               <h3 className="text-[22px] md:leading-[22px] font-bold text-white mb-[15px]">
                 {item.title}
               </h3>
-
-              {/* DESC */}
               <p className="text-lg leading-[26px] text-[#A8A9AD] font-medium">{item.desc}</p>
             </div>
           ))}

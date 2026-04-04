@@ -32,12 +32,10 @@ export default function FeaturesSection() {
             <div
               key={i}
               className="bg-[#F4F4F566] rounded-[30px] border border-[#E9E9EB] py-[40px] px-[30px] text-center
-              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-            >
+              transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
               <div className="w-[70px] sm:w-[84px] h-[70px] sm:h-[84px] mx-auto mb-[30px] rounded-[20px] bg-[#25C8661A] flex items-center justify-center">
                 <img src={item.icon} alt="icon" />
               </div>
-
               <h3 className="text-[22px] md:leading-[22px] font-bold text-[#262732] mb-[15px]">
                 {item.title}
               </h3>
