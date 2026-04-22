@@ -62,17 +62,25 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
       setSelectedAddress(currentWallet.eth_address || "");
     } else if (selectedToken === "btc") {
       setSelectedAddress(currentWallet.btc_address || "");
-    } else if (selectedToken === "trx") {
+    } else if (selectedToken === "trc20") {
       setSelectedAddress(currentWallet.tron_address || "");
-    } else {
+    } else if (selectedToken === "usdt") {
+    setSelectedAddress(currentWallet.eth_address || "");
+    } 
+    else if (selectedToken === "bnb") {
+      setSelectedAddress(currentWallet.eth_address || "");
+    } 
+    else {
       setSelectedAddress("");
     }
   }, [selectedToken, wallets, activeWallet]);
+
   useEffect(() => {
     if (open) {
       setSelectedToken("eth");
     }
   }, [open]);
+
   const handleCopy = async () => {
     if (!address) {
       toast.error("Address not available");
@@ -126,7 +134,9 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
             >
               <option value="eth">Ethereum</option>
               <option value="btc">Bitcoin</option>
-              <option value="trx">TRC20</option>
+              <option value="trc20">TRC20</option>
+              <option value="usdt">ERC-20</option>
+              <option value="bnb">Binance</option>
             </select>
           </div>
 
@@ -179,10 +189,13 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
 
           <div className="border border-[#FFDD1D1A] bg-[#FFDD1D05] rounded-[6px] px-[15px] py-3 w-full sm:w-max">
             <p className="text-[#FFDD1D] text-base sm:text-lg font-medium">
-              {selectedToken === "eth" && "Only send ETH / ERC-20 tokens to this address."}
-              {selectedToken === "btc" && "Only send BTC to this address."}
-              {selectedToken === "trx" && "Only send TRX / TRC-20 tokens to this address."}
-            </p>
+            {selectedToken === "eth" && "Only send ETH / ERC-20 tokens to this address."}
+            {selectedToken === "btc" && "Only send BTC to this address."}
+            {selectedToken === "trx" && "Only send TRC-20 tokens to this address."}
+            {selectedToken === "trc20" && "Only send TRC-20 tokens to this address."}
+            {selectedToken === "usdt" && "Only send USDT (ERC-20) to this address."}
+            {selectedToken === "bnb" && "Only send BNB tokens to this address."}
+          </p>
           </div>
           {/* <button
             className="w-full mt-[30px] py-3 sm:py-[18px] rounded-xl bg-[#25C866] 

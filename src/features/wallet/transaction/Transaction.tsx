@@ -8,6 +8,8 @@ import { getTransactions, type Transaction } from "../../../api/walletApi";
 import d1 from "@/assets/d1.png";
 import d2 from "@/assets/d2.png";
 import d5 from "@/assets/d5.png";
+import d9 from "@/assets/d9.png";
+import d3 from "@/assets/d3.png";
 import Loader from "../../component/Loader";
 import { TbCopy } from "react-icons/tb";
 
@@ -57,6 +59,9 @@ function TransactionPage() {
             ETH: { name: "Ethereum", icon: d1 },
             BTC: { name: "Bitcoin", icon: d2 },
             USDT: { name: "Tether", icon: d5 },
+            TRX: { name: "Tron", icon: d9 },
+            TRC20: { name: "Trc20", icon: d5 },
+            BNB: { name: "Bnb", icon: d3 },
           };
 
           const tokenData = tokenMap[symbol] || tokenMap["ETH"];

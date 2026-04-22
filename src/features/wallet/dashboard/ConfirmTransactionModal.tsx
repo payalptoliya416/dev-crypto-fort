@@ -3,7 +3,7 @@ import { TbCopy } from "react-icons/tb";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sendTransaction } from "../../../api/transactionApi";
 import { formatBalance } from "../../component/format";
 
@@ -25,6 +25,13 @@ function ConfirmTransactionModal({
   const { toAddress, amount, totalCost, selectedToken } = useSelector(
     (state: RootState) => state.transaction,
   );
+
+  useEffect(() => {
+  if (open) {
+    setLoading(false);
+  }
+}, [open]);
+
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -39,7 +46,29 @@ function ConfirmTransactionModal({
     }
   };
 
+ const getFromAddress = (): string => {
+  if (!activeWallet) return "";
+
+  switch (selectedToken?.toLowerCase()) {
+    case "eth":
+    case "usdt":
+    case "bnb":
+      return activeWallet.eth_address || "";
+
+    case "trc20":
+      return activeWallet.tron_address || "";
+
+    case "btc":
+      return activeWallet.btc_address || "";
+
+    default:
+      return activeWallet.eth_address || "";
+  }
+};
+
   const handleConfirmSend = async () => {
+    if (loading) return;
+
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
       return;
@@ -55,28 +84,59 @@ function ConfirmTransactionModal({
         type: selectedToken as any, 
       });
 
-      if (res.success) {
-        toast.success(res.message || "Transaction sent");
-        onClose();
-      } else {
-        const errorMsg =
-          (res as any)?.error ||
-          (res as any)?.data?.error ||
-          res.message ||
-          "Transaction failed";
+    if (res.success) {
+  toast.success(res.message || "Transaction sent");
+  onClose();
+} else {
+  let errorMsg = "Transaction failed";
 
-        toast.error(errorMsg);
-      }
+  // ✅ Laravel validation errors
+ if ((res as any)?.errors) {
+  const errorsObj = (res as any).errors;
+
+  const firstKey = Object.keys(errorsObj)[0];
+  if (firstKey && errorsObj[firstKey]?.length > 0) {
+    errorMsg = errorsObj[firstKey][0];
+  }
+}
+  // ✅ direct message
+  else if (res?.message) {
+    errorMsg = res.message;
+  }
+
+  toast.error(errorMsg);
+  setLoading(false);
+}
     } catch (error: any) {
-      const errorMsg =
-        error?.response?.data?.error ||
-        error?.message ||
-        "Something went wrong";
+  let errorMsg = "Something went wrong";
 
-      toast.error(errorMsg);
-    } finally {
-      setLoading(false);
+  // ✅ CASE 1: direct error.errors (YOUR CASE)
+  if (error?.errors) {
+    const firstKey = Object.keys(error.errors)[0];
+    if (error.errors[firstKey]?.length > 0) {
+      errorMsg = error.errors[firstKey][0];
     }
+  }
+
+  // ✅ CASE 2: axios error.response.data.errors
+  else if (error?.response?.data?.errors) {
+    const firstKey = Object.keys(error.response.data.errors)[0];
+    if (error.response.data.errors[firstKey]?.length > 0) {
+      errorMsg = error.response.data.errors[firstKey][0];
+    }
+  }
+
+  // ✅ CASE 3: message fallback
+  else if (error?.response?.data?.message) {
+    errorMsg = error.response.data.message;
+  }
+  else if (error?.message) {
+    errorMsg = error.message;
+  }
+
+  toast.error(errorMsg);
+}
+ setLoading(false);
   };
 
   if (!open) return null;
@@ -116,9 +176,9 @@ function ConfirmTransactionModal({
               <p className="text-white text-base sm:text-lg font-medium">From:</p>
 
               <div className="flex items-center gap-3 text-[#7A7D83] text-base sm:text-lg">
-                {shortenAddress(activeWallet?.eth_address || "")}
+                {shortenAddress(getFromAddress())}
                 <TbCopy
-                  onClick={() => handleCopy(activeWallet?.eth_address || "")}
+                  onClick={() => handleCopy(getFromAddress())}
                   className="cursor-pointer hover:text-white"
                 />
               </div>
@@ -156,6 +216,7 @@ function ConfirmTransactionModal({
             </p>
           </div>
           <button
+          type="button"
             onClick={handleConfirmSend}
             disabled={loading}
             className="w-full mt-[30px] py-3 sm:py-[18px] rounded-xl bg-[#25C866] text-white font-bold hover:opacity-90 transition cursor-pointer text-base sm:text-lg disabled:opacity-70"

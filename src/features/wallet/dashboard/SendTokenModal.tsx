@@ -122,6 +122,10 @@ useEffect(() => {
     onNext();
   };
 
+  const isDisabled =
+  gasLoading ||
+  !gasFee;
+
   if (!open) return null;
 
   return (
@@ -171,6 +175,7 @@ useEffect(() => {
                   Ethereum
                 </option>
 
+                {/* <option value="trx" className="bg-[#161F37] text-white"> */}
                 <option value="trc20" className="bg-[#161F37] text-white">
                   TRC-20
                 </option>
@@ -279,11 +284,11 @@ useEffect(() => {
 
             <button
               onClick={handleSend}
-              disabled={false}
+              disabled={isDisabled}
               className="w-full mt-[30px] py-3 sm:py-[18px] rounded-xl bg-[#25C866] 
-          text-white font-bold transition cursor-pointer text-base sm:text-lg
-          flex items-center justify-center gap-2
-          disabled:opacity-70 disabled:cursor-not-allowed"
+            text-white font-bold transition cursor-pointer text-base sm:text-lg
+              flex items-center justify-center gap-2
+              disabled:opacity-70 disabled:cursor-not-allowed"
             >
               Send Token
             </button>
