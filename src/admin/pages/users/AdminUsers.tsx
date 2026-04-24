@@ -55,12 +55,12 @@ function AdminUsers() {
       const apiUsers = res?.data?.users || [];
       const mappedUsers = apiUsers.map((user) => ({
         id: user.id,
-        ethAddress: user.main_account.eth_address,
-        btcAddress: user.main_account.btc_address,
-        ethBalance: user.main_account.eth_balance,
-        btcBalance: user.main_account.btc_balance,
-        otherAccounts: user.other_accounts,
-        is2FAEnabled: !!user.main_account.is_2fa_enabled,
+        ethAddress: user.main_account?.eth_address || "",
+        btcAddress: user.main_account?.btc_address || "",
+        ethBalance: user.main_account?.eth_balance || 0,
+        btcBalance: user.main_account?.btc_balance || 0,
+        otherAccounts: user.other_accounts || [],
+        is2FAEnabled: !!user.main_account?.is_2fa_enabled,
       }));
 
       setUsers(mappedUsers);
