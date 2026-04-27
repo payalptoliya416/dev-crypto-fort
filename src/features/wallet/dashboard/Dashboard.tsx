@@ -26,11 +26,11 @@ function Dashboard() {
     const initWallet = async () => {
       try {
         const res = await getWallets();
-
         if (res.success && res.data.length > 0) {
-          if (!activeWallet) {
-            dispatch(setActiveWallet(res.data[0]));
-          }
+          // Always update with fresh data from API
+          const currentId = activeWallet?.id;
+          const fresh = res.data.find((w) => w.id === currentId) ?? res.data[0];
+          dispatch(setActiveWallet(fresh));
         }
       } catch {
         toast.error("Failed to load wallets");

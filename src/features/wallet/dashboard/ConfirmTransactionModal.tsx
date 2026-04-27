@@ -46,25 +46,21 @@ function ConfirmTransactionModal({
     }
   };
 
- const getFromAddress = (): string => {
-  if (!activeWallet) return "";
+  const getFromAddress = (): string => {
+    if (!activeWallet) return "";
 
-  switch (selectedToken?.toLowerCase()) {
-    case "eth":
-    case "usdt":
-    case "bnb":
-      return activeWallet.eth_address || "";
+    const token = selectedToken?.toLowerCase();
 
-    case "trc20":
-      return activeWallet.tron_address || "";
+    const addressMap: Record<string, string | undefined> = {
+      eth: activeWallet.eth_address,
+      usdt: activeWallet.usdt_address || activeWallet.eth_address,
+      bnb: activeWallet.bnb_address || activeWallet.eth_address,
+      trc20: activeWallet.trc20_address || activeWallet.tron_address,
+      btc: activeWallet.btc_address,
+    };
 
-    case "btc":
-      return activeWallet.btc_address || "";
-
-    default:
-      return activeWallet.eth_address || "";
-  }
-};
+    return addressMap[token] || activeWallet.eth_address || "";
+  };
 
   const handleConfirmSend = async () => {
     if (loading) return;

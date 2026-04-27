@@ -5,12 +5,19 @@ export interface Wallet {
   eth_address: string;
   btc_address?: string;
   tron_address?: string;
+  bnb_address?: string;
+  usdt_address?: string;
+  trc20_address?: string;
   label: string | null;
   status: string;
   created_at: string;
   eth_balance: string;
   btc_balance: string;
   usdt_balance: string;
+  trc20_balance?: string;
+  bnb_balance?: string;
+  trx_balance?: string;
+  bep20_balance?: string;
 }
 
 export interface WalletListResponse {

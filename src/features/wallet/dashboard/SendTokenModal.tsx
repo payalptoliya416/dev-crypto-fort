@@ -1,13 +1,14 @@
 import { IoClose } from "react-icons/io5";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { getGasFee } from "../../../api/transactionApi";
 import Loader from "../../component/Loader";
-import { formatBalance } from "../../component/format";
 import { setTransactionData } from "../../../redux/transactionSlice";
 // import { HiOutlineQrCode } from "react-icons/hi2";
 // import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
+import type { RootState } from "../../../redux/store/store";
+import { formatBalance } from "../../component/format";
 interface SendTokenModalProps {
   open: boolean;
   onClose: () => void;
@@ -15,9 +16,9 @@ interface SendTokenModalProps {
 }
 
 function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
-  // const activeWallet = useSelector(
-  //   (state: RootState) => state.activeWallet.wallet,
-  // );
+  const activeWallet = useSelector(
+    (state: RootState) => state.activeWallet.wallet,
+  );
   const dispatch = useDispatch();
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -30,19 +31,21 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     amount?: string;
     selectedToken?: string;
   }>({});
-  const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
+  // const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
+  const gasFeeInEth = gasFee ? Number(gasFee) : 0;
   const totalCost = Number(amount || 0) + gasFeeInEth;
+  const [balance, setBalance] = useState("0");
 
-useEffect(() => {
-  if (!open) {
-    setToAddress("");
-    setAmount("");
-    setSelectedToken("");
-    setErrors({});
-    setGasFee(null);
-    setShowQR(false);
-  }
-}, [open]);
+  useEffect(() => {
+    if (!open) {
+      setToAddress("");
+      setAmount("");
+      setSelectedToken("");
+      setErrors({});
+      setGasFee(null);
+      setShowQR(false);
+    }
+  }, [open]);
 
   //   useEffect(() => {
   //   if (!open) return;
@@ -51,6 +54,21 @@ useEffect(() => {
   //     setToAddress(activeWallet.eth_address);
   //   }
   // }, [open, activeWallet]);
+
+  useEffect(() => {
+    if (!selectedToken || !activeWallet) return;
+
+    const balanceMap: Record<string, string | undefined> = {
+      eth: activeWallet.eth_balance,
+      btc: activeWallet.btc_balance,
+      usdt: activeWallet.usdt_balance,
+      trc20: activeWallet.trc20_balance,
+      bnb: activeWallet.bnb_balance,
+      trx: activeWallet.trx_balance,
+    };
+
+     setBalance(balanceMap[selectedToken] ?? "0");
+  }, [selectedToken, activeWallet]);
 
   useEffect(() => {
     if (!open) return;
@@ -105,7 +123,7 @@ useEffect(() => {
   const handleSend = () => {
     if (!validate()) return;
 
-    const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
+    const gasFeeInEth = gasFee ? Number(gasFee) : 0;
     const totalCost = Number(amount || 0) + gasFeeInEth;
 
     dispatch(
@@ -196,7 +214,14 @@ useEffect(() => {
                 <p className="text-[#ef4343] text-sm mt-1">{errors.selectedToken}</p>
               )}
             </div>
-
+            <div className="flex justify-between text-base text-[#7A7D83] mb-5 flex-wrap">
+              <p>Available Balance</p>
+              <p>
+                {selectedToken
+                  ? `${balance} ${selectedToken.toUpperCase()}`
+                  : "0.00"}
+              </p>
+            </div>
             <div className="mb-5">
               <label className="text-base sm:text-lg text-[#7A7D83] mb-[10px] block">
                 Recipient Address
@@ -236,7 +261,7 @@ useEffect(() => {
                 Amount
               </label>
 
-              <input
+              {/* <input
                 value={amount}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -253,7 +278,41 @@ useEffect(() => {
                 inputMode="decimal"
                 className={`w-full bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none
     ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
-              />
+              /> */}
+               <div className="flex gap-2">
+                  <input
+                    value={amount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (!/^\d*\.?\d*$/.test(value)) return;
+
+                      setAmount(value);
+
+                      if (errors.amount) {
+                        setErrors((prev) => ({ ...prev, amount: undefined }));
+                      }
+                    }}
+                    placeholder="Amount"
+                    inputMode="decimal"
+                    className={`flex-1 bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none
+                    ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!selectedToken) return; 
+                    let max = Number(balance);
+
+                    setAmount(max > 0 ? max.toString() : "0");
+                  }}
+                  disabled={!selectedToken}
+                    className="px-4 py-2 bg-[#202A43] border border-[#3C3D47] text-white rounded-xl hover:bg-[#2a3555] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    MAX
+                  </button>
+                </div>
 
               {errors.amount && (
                 <p className="text-[#ef4343] text-sm mt-1">{errors.amount}</p>
@@ -268,7 +327,7 @@ useEffect(() => {
                     <Loader />
                   </div>
                 ) : (
-                  <p> {gasFee ? `${formatBalance(gasFee)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : "--"}</p>
+                  <p> {gasFee ? `${gasFee} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : "--"}</p>
                 )}
               </div>
 
@@ -279,6 +338,11 @@ useEffect(() => {
                     ? `${formatBalance(totalCost)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`
                     : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
                 </p>
+                {/* <p>
+                {amount && gasFee
+                  ? `${totalCost} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`
+                  : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
+              </p> */}
               </div>
             </div>
 
