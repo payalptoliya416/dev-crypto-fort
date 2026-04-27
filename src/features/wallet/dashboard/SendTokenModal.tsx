@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { getGasFee } from "../../../api/transactionApi";
 import Loader from "../../component/Loader";
 import { setTransactionData } from "../../../redux/transactionSlice";
-// import { HiOutlineQrCode } from "react-icons/hi2";
-// import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 import type { RootState } from "../../../redux/store/store";
 import { formatBalance } from "../../component/format";
@@ -31,6 +29,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     amount?: string;
     selectedToken?: string;
   }>({});
+
   // const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
   const gasFeeInEth = gasFee ? Number(gasFee) : 0;
   const totalCost = Number(amount || 0) + gasFeeInEth;
@@ -46,14 +45,6 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       setShowQR(false);
     }
   }, [open]);
-
-  //   useEffect(() => {
-  //   if (!open) return;
-
-  //   if (activeWallet?.eth_address) {
-  //     setToAddress(activeWallet.eth_address);
-  //   }
-  // }, [open, activeWallet]);
 
   useEffect(() => {
     if (!selectedToken || !activeWallet) return;
@@ -111,6 +102,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   // const handleShowQR = () => {
   //   if (!toAddress.trim()) {
   //     toast.error("Please enter recipient address first");
@@ -237,8 +229,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                     }
                   }}
                   placeholder="Enter recipient address"
-                  className={`flex-1 min-w-0 bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none
-  ${errors.toAddress ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
+                  className={`flex-1 min-w-0 bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none ${errors.toAddress ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
                 />
                 {/* <button
                   type="button"
@@ -276,8 +267,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                 }}
                 placeholder="Amount"
                 inputMode="decimal"
-                className={`w-full bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none
-    ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
+                className={`w-full bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
               /> */}
                <div className="flex gap-2">
                   <input

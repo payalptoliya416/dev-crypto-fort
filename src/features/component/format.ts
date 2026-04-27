@@ -25,13 +25,13 @@ export const formatBalance = (
   const num = Number(balance);
 
   if (num < 0.000001) {
-    return num.toFixed(10).replace(/\.?0+$/, ''); 
+    return num.toFixed(8).replace(/\.?0+$/, ''); 
   }
   
   if (num < 1) {
     return num.toFixed(8).replace(/\.?0+$/, '');
   }
-  
+
   return num.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 8,

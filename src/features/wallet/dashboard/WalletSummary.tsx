@@ -50,7 +50,7 @@ export default function WalletSummary() {
     if (cachedPrices) {
       try {
         const parsedPrices: Record<string, any> = JSON.parse(cachedPrices);
-        if (parsedPrices[currency]) {
+        if (parsedPrices[currency]?.price) {
           setEthPrice(parseFloat(parsedPrices[currency].price) || 0);
           setIsPriceLoading(false);
           return;
@@ -64,31 +64,27 @@ export default function WalletSummary() {
       setIsPriceLoading(true);
       try {
         const response = await getPrices({
-          symbols: "BTC,ETH,USDT,BNB,TRX",
-          base: "USD, EUR, GBP, AED, AUD, CAD, NOK, NZD, CHF, BTC",
+          symbols: "ETH",
+          base: currency,
         });
 
         if (
           response.success &&
           response.prices &&
-          Array.isArray(response.prices)
+          Array.isArray(response.prices) &&
+          response.prices.length > 0
         ) {
-          // Store all prices in localStorage
-          const allPrices: Record<string, any> = {};
-          response.prices.forEach(
-            (priceObj: { symbol: string; base: string; price: string }) => {
-              allPrices[priceObj.base] = priceObj;
-            },
-          );
+          const price = parseFloat(response.prices[0].price) || 0;
+          setEthPrice(price);
 
-          localStorage.setItem(
-            `ethPricesByCurrency`,
-            JSON.stringify(allPrices),
-          );
-
-          // Set the price for the current currency
-          const currentCurrencyPrice = allPrices[currency]?.price || 0;
-          setEthPrice(parseFloat(currentCurrencyPrice) || 0);
+          // cache karo
+          const cachedPrices: Record<string, any> = {};
+          try {
+            const existing = localStorage.getItem("ethPricesByCurrency");
+            if (existing) Object.assign(cachedPrices, JSON.parse(existing));
+          } catch {}
+          cachedPrices[currency] = { price: response.prices[0].price };
+          localStorage.setItem("ethPricesByCurrency", JSON.stringify(cachedPrices));
         } else {
           setEthPrice(0);
         }
