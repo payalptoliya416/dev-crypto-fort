@@ -16,6 +16,7 @@ import { TbCopy } from "react-icons/tb";
 interface TransactionRow {
   name: string;
   eth_address: string;
+  hash: string; 
   amount: string;
   type: "Sent" | "Received";
   status: "Confirmed" | "Pending" | "Failed";
@@ -71,6 +72,8 @@ function TransactionPage() {
 
             eth_address:
               tx.transaction_type === "Send" ? tx.to_address : tx.from_address,
+            
+            hash: tx.hash, 
 
             amount: `${tx.amount} ${symbol}`,
 
@@ -107,21 +110,35 @@ function TransactionPage() {
       header: "Name",
       key: "name",
       render: (row) => (
-        <div className="flex items-center gap-[10px]">
+        <div className="flex items-start md:items-center gap-[10px]">
           <img src={row.icon} alt="icon" className="w-8 h-8" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-[#7A7D83]">
-                {row.eth_address.slice(0, 6)}...{row.eth_address.slice(-4)}
-              </p>
+         <div className="flex flex-col gap-1">
+          {/* Address */}
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-[#7A7D83]">
+              Addr:  {row.eth_address.slice(0, 6)}...{row.eth_address.slice(-4)}
+            </p>
+            <TbCopy
+              className="text-[#7A7D83] cursor-pointer hover:text-white"
+              size={14}
+              onClick={() => handleCopy(row.eth_address)}
+            />
+          </div>
 
-              <TbCopy 
-                className="text-[#7A7D83] cursor-pointer hover:text-white transition"
-                size={16}
-                onClick={() => handleCopy(row.eth_address)}
-              />
-            </div>
+          {/* Hash */}
+          <div className="flex items-center gap-2">
+          <p className="text-xs text-[#7A7D83]">
+            Tx: {row.hash.slice(0, 6)}...{row.hash.slice(-4)}
+          </p>
+          <TbCopy
+            className="text-[#7A7D83] cursor-pointer hover:text-white"
+            size={14}
+            onClick={() => handleCopy(row.hash)} // ✅ FIX
+          />
+        </div>
+      </div>
           </div>
         </div>
       ),

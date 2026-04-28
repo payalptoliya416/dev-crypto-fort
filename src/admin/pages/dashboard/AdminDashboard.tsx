@@ -4,6 +4,7 @@ import CommonTable from "../../components/CommonTable";
 import { FiSearch } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { getAdminTransactions } from "../../adminapi/adminTransactions";
+import { TbCopy } from "react-icons/tb";
 
 interface Transaction {
   id: number;
@@ -87,9 +88,10 @@ function AdminDashboard() {
       accessor: (row) => (
         <span
           onClick={() => handleCopy(row.hash)}
-          className="text-xs cursor-pointer hover:text-[#25C866]"
+          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2 items-center"
         >
           {truncateAddress(row.hash)}
+           <TbCopy/>
         </span>
       ),
     },
@@ -98,9 +100,10 @@ function AdminDashboard() {
       accessor: (row) => (
         <span
           onClick={() => handleCopy(row.fromAddress)}
-          className="text-xs cursor-pointer hover:text-[#25C866]"
+          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2"
         >
           {truncateAddress(row.fromAddress)}
+           <TbCopy/>
         </span>
       ),
     },
@@ -109,9 +112,10 @@ function AdminDashboard() {
       accessor: (row) => (
         <span
           onClick={() => handleCopy(row.toAddress)}
-          className="text-xs cursor-pointer hover:text-[#25C866]"
+          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2"
         >
           {truncateAddress(row.toAddress)}
+           <TbCopy/>
         </span>
       ),
     },
@@ -152,15 +156,12 @@ function AdminDashboard() {
   return (
     <div>
       <div className="bg-[#16233A] border border-[#24324D] shadow-lg rounded-[10px]">
-        {/* Header */}
         <div className="sm:flex justify-between items-center p-5 border-b border-bordercolor flex-wrap sm:gap-4">
           <h3 className="text-lg font-semibold text-white mb-3 sm:mb-0">
             Transactions History
           </h3>
-
           <div className="relative">
             <FiSearch className="absolute left-3 top-2.5 text-gray-400" />
-
             <input
               type="search"
               value={search}
@@ -173,8 +174,6 @@ function AdminDashboard() {
             />
           </div>
         </div>
-
-        {/* Table */}
         <CommonTable
           columns={columns}
           data={data}

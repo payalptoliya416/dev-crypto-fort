@@ -115,7 +115,6 @@ function CommonTable<T extends { id: number | string }>({
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-[#24324D] bg-[#161F37]">
-        {/* Page Info */}
         <span className="text-sm text-gray-400 text-center sm:text-left">
           Page {page} of {lastPage}
         </span>

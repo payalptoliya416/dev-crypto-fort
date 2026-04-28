@@ -19,7 +19,6 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
       {/* Desktop Table */}
       <div className="hidden md:block overflow-hidden rounded-xl border border-[#3C3D47]">
         <table className="w-full text-left">
-          {/* Header */}
           <thead className="bg-[#285AD71F]">
             <tr>
               <th className="text-[#F4F4F5] text-sm px-5 py-[19px] font-normal">
@@ -34,14 +33,12 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
             </tr>
           </thead>
 
-          {/* Body */}
           <tbody>
             {assets.map((asset, index) => (
               <tr
                 key={index}
                 className="border-t border-[#3C3D47] hover:bg-[#18233D] transition odd:bg-[#161F37] even:bg-[#202A43]"
               >
-                {/* Name */}
                 <td className="py-[13px] px-5 flex items-center gap-[10px]">
                   <img src={asset.icon} alt="icon-img" />
 
@@ -55,12 +52,10 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
                   </div>
                 </td>
 
-                {/* Price */}
                 <td className="py-[13px] px-5 text-[#7A7D83] text-base font-normal text-right">
                   {asset.price}
                 </td>
 
-                {/* Change */}
                 <td className="py-[13px] px-5 text-right w-36">
                   <span
                     className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex justify-center items-center w-full max-w-[65px] gap-[5px]
@@ -91,7 +86,6 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
             key={index}
             className="border border-[#3C3D47] p-4 bg-[#161F37]"
           >
-            {/* Top Row */}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <img src={asset.icon} alt="icon" />
@@ -101,8 +95,6 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
                   <p className="text-xs text-[#7A7D83]">{asset.symbol}</p>
                 </div>
               </div>
-
-              {/* Change Badge */}
               <span
                 className={`inline-flex items-center gap-[5px] px-[10px] py-[6px] rounded-[5px] text-sm font-medium
                   ${
@@ -120,7 +112,6 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
               </span>
             </div>
 
-            {/* Price Row */}
             <div className="flex justify-between mt-3 text-sm">
               <p className="text-[#7A7D83]">Last Price</p>
               <p className="text-white">{asset.price}</p>

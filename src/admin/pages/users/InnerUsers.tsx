@@ -95,7 +95,6 @@ function InnerUsers() {
   return (
     <div>
       <div className="bg-[#13213A] border border-[#24324D] rounded-lg overflow-hidden">
-        {/* Header */}
         <div className="flex justify-between items-center p-5 border-b border-[#24324D] flex-wrap gap-4">
           <h3 className="text-white text-lg font-semibold">User Wallets</h3>
 

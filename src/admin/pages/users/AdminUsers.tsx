@@ -175,7 +175,6 @@ function AdminUsers() {
   return (
     <div>
       <div className="bg-[#13213A] border border-[#24324D] rounded-lg overflow-hidden">
-        {/* Header */}
         <div className="flex justify-between items-center p-5 border-b border-[#24324D] flex-wrap gap-4">
           <h3 className="text-white text-lg font-semibold">Active Clients</h3>
 
@@ -195,7 +194,6 @@ function AdminUsers() {
           </div>
         </div>
 
-        {/* Table */}
         <CommonTable
           columns={columns}
           data={users}
@@ -236,13 +234,13 @@ function AdminUsers() {
                   onClick={confirmReset2FA}
                   disabled={confirmLoading}
                   className={`px-4 py-2 rounded-lg font-semibold transition
-    ${
-      confirmLoading
-        ? "bg-green-400 cursor-not-allowed opacity-70"
-        : "bg-[#25C866] hover:bg-green-500 cursor-pointer"
-    }
-    text-white`}
-                >
+                  ${
+                    confirmLoading
+                      ? "bg-green-400 cursor-not-allowed opacity-70"
+                      : "bg-[#25C866] hover:bg-green-500 cursor-pointer"
+                  }
+                  text-white`}
+                  >
                   {confirmLoading ? "Resetting..." : "Confirm"}
                 </button>
               </div>

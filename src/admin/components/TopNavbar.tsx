@@ -142,19 +142,15 @@ function TopNavbar({ toggleSidebar }: Props) {
               </div>
             </div>
 
-            {/* Dropdown */}
             {openMenu && (
               <div
                 ref={dropdownRef}
-                className="absolute right-0 top-14 w-56 bg-[#0F1A2F] border border-[#24324D] rounded-xl shadow-2xl overflow-hidden z-50"
-              >
-                {/* User info */}
+                className="absolute right-0 top-14 w-56 bg-[#0F1A2F] border border-[#24324D] rounded-xl shadow-2xl overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-[#24324D]">
                   <p className="text-white text-sm font-semibold">User</p>
                   <p className="text-gray-400 text-xs">Administrator</p>
                 </div>
 
-                {/* Menu */}
                 <div className="py-2">
                   <button
                     onClick={() => {
@@ -167,7 +163,6 @@ function TopNavbar({ toggleSidebar }: Props) {
                   </button>
                 </div>
 
-                {/* Logout */}
                 <div className="border-t border-[#24324D]">
                   <button
                     onClick={handleLogout}
