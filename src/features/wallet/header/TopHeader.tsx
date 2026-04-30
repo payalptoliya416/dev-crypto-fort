@@ -1,4 +1,4 @@
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo_svg.svg";
 import logo2 from "@/assets/logo2.png";
 import avtar from "@/assets/avtar.png";
 import { Link, useNavigate } from "react-router-dom";
@@ -106,7 +106,7 @@ export default function TopHeader() {
             <img
               src={isSmall ? logo2 : logo}
               alt="Secure Wallet"
-              className="pe-1"
+              className="pe-1 w-full max-w-[200px]"
             />
           </Link>
           <Tooltip.Provider delayDuration={200}>

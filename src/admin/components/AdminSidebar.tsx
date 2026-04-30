@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo_svg.svg";
 import { FiRepeat, FiUsers } from "react-icons/fi";
 
 function AdminSidebar() {
   return (
     <div className="w-64 h-full bg-[#0F1E38] border-r border-[#24324D] flex flex-col">
       <div className="px-6 py-[18.5px] border-b border-[#24324D]">
-        <img src={logo} alt="logo" className="w-36" />
+        <img src={logo} alt="logo" className="w-full max-w-[200px]" />
       </div>
 
       <nav className="flex flex-col gap-2 mt-6 px-4">

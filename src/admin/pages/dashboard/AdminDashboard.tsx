@@ -100,7 +100,7 @@ function AdminDashboard() {
       accessor: (row) => (
         <span
           onClick={() => handleCopy(row.fromAddress)}
-          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2"
+          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2 items-center"
         >
           {truncateAddress(row.fromAddress)}
            <TbCopy/>
@@ -112,7 +112,7 @@ function AdminDashboard() {
       accessor: (row) => (
         <span
           onClick={() => handleCopy(row.toAddress)}
-          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2"
+          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2 items-center"
         >
           {truncateAddress(row.toAddress)}
            <TbCopy/>

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo_svg.svg";
 import logo2 from "@/assets/logo2.png";
 import { useEffect, useState } from "react";
 
@@ -11,7 +11,7 @@ type AppLogoProps = {
 
 function AppLogo({
   className = "",
-  imgClassName = "pe-1",
+  imgClassName = "pe-1 w-full max-w-[200px]",
 }: AppLogoProps) {
   const [isSmall, setIsSmall] = useState(window.innerWidth < 375);
   const token = localStorage.getItem("token");
