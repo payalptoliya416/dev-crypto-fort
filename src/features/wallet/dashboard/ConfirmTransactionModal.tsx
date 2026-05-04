@@ -15,11 +15,13 @@ function shortenAddress(address: string) {
 interface ConfirmTransactionModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => Promise<void>;
 }
 
 function ConfirmTransactionModal({
   open,
   onClose,
+  onSuccess,
 }: ConfirmTransactionModalProps) {
   // gasFee
   const { toAddress, amount, totalCost, selectedToken } = useSelector(
@@ -83,6 +85,7 @@ function ConfirmTransactionModal({
     if (res.success) {
   toast.success(res.message || "Transaction sent");
   onClose();
+  await onSuccess?.();
 } else {
   let errorMsg = "Transaction failed";
 

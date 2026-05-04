@@ -8,9 +8,10 @@ import { swapToken } from "../../../api/transactionApi";
 interface Props {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => Promise<void>;
 }
 
-function SwapModal({ open, onClose }: Props) {
+function SwapModal({ open, onClose, onSuccess }: Props) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -92,6 +93,8 @@ function SwapModal({ open, onClose }: Props) {
       if (res.success) {
         toast.success(res.message || "Swap successful");
         resetForm();
+        onClose();
+        await onSuccess?.();
       }
     } catch (error: any) {
       let message = "Something went wrong. Please try again.";

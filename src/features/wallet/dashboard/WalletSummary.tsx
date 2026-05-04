@@ -19,7 +19,7 @@ import { setActiveWallet } from "../../../redux/activeWalletSlice";
 import Loader from "../../component/Loader";
 import { useRef } from "react";
 
-export default function WalletSummary() {
+export default function WalletSummary({ refreshWallets }: { refreshWallets: () => Promise<void> }) {
   const [open, setOpen] = useState(false);
   const [wallets, setWallets] = useState<Wallet[]>([]);
 
@@ -270,6 +270,7 @@ export default function WalletSummary() {
       <ConfirmTransactionModal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
+        onSuccess={refreshWallets}
       />
       {/* ---------------------- */}
       <ReceiveTokenModal
@@ -277,7 +278,7 @@ export default function WalletSummary() {
         onClose={() => setReceiveOpen(false)}
       />
       {/* ------------ */}
-      <SwapModal open={swapOpen} onClose={() => setSwapOpen(false)} />
+      <SwapModal open={swapOpen} onClose={() => setSwapOpen(false)} onSuccess={refreshWallets} />
     </>
   );
 }
