@@ -97,6 +97,8 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       newErrors.amount = "Amount is required";
     } else if (Number(amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
+    }else if (Number(amount) + gasFeeInEth > Number(balance)) {
+    newErrors.amount = "Insufficient balance (including gas fee)";
     }
 
     setErrors(newErrors);
@@ -132,9 +134,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     onNext();
   };
 
-  const isDisabled =
-  gasLoading ||
-  !gasFee;
+  const isDisabled = gasLoading || gasFee === null;
 
   if (!open) return null;
 
@@ -291,11 +291,19 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      if (!selectedToken) return; 
-                    let max = Number(balance);
+                  onClick={() => {
+                    if (!selectedToken) return;
 
-                    setAmount(max > 0 ? max.toString() : "0");
+                    const bal = Number(balance);
+                    const gas = gasFee ? Number(gasFee) : 0;
+
+                    // subtract gas fee from balance
+                    const maxSendable = bal - gas;
+
+                    // avoid negative values
+                    const finalAmount = maxSendable > 0 ? maxSendable : 0;
+
+                    setAmount(finalAmount.toString());
                   }}
                   disabled={!selectedToken}
                     className="px-4 py-2 bg-[#202A43] border border-[#3C3D47] text-white rounded-xl hover:bg-[#2a3555] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
