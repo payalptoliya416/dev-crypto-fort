@@ -5,6 +5,7 @@ import d3 from "@/assets/d3.png";
 import d9 from "@/assets/d9.png";
 import up from "@/assets/up.svg";
 import CommonTable, { type Column } from "../../component/CommonTable";
+import { formatBalance } from "../../component/format";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import Loader from "../../component/Loader";
@@ -177,11 +178,7 @@ const assetList: Asset[] = Object.values(COIN_CONFIG).map((coin) => ({
 
         return (
           <p className="text-[#7A7D83] text-base font-normal">
-            $
-            {price.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            ${formatBalance(price, { isFiat: true })}
           </p>
         );
       },

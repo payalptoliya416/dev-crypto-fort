@@ -250,11 +250,7 @@ function Balance() {
 
         return (
           <p className="text-[#7A7D83] text-base font-normal">
-            $
-            {total.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            ${formatBalance(total, { isFiat: true })}
           </p>
         );
       },

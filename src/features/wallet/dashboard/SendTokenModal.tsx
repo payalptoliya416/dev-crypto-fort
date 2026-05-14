@@ -22,7 +22,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   const [amount, setAmount] = useState("");
   const [selectedToken, setSelectedToken] = useState("");
   const [gasLoading, setGasLoading] = useState(false);
-  const [gasFee, setGasFee] = useState<string | null>(null);
+  const [gasFeeEth, setGasFeeEth] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
   const [errors, setErrors] = useState<{
     toAddress?: string;
@@ -30,10 +30,23 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     selectedToken?: string;
   }>({});
 
-  // const gasFeeInEth = gasFee ? Number(gasFee) / 1_000_000_000 : 0;
-  const gasFeeInEth = gasFee ? Number(gasFee) : 0;
+  const gasFeeInEth = gasFeeEth ? Number(gasFeeEth) : 0;
   const totalCost = Number(amount || 0) + gasFeeInEth;
   const [balance, setBalance] = useState("0");
+
+  const nativeTokenSymbols: Record<string, string> = {
+    eth: "ETH",
+    trc20: "TRX",
+    usdt: "ETH",
+    btc: "BTC",
+    bnb: "BNB",
+    trx: "TRX",
+  };
+
+  const selectedNativeSymbol =
+    selectedToken && nativeTokenSymbols[selectedToken]
+      ? nativeTokenSymbols[selectedToken]
+      : "ETH";
 
   useEffect(() => {
     if (!open) {
@@ -41,7 +54,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       setAmount("");
       setSelectedToken("");
       setErrors({});
-      setGasFee(null);
+      setGasFeeEth(null);
       setShowQR(false);
     }
   }, [open]);
@@ -62,15 +75,26 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   }, [selectedToken, activeWallet]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setGasFeeEth(null);
+      return;
+    }
+
+    if (!selectedToken) {
+      setGasFeeEth(null);
+      return;
+    }
 
     const fetchGasFee = async () => {
       try {
         setGasLoading(true);
 
-        const res = await getGasFee();
+        const res = await getGasFee({ token: selectedToken, amount });
         if (res.success && res.data) {
-          setGasFee(res.data.gas_eth);
+          const gasEth =
+            res.data.gas_fee_eth ?? res.data.gas_eth ?? "0";
+
+          setGasFeeEth(gasEth);
         }
       } catch (e) {
         console.error("Failed to get gas fee");
@@ -79,8 +103,12 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       }
     };
 
-    fetchGasFee();
-  }, [open]);
+    const timer = window.setTimeout(() => {
+      fetchGasFee();
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [open, selectedToken, amount]);
 
   const validate = () => {
     const newErrors: typeof errors = {};
@@ -98,7 +126,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     } else if (Number(amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
     }else if (Number(amount) + gasFeeInEth > Number(balance)) {
-    newErrors.amount = "Insufficient balance (including gas fee)";
+      newErrors.amount = "Insufficient balance for gas fee";
     }
 
     setErrors(newErrors);
@@ -117,14 +145,14 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   const handleSend = () => {
     if (!validate()) return;
 
-    const gasFeeInEth = gasFee ? Number(gasFee) : 0;
+    const gasFeeInEth = gasFeeEth ? Number(gasFeeEth) : 0;
     const totalCost = Number(amount || 0) + gasFeeInEth;
 
     dispatch(
       setTransactionData({
         toAddress,
         amount,
-        gasFee: gasFee || "0",
+        gasFee: gasFeeEth || "0",
         totalCost: totalCost.toString(),
         selectedToken,
       }),
@@ -134,7 +162,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
     onNext();
   };
 
-  const isDisabled = gasLoading || gasFee === null;
+  const isDisabled = gasLoading || gasFeeEth === null;
 
   if (!open) return null;
 
@@ -292,20 +320,17 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                   <button
                     type="button"
                   onClick={() => {
-                    if (!selectedToken) return;
+                    if (!selectedToken || !gasFeeEth) return;
 
                     const bal = Number(balance);
-                    const gas = gasFee ? Number(gasFee) : 0;
+                    const gas = Number(gasFeeEth);
 
-                    // subtract gas fee from balance
                     const maxSendable = bal - gas;
-
-                    // avoid negative values
                     const finalAmount = maxSendable > 0 ? maxSendable : 0;
 
-                    setAmount(finalAmount.toString());
+                    setAmount(finalAmount > 0 ? formatBalance(finalAmount) : "0");
                   }}
-                  disabled={!selectedToken}
+                  disabled={!selectedToken || gasLoading || gasFeeEth === null}
                     className="px-4 py-2 bg-[#202A43] border border-[#3C3D47] text-white rounded-xl hover:bg-[#2a3555] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     MAX
@@ -319,28 +344,27 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
 
             <div className="mt-[25px] space-y-5 text-sm">
               <div className="flex justify-between text-white text-base sm:text-lg font-medium">
-                <p>Gas Fees</p>
+                <p>Gas Fee ({selectedNativeSymbol})</p>
                 {gasLoading ? (
                   <div className="w-10 h-5 overflow-hidden">
                     <Loader />
                   </div>
                 ) : (
-                  <p> {gasFee ? `${gasFee} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : "--"}</p>
+                  <p>
+                    {gasFeeEth
+                      ? `${formatBalance(gasFeeEth)} ${selectedNativeSymbol}`
+                      : "--"}
+                  </p>
                 )}
               </div>
 
               <div className="flex justify-between text-white text-base sm:text-lg font-medium">
                 <p>Total Cost</p>
                 <p>
-                  {amount && gasFee
+                  {amount && gasFeeEth
                     ? `${formatBalance(totalCost)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`
                     : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
                 </p>
-                {/* <p>
-                {amount && gasFee
-                  ? `${totalCost} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`
-                  : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
-              </p> */}
               </div>
             </div>
 

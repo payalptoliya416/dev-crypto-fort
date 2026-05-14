@@ -16,19 +16,33 @@
 // };
 
 export const formatBalance = (
-  balance: number | string | null | undefined
+  balance: number | string | null | undefined,
+  options?: { isFiat?: boolean }
 ): string => {
-  if (balance == null || isNaN(Number(balance)) || Number(balance) === 0) {
+  if (balance == null || isNaN(Number(balance))) {
     return "0.00";
   }
 
   const num = Number(balance);
 
-  if (num < 0.000001) {
-    return num.toFixed(8).replace(/\.?0+$/, ''); 
+  if (options?.isFiat) {
+    return num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
-  
-  if (num < 1) {
+
+  if (num === 0) {
+    return "0.00";
+  }
+
+  const absolute = Math.abs(num);
+
+  if (absolute < 0.000001) {
+    return num.toFixed(8).replace(/\.?0+$/, '');
+  }
+
+  if (absolute < 1) {
     return num.toFixed(8).replace(/\.?0+$/, '');
   }
 

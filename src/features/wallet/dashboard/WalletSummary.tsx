@@ -41,7 +41,7 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const ethBalanceNumber = Number(activeWallet?.eth_balance || 0);
   const totalValue = ethBalanceNumber * ethPrice;
   const formattedBalance = formatBalance(ethBalanceNumber);
-  const formattedTotal = formatBalance(totalValue);
+  const formattedTotal = formatBalance(totalValue, { isFiat: true });
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     // Check if prices are already stored in localStorage
@@ -211,8 +211,7 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
               ) : (
                 <>
                   <h2 className="text-[#25C866] text-3xl xl:text-5xl font-semibold mb-[15px]">
-                    {getSymbol(currency)}
-                    {formattedTotal?.toLocaleString()}
+                    {getSymbol(currency)}{formattedTotal}
                   </h2>
                   <div className="flex justify-between items-center flex-wrap gap-4">
                     <div className="flex items-center gap-[10px] text-white text-xl">
