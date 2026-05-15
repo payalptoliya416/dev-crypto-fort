@@ -18,6 +18,7 @@ interface CommonTableProps<T> {
   columns: Column<T>[];
   pageSizeOptions?: number[];
   defaultPageSize?: number;
+  onRowClick?: (row: T) => void;
 }
 
 function CommonTable<T>({
@@ -25,6 +26,7 @@ function CommonTable<T>({
   columns,
   pageSizeOptions = [10, 20, 30, 50],
   defaultPageSize = 10,
+  onRowClick,
 }: CommonTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
@@ -69,7 +71,10 @@ function CommonTable<T>({
             {paginatedData.map((row, index) => (
               <tr
                 key={index}
-                className="border-t border-[#3C3D47] hover:bg-[#18233D] transition odd:bg-[#161F37] even:bg-[#202A43]"
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                className={`border-t border-[#3C3D47] hover:bg-[#18233D] transition odd:bg-[#161F37] even:bg-[#202A43] ${
+                  onRowClick ? "cursor-pointer" : ""
+                }`}
               >
                 {columns.map((col, i) => (
                   <td
@@ -93,7 +98,10 @@ function CommonTable<T>({
         {paginatedData.map((row, index) => (
           <div
             key={index}
-            className="border border-[#3C3D47] p-4 bg-[#161F37]"
+            onClick={onRowClick ? () => onRowClick(row) : undefined}
+            className={`border border-[#3C3D47] p-4 bg-[#161F37] ${
+              onRowClick ? "cursor-pointer" : ""
+            }`}
           >
             {columns.map((col, i) => (
               <div key={i} className="flex justify-between mt-2">

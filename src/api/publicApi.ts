@@ -54,7 +54,8 @@ export async function publicApi<T>(
 }
 
 export interface GetPricesRequest {
-  symbols: string;
+  symbol?: string;
+  symbols?: string;
   base: string;
 }
 
@@ -71,8 +72,13 @@ export interface GetPricesResponse {
 }
 
 export async function getPrices(request: GetPricesRequest): Promise<GetPricesResponse> {
+  const body = {
+    base: request.base,
+    symbols: request.symbols ?? request.symbol,
+  };
+
   return publicApi<GetPricesResponse>("/get-prices", {
     method: "POST",
-    body: request,
+    body,
   });
 }

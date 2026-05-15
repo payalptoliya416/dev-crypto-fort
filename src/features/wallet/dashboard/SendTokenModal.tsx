@@ -2,6 +2,7 @@ import { IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { getGasFee } from "../../../api/transactionApi";
+import { getPrices } from "../../../api/publicApi";
 import Loader from "../../component/Loader";
 import { setTransactionData } from "../../../redux/transactionSlice";
 import QRCode from "react-qr-code";
@@ -11,9 +12,19 @@ interface SendTokenModalProps {
   open: boolean;
   onClose: () => void;
   onNext: () => void;
+  defaultSelectedToken?: string;
+  defaultAmount?: string;
+  dashboardMode?: boolean;
 }
 
-function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
+function SendTokenModal({
+  open,
+  onClose,
+  onNext,
+  defaultSelectedToken,
+  defaultAmount,
+  dashboardMode = false,
+}: SendTokenModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -33,6 +44,8 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   const gasFeeInEth = gasFeeEth ? Number(gasFeeEth) : 0;
   const totalCost = Number(amount || 0) + gasFeeInEth;
   const [balance, setBalance] = useState("0");
+  const [marketValue, setMarketValue] = useState<number | null>(null);
+  const [marketLoading, setMarketLoading] = useState(false);
 
   const nativeTokenSymbols: Record<string, string> = {
     eth: "ETH",
@@ -48,6 +61,27 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       ? nativeTokenSymbols[selectedToken]
       : "ETH";
 
+  const getApiSymbol = (token: string) => {
+    switch (token.toLowerCase()) {
+      case "btc":
+        return "BTC";
+      case "eth":
+        return "ETH";
+      case "usdt":
+        return "USDT";
+      case "bnb":
+        return "BNB";
+      case "trx":
+        return "TRX";
+      case "trc20":
+        return "TRC20";
+      default:
+        return "ETH";
+    }
+  };
+
+  const parsedAmount = Number(String(amount).replace(/[,\s]/g, "")) || 0;
+
   useEffect(() => {
     if (!open) {
       setToAddress("");
@@ -56,8 +90,39 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       setErrors({});
       setGasFeeEth(null);
       setShowQR(false);
+      return;
     }
-  }, [open]);
+
+    if (defaultSelectedToken) {
+      setSelectedToken(defaultSelectedToken);
+    }
+    if (defaultAmount) {
+      setAmount(defaultAmount);
+    }
+    setErrors({});
+    setShowQR(false);
+  }, [open, defaultSelectedToken, defaultAmount]);
+
+  useEffect(() => {
+    if (!open || !dashboardMode || !defaultAmount || !selectedToken || gasFeeEth === null) return;
+
+    const parsedDefaultAmount = Number(String(defaultAmount).replace(/[,\s]/g, "")) || 0;
+    const isNativeGasToken =
+      selectedToken === "eth" ||
+      selectedToken === "bnb" ||
+      selectedToken === "trx" ||
+      selectedToken === "btc";
+
+    const computedAmount = isNativeGasToken
+      ? Math.max(parsedDefaultAmount - Number(gasFeeEth), 0)
+      : parsedDefaultAmount;
+
+    const formattedAmount = computedAmount > 0 ? formatBalance(computedAmount) : "0";
+
+    if (amount === defaultAmount || amount === "" || amount === formattedAmount) {
+      setAmount(formattedAmount);
+    }
+  }, [open, dashboardMode, defaultAmount, selectedToken, gasFeeEth, amount]);
 
   useEffect(() => {
     if (!selectedToken || !activeWallet) return;
@@ -77,11 +142,13 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
   useEffect(() => {
     if (!open) {
       setGasFeeEth(null);
+      setMarketValue(null);
       return;
     }
 
     if (!selectedToken) {
       setGasFeeEth(null);
+      setMarketValue(null);
       return;
     }
 
@@ -103,12 +170,43 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       }
     };
 
+    const fetchMarketValue = async () => {
+      if (!amount || parsedAmount <= 0) {
+        setMarketValue(null);
+        return;
+      }
+
+      const symbol = getApiSymbol(selectedToken);
+      setMarketLoading(true);
+      try {
+        const response = await getPrices({
+          symbol,
+          base: "USD",
+        });
+
+        const priceString = response?.prices?.[0]?.price || "";
+        const price = Number(String(priceString).replace(/[,\s]/g, ""));
+
+        if (response.success && price > 0) {
+          setMarketValue(price * parsedAmount);
+        } else {
+          setMarketValue(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch market value", error);
+        setMarketValue(null);
+      } finally {
+        setMarketLoading(false);
+      }
+    };
+
     const timer = window.setTimeout(() => {
       fetchGasFee();
+      fetchMarketValue();
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [open, selectedToken, amount]);
+  }, [open, selectedToken, amount, parsedAmount, dashboardMode]);
 
   const validate = () => {
     const newErrors: typeof errors = {};
@@ -125,13 +223,36 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
       newErrors.amount = "Amount is required";
     } else if (Number(amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
-    }else if (Number(amount) + gasFeeInEth > Number(balance)) {
+    } else if (Number(amount) > Number(balance)) {
+      newErrors.amount = "Amount exceeds available balance";
+    } else if (
+      selectedToken === "usdt" ||
+      selectedToken === "trc20"
+    ) {
+      if (gasFeeInEth > selectedNativeBalance) {
+        newErrors.amount = "Insufficient native balance for gas fee";
+      }
+    } else if (Number(amount) + gasFeeInEth > Number(balance)) {
       newErrors.amount = "Insufficient balance for gas fee";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const nativeBalanceMap: Record<string, string | undefined> = {
+    eth: activeWallet?.eth_balance,
+    btc: activeWallet?.btc_balance,
+    usdt: activeWallet?.eth_balance,
+    trc20: activeWallet?.trx_balance,
+    bnb: activeWallet?.bnb_balance,
+    trx: activeWallet?.trx_balance,
+  };
+
+  const selectedNativeBalance =
+    selectedToken && nativeBalanceMap[selectedToken]
+      ? Number(nativeBalanceMap[selectedToken])
+      : 0;
 
   // const handleShowQR = () => {
   //   if (!toAddress.trim()) {
@@ -155,6 +276,7 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
         gasFee: gasFeeEth || "0",
         totalCost: totalCost.toString(),
         selectedToken,
+        marketValue,
       }),
     );
 
@@ -319,18 +441,23 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
 
                   <button
                     type="button"
-                  onClick={() => {
-                    if (!selectedToken || !gasFeeEth) return;
+                    onClick={() => {
+                      if (!selectedToken || !gasFeeEth) return;
 
-                    const bal = Number(balance);
-                    const gas = Number(gasFeeEth);
+                      const bal = Number(balance);
+                      const gas = Number(gasFeeEth);
+                      const isNativeGasToken =
+                        selectedToken === "eth" ||
+                        selectedToken === "bnb" ||
+                        selectedToken === "trx" ||
+                        selectedToken === "btc";
 
-                    const maxSendable = bal - gas;
-                    const finalAmount = maxSendable > 0 ? maxSendable : 0;
+                      const maxSendable = isNativeGasToken ? bal - gas : bal;
+                      const finalAmount = maxSendable > 0 ? maxSendable : 0;
 
-                    setAmount(finalAmount > 0 ? formatBalance(finalAmount) : "0");
-                  }}
-                  disabled={!selectedToken || gasLoading || gasFeeEth === null}
+                      setAmount(finalAmount > 0 ? formatBalance(finalAmount) : "0");
+                    }}
+                    disabled={!selectedToken || gasLoading || gasFeeEth === null}
                     className="px-4 py-2 bg-[#202A43] border border-[#3C3D47] text-white rounded-xl hover:bg-[#2a3555] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     MAX
@@ -353,6 +480,21 @@ function SendTokenModal({ open, onClose, onNext }: SendTokenModalProps) {
                   <p>
                     {gasFeeEth
                       ? `${formatBalance(gasFeeEth)} ${selectedNativeSymbol}`
+                      : "--"}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-between text-white text-base sm:text-lg font-medium">
+                <p>Value (USD)</p>
+                {marketLoading ? (
+                  <div className="w-10 h-5 overflow-hidden">
+                    <Loader />
+                  </div>
+                ) : (
+                  <p>
+                    {marketValue !== null
+                      ? `$${formatBalance(marketValue, { isFiat: true })}`
                       : "--"}
                   </p>
                 )}

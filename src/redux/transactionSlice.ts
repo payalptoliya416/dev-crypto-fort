@@ -7,6 +7,7 @@ interface TransactionState {
   gasFee: string;
   totalCost: string;
   selectedToken: string;
+  marketValue?: number | null;
 }
 
 const initialState: TransactionState = {
@@ -15,6 +16,7 @@ const initialState: TransactionState = {
   gasFee: "",
   totalCost: "",
   selectedToken: "",
+  marketValue: null,
 };
 
 const transactionSlice = createSlice({

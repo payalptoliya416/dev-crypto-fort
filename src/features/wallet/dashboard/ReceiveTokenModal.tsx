@@ -10,9 +10,10 @@ import { getWallets } from "../../../api/walletApi";
 interface ReceiveTokenModalProps {
   open: boolean;
   onClose: () => void;
+  defaultSelectedToken?: string;
 }
 
-function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
+function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveTokenModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -24,10 +25,11 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
 
   useEffect(() => {
     if (open) {
-      setSelectedToken("eth");
-      setSelectedAddress(activeWallet?.eth_address || ""); 
+      const token = defaultSelectedToken || "eth";
+      setSelectedToken(token);
+      setSelectedAddress("");
     }
-  }, [open, activeWallet]);
+  }, [open, defaultSelectedToken]);
 
   useEffect(() => {
     if (!open) return;
@@ -74,12 +76,6 @@ function ReceiveTokenModal({ open, onClose }: ReceiveTokenModalProps) {
       setSelectedAddress("");
     }
   }, [selectedToken, wallets, activeWallet]);
-
-  useEffect(() => {
-    if (open) {
-      setSelectedToken("eth");
-    }
-  }, [open]);
 
   const handleCopy = async () => {
     if (!address) {

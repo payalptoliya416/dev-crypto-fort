@@ -23,6 +23,7 @@ interface TransactionRow {
   status: "Confirmed" | "Pending" | "Failed";
   icon: string;
   currency?: string;
+  timestamp: string;
 }
 
 function TransactionPage() {
@@ -82,6 +83,7 @@ function TransactionPage() {
             status: mapTxStatus(tx.txreceipt_status),
 
             icon: tokenData.icon,
+            timestamp: tx.timestamp,
           };
         });
         setRows(mapped);
@@ -151,6 +153,18 @@ function TransactionPage() {
           </div>
         </div>
       ),
+    },
+    {
+      header: "Date",
+      key: "timestamp",
+      render: (row) => {
+        const date = new Date(row.timestamp);
+        return (
+          <p className="text-[#7A7D83] text-sm font-normal">
+            {isNaN(date.getTime()) ? "N/A" : date.toLocaleString()}
+          </p>
+        );
+      },
     },
     {
       header: "Amount",

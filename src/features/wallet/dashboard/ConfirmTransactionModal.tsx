@@ -3,7 +3,7 @@ import { TbCopy } from "react-icons/tb";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { sendTransaction } from "../../../api/transactionApi";
 import { formatBalance } from "../../component/format";
 
@@ -24,15 +24,9 @@ function ConfirmTransactionModal({
   onSuccess,
 }: ConfirmTransactionModalProps) {
   // gasFee
-  const { toAddress, amount, totalCost, selectedToken } = useSelector(
+  const { toAddress, amount, totalCost, selectedToken, marketValue } = useSelector(
     (state: RootState) => state.transaction,
   );
-
-  useEffect(() => {
-  if (open) {
-    setLoading(false);
-  }
-}, [open]);
 
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
@@ -47,7 +41,6 @@ function ConfirmTransactionModal({
       toast.error("Failed to copy");
     }
   };
-
   const getFromAddress = (): string => {
     if (!activeWallet) return "";
 
@@ -79,63 +72,51 @@ function ConfirmTransactionModal({
         wallet_id: activeWallet.id,
         to_address: toAddress,
         amount: amount,
-        type: selectedToken as any, 
+        type: selectedToken as any,
       });
 
-    if (res.success) {
-  toast.success(res.message || "Transaction sent");
-  onClose();
-  await onSuccess?.();
-} else {
-  let errorMsg = "Transaction failed";
+      if (res.success) {
+        toast.success(res.message || "Transaction sent");
+        onClose();
+        await onSuccess?.();
+      } else {
+        let errorMsg = "Transaction failed";
 
-  // ✅ Laravel validation errors
- if ((res as any)?.errors) {
-  const errorsObj = (res as any).errors;
+        if ((res as any)?.errors) {
+          const errorsObj = (res as any).errors;
+          const firstKey = Object.keys(errorsObj)[0];
+          if (firstKey && errorsObj[firstKey]?.length > 0) {
+            errorMsg = errorsObj[firstKey][0];
+          }
+        } else if (res?.message) {
+          errorMsg = res.message;
+        }
 
-  const firstKey = Object.keys(errorsObj)[0];
-  if (firstKey && errorsObj[firstKey]?.length > 0) {
-    errorMsg = errorsObj[firstKey][0];
-  }
-}
-  // ✅ direct message
-  else if (res?.message) {
-    errorMsg = res.message;
-  }
-
-  toast.error(errorMsg);
-  setLoading(false);
-}
+        toast.error(errorMsg);
+        setLoading(false);
+      }
     } catch (error: any) {
-  let errorMsg = "Something went wrong";
+      let errorMsg = "Something went wrong";
 
-  // ✅ CASE 1: direct error.errors (YOUR CASE)
-  if (error?.errors) {
-    const firstKey = Object.keys(error.errors)[0];
-    if (error.errors[firstKey]?.length > 0) {
-      errorMsg = error.errors[firstKey][0];
+      if (error?.errors) {
+        const firstKey = Object.keys(error.errors)[0];
+        if (error.errors[firstKey]?.length > 0) {
+          errorMsg = error.errors[firstKey][0];
+        }
+      } else if (error?.response?.data?.errors) {
+        const firstKey = Object.keys(error.response.data.errors)[0];
+        if (error.response.data.errors[firstKey]?.length > 0) {
+          errorMsg = error.response.data.errors[firstKey][0];
+        }
+      } else if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+
+      toast.error(errorMsg);
+      setLoading(false);
     }
-  }
-
-  // ✅ CASE 2: axios error.response.data.errors
-  else if (error?.response?.data?.errors) {
-    const firstKey = Object.keys(error.response.data.errors)[0];
-    if (error.response.data.errors[firstKey]?.length > 0) {
-      errorMsg = error.response.data.errors[firstKey][0];
-    }
-  }
-
-  // ✅ CASE 3: message fallback
-  else if (error?.response?.data?.message) {
-    errorMsg = error.response.data.message;
-  }
-  else if (error?.message) {
-    errorMsg = error.message;
-  }
-
-  toast.error(errorMsg);
-}
- setLoading(false);
   };
 
   if (!open) return null;
@@ -199,6 +180,15 @@ function ConfirmTransactionModal({
               <p className="text-white text-base sm:text-lg font-medium">Amount:</p>
               <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
                 {amount ? `${formatBalance(amount)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
+              </p>
+            </div>
+
+            <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
+              <p className="text-white text-base sm:text-lg font-medium">Market Value:</p>
+              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
+                {marketValue !== null
+                  ? `$${formatBalance(marketValue, { isFiat: true })}`
+                  : "--"}
               </p>
             </div>
 
