@@ -8,6 +8,7 @@ import { setTransactionData } from "../../../redux/transactionSlice";
 import QRCode from "react-qr-code";
 import type { RootState } from "../../../redux/store/store";
 import { formatBalance } from "../../component/format";
+import TokenDropdown from "./TokenDropdown";
 interface SendTokenModalProps {
   open: boolean;
   onClose: () => void;
@@ -163,7 +164,7 @@ function SendTokenModal({
 
           setGasFeeEth(gasEth);
         }
-      } catch (e) {
+      } catch {
         console.error("Failed to get gas fee");
       } finally {
         setGasLoading(false);
@@ -317,41 +318,16 @@ function SendTokenModal({
                 Select Token
               </label>
 
-              <select
+              <TokenDropdown
                 value={selectedToken}
-                 onChange={(e) => {
-                    setSelectedToken(e.target.value);
-                    if (errors.selectedToken) {
-                      setErrors((prev) => ({ ...prev, selectedToken: undefined }));
-                    }
-                  }}
-                className={`w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none  ${errors.selectedToken ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
-              >
-                <option value="" className="bg-[#161F37] text-[#7A7D83]">
-                  Select token
-                </option>
-
-                <option value="eth" className="bg-[#161F37] text-white">
-                  Ethereum
-                </option>
-
-                {/* <option value="trx" className="bg-[#161F37] text-white"> */}
-                <option value="trc20" className="bg-[#161F37] text-white">
-                  TRC-20
-                </option>
-                
-                <option value="usdt" className="bg-[#161F37] text-white">
-                   ERC-20
-                </option>
-
-                <option value="btc" className="bg-[#161F37] text-white">
-                  Bitcoin
-                </option>
-
-                <option value="bnb" className="bg-[#161F37] text-white">
-                  Binance
-                </option>
-              </select>
+                onChange={(token) => {
+                  setSelectedToken(token);
+                  if (errors.selectedToken) {
+                    setErrors((prev) => ({ ...prev, selectedToken: undefined }));
+                  }
+                }}
+                hasError={Boolean(errors.selectedToken)}
+              />
               {errors.selectedToken && (
                 <p className="text-[#ef4343] text-sm mt-1">{errors.selectedToken}</p>
               )}

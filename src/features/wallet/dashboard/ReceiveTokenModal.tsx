@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
 import { useEffect, useState } from "react";
 import { getWallets } from "../../../api/walletApi";
+import TokenDropdown from "./TokenDropdown";
 
 interface ReceiveTokenModalProps {
   open: boolean;
@@ -13,11 +14,18 @@ interface ReceiveTokenModalProps {
   defaultSelectedToken?: string;
 }
 
+interface WalletAddressData {
+  id: string | number;
+  eth_address?: string;
+  btc_address?: string;
+  tron_address?: string;
+}
+
 function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveTokenModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
-  const [wallets, setWallets] = useState<any[]>([]);
+  const [wallets, setWallets] = useState<WalletAddressData[]>([]);
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedToken, setSelectedToken] = useState("eth");
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -39,7 +47,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
         setLoadingQR(true);
         const res = await getWallets();
         if (res.success && res.data) {
-          setWallets(res.data);
+          setWallets(res.data as WalletAddressData[]);
         }
       } catch {
         toast.error("Failed to load wallets");
@@ -123,17 +131,10 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
               Select Token
             </label>
 
-            <select
+            <TokenDropdown
               value={selectedToken}
-              onChange={(e) => setSelectedToken(e.target.value)}
-              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none"
-            >
-              <option value="eth">Ethereum</option>
-              <option value="btc">Bitcoin</option>
-              <option value="trc20">TRC20</option>
-              <option value="usdt">ERC-20</option>
-              <option value="bnb">Binance</option>
-            </select>
+              onChange={setSelectedToken}
+            />
           </div>
 
           <div className="flex justify-center mb-[30px]">
