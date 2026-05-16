@@ -74,13 +74,11 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
       setSelectedAddress(currentWallet.btc_address || "");
     } else if (selectedToken === "trc20") {
       setSelectedAddress(currentWallet.tron_address || "");
-    } else if (selectedToken === "usdt") {
-    setSelectedAddress(currentWallet.eth_address || "");
-    } 
-    else if (selectedToken === "bnb") {
+    } else if (selectedToken === "usdt" || selectedToken === "usdc") {
       setSelectedAddress(currentWallet.eth_address || "");
-    } 
-    else {
+    } else if (selectedToken === "bnb") {
+      setSelectedAddress(currentWallet.eth_address || "");
+    } else {
       setSelectedAddress("");
     }
   }, [selectedToken, wallets, activeWallet]);
@@ -191,6 +189,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
             {selectedToken === "trx" && "Only send TRC-20 tokens to this address."}
             {selectedToken === "trc20" && "Only send TRC-20 tokens to this address."}
             {selectedToken === "usdt" && "Only send USDT (ERC-20) to this address."}
+            {selectedToken === "usdc" && "Only send USDC (TRC20) to this address."}
             {selectedToken === "bnb" && "Only send BNB tokens to this address."}
           </p>
           </div>

@@ -5,11 +5,12 @@ import CommonTable, { type Column } from "../../component/CommonTable";
 import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
 import { getTransactions, type Transaction } from "../../../api/walletApi";
-import d1 from "@/assets/d1.png";
-import d2 from "@/assets/d2.png";
-import d5 from "@/assets/d5.png";
-import d9 from "@/assets/d9.png";
-import d3 from "@/assets/d3.png";
+import d1 from "@/assets/Ethereum.png";
+import d2 from "@/assets/Bitcoin.png";
+import d3 from "@/assets/Binance.png";
+import d4 from "@/assets/USDC.png";
+import d5 from "@/assets/TRC-20.png";
+import d9 from "@/assets/tron.png";
 import Loader from "../../component/Loader";
 import { TbCopy } from "react-icons/tb";
 
@@ -62,6 +63,7 @@ function TransactionPage() {
             ETH: { name: "Ethereum", icon: d1 },
             BTC: { name: "Bitcoin", icon: d2 },
             USDT: { name: "Tether", icon: d5 },
+            USDC: { name: "USDC (TRC20)", icon: d4 },
             TRX: { name: "Tron", icon: d9 },
             TRC20: { name: "Trc20", icon: d5 },
             BNB: { name: "Bnb", icon: d3 },

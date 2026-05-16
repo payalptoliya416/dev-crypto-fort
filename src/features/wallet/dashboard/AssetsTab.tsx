@@ -1,8 +1,9 @@
-import d1 from "@/assets/d1.png";
-import d2 from "@/assets/d2.png";
-import d5 from "@/assets/d5.png";
-import d3 from "@/assets/d3.png";
-import d9 from "@/assets/d9.png";
+import d1 from "@/assets/Ethereum.png";
+import d2 from "@/assets/Bitcoin.png";
+import d4 from "@/assets/USDC.png";
+import d5 from "@/assets/TRC-20.png";
+import d3 from "@/assets/Binance.png";
+import d9 from "@/assets/tron.png";
 import up from "@/assets/up.svg";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import { formatBalance } from "../../component/format";
@@ -30,7 +31,7 @@ interface Asset {
 
 function AssetsTab() {
   const [loading, setLoading] = useState(true);
-  const [socketLoaded, setSocketLoaded] = useState(false);
+  
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assetActionOpen, setAssetActionOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
@@ -41,57 +42,58 @@ function AssetsTab() {
     (state: RootState) => state.activeWallet.wallet,
   );
 
-  const hasValidPrices = () => {
-    const saved = localStorage.getItem("crypto_prices");
-    if (!saved) return false;
-    const prices = JSON.parse(saved);
-
-    return Object.values(prices).some(
-      (p: any) => p?.price && Number(p.price) > 0,
-    );
-  };
+  
 
   useEffect(() => {
     const socket = io("https://socket.cryptosfort.com", {
       transports: ["websocket"],
     });
 
- socket.onAny((_, data) => {
-  if (!data?.prices) return;
-  const saved = localStorage.getItem("crypto_prices");
-  const storedPrices = saved ? JSON.parse(saved) : {};
-
-  setSocketLoaded(true);
-
-  setAssets((prevAssets) => {
-    const updated = prevAssets.map((asset) => {
-
-      const match = data.prices.find(
-        (p: any) =>
-          String(p.symbol).toUpperCase() === String(asset.symbol).toUpperCase(),
-      );
-
-      const newPrice = Number(match.price);
-
-      const previousPrice = Number(
-        storedPrices?.[asset.symbol]?.price || asset.price || 0,
-      );
-      let changePercent = asset.change;
-      let isUp = asset.up;
-
-      if (previousPrice > 0) {
-        const diff = ((newPrice - previousPrice) / previousPrice) * 100;
-        changePercent = `${diff.toFixed(2)}%`;
-        isUp = diff >= 0;
-      }
-
-      return {
-        ...asset,
-        price: newPrice.toString(),
-        change: changePercent,
-        up: isUp,
-      };
+    socket.on("connect", () => {
+      // connected
     });
+
+    socket.on("connect_error", (error) => {
+      console.warn("Socket connect error:", error);
+    });
+
+    socket.onAny((_, data) => {
+      if (!data?.prices || !Array.isArray(data.prices)) return;
+      const saved = localStorage.getItem("crypto_prices");
+      const storedPrices = saved ? JSON.parse(saved) : {};
+
+      // socket price update received
+
+      setAssets((prevAssets) => {
+        const updated = prevAssets.map((asset) => {
+          const match = data.prices.find(
+            (p: any) =>
+              String(p.symbol).toUpperCase() === String(asset.symbol).toUpperCase(),
+          );
+
+          const newPrice = match?.price != null
+            ? Number(match.price)
+            : Number(asset.price || 0);
+
+          const previousPrice = Number(
+            storedPrices?.[asset.symbol]?.price || asset.price || 0,
+          );
+          let changePercent = asset.change;
+          let isUp = asset.up;
+
+          if (previousPrice > 0) {
+            const diff = ((newPrice - previousPrice) / previousPrice) * 100;
+            changePercent = `${diff.toFixed(2)}%`;
+            isUp = diff >= 0;
+          }
+
+          return {
+            ...asset,
+            price: newPrice.toString(),
+            change: changePercent,
+            up: isUp,
+          };
+        });
 
     if (updated.length > 0) {
       const priceMap: any = {};
@@ -129,6 +131,7 @@ function AssetsTab() {
     btc: { name: "Bitcoin", symbol: "BTC", icon: d2 },
     eth: { name: "Ethereum", symbol: "ETH", icon: d1 },
     usdt: { name: "Tether", symbol: "USDT", icon: d5 },
+    usdc: { name: "USDC (TRC20)", symbol: "USDC", icon: d4 },
     bnb: { name: "BNB", symbol: "BNB", icon: d3 },
     trx: { name: "TRON", symbol: "TRX", icon: d9 },
     trc20: { name: "USDT (TRC20)", symbol: "USDT", icon: d5 },
@@ -138,9 +141,7 @@ function AssetsTab() {
     if (!activeWallet?.id) return;
 
     const fetchBalance = async () => {
-      if (hasValidPrices()) {
-        setSocketLoaded(true);
-      }
+      // if we have cached prices, continue — no socketLoaded state needed
       try {
         setLoading(true);
         const balanceRes = await getBalance({
@@ -277,7 +278,7 @@ function AssetsTab() {
           Assets
         </h3>
       </div>
-      {loading || !socketLoaded ? (
+      {loading ? (
         <div className="flex justify-center items-center py-20">
           <Loader />
         </div>

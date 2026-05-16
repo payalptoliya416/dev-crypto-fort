@@ -1,11 +1,12 @@
-import d1 from "@/assets/d1.png";
-import d2 from "@/assets/d2.png";
-import d3 from "@/assets/d3.png";
-import d5 from "@/assets/d5.png";
+import d1 from "@/assets/Ethereum.png";
+import d2 from "@/assets/Bitcoin.png";
+import d3 from "@/assets/Binance.png";
+import d4 from "@/assets/USDC.png";
+import d5 from "@/assets/TRC-20.png";
 import { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 
-interface TokenOption {
+export interface TokenOption {
   value: string;
   label: string;
   symbol: string;
@@ -16,6 +17,7 @@ const tokenOptions: TokenOption[] = [
   { value: "eth", label: "Ethereum", symbol: "ETH", icon: d1 },
   { value: "trc20", label: "TRC-20", symbol: "USDT", icon: d5 },
   { value: "usdt", label: "ERC-20", symbol: "USDT", icon: d5 },
+  { value: "usdc", label: "USDC (TRC20)", symbol: "USDC", icon: d4 },
   { value: "btc", label: "Bitcoin", symbol: "BTC", icon: d2 },
   { value: "bnb", label: "Binance", symbol: "BNB", icon: d3 },
 ];
@@ -25,6 +27,8 @@ interface TokenDropdownProps {
   onChange: (value: string) => void;
   hasError?: boolean;
   placeholder?: string;
+  options?: TokenOption[];
+  excludeValues?: string[];
 }
 
 function TokenDropdown({
@@ -32,10 +36,16 @@ function TokenDropdown({
   onChange,
   hasError = false,
   placeholder = "Select token",
+  options,
+  excludeValues = [],
 }: TokenDropdownProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const selectedToken = tokenOptions.find((token) => token.value === value);
+  const availableOptions = (options ?? tokenOptions).filter(
+    (token) => !excludeValues.includes(token.value),
+  );
+  const selectedToken = availableOptions.find((token) => token.value === value) ||
+    (options ?? tokenOptions).find((token) => token.value === value);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,7 +99,7 @@ function TokenDropdown({
           className="absolute left-0 right-0 mt-2 rounded-xl bg-[#131F3A] border border-[#2A3553] shadow-xl z-[1001] overflow-hidden"
           role="listbox"
         >
-          {tokenOptions.map((token) => (
+          {availableOptions.map((token) => (
             <button
               key={token.value}
               type="button"

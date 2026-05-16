@@ -43,7 +43,12 @@ function SendTokenModal({
   }>({});
 
   const gasFeeInEth = gasFeeEth ? Number(gasFeeEth) : 0;
-  const totalCost = Number(amount || 0) + gasFeeInEth;
+
+  const isNativeToken =
+    selectedToken === "eth" ||
+    selectedToken === "bnb" ||
+    selectedToken === "trx" ||
+    selectedToken === "btc";
   const [balance, setBalance] = useState("0");
   const [marketValue, setMarketValue] = useState<number | null>(null);
   const [marketLoading, setMarketLoading] = useState(false);
@@ -52,6 +57,7 @@ function SendTokenModal({
     eth: "ETH",
     trc20: "TRX",
     usdt: "ETH",
+    usdc: "ETH",
     btc: "BTC",
     bnb: "BNB",
     trx: "TRX",
@@ -70,6 +76,8 @@ function SendTokenModal({
         return "ETH";
       case "usdt":
         return "USDT";
+      case "usdc":
+        return "USDC";
       case "bnb":
         return "BNB";
       case "trx":
@@ -132,6 +140,7 @@ function SendTokenModal({
       eth: activeWallet.eth_balance,
       btc: activeWallet.btc_balance,
       usdt: activeWallet.usdt_balance,
+      usdc: (activeWallet as any).usdc_balance,
       trc20: activeWallet.trc20_balance,
       bnb: activeWallet.bnb_balance,
       trx: activeWallet.trx_balance,
@@ -209,6 +218,21 @@ function SendTokenModal({
     return () => window.clearTimeout(timer);
   }, [open, selectedToken, amount, parsedAmount, dashboardMode]);
 
+  const nativeBalanceMap: Record<string, string | undefined> = {
+    eth: activeWallet?.eth_balance,
+    btc: activeWallet?.btc_balance,
+    usdt: activeWallet?.eth_balance,
+    usdc: activeWallet?.eth_balance,
+    trc20: activeWallet?.trx_balance,
+    bnb: activeWallet?.bnb_balance,
+    trx: activeWallet?.trx_balance,
+  };
+
+  const selectedNativeBalance =
+    selectedToken && nativeBalanceMap[selectedToken]
+      ? Number(nativeBalanceMap[selectedToken])
+      : 0;
+
   const validate = () => {
     const newErrors: typeof errors = {};
 
@@ -226,34 +250,25 @@ function SendTokenModal({
       newErrors.amount = "Amount must be greater than 0";
     } else if (Number(amount) > Number(balance)) {
       newErrors.amount = "Amount exceeds available balance";
-    } else if (
-      selectedToken === "usdt" ||
-      selectedToken === "trc20"
-    ) {
-      if (gasFeeInEth > selectedNativeBalance) {
-        newErrors.amount = "Insufficient native balance for gas fee";
+    } else {
+      // gas balance checks
+      if (isNativeToken) {
+        // for native token sends, ensure balance covers amount + gas
+        if (Number(amount) + gasFeeInEth > Number(balance)) {
+          newErrors.amount = "Insufficient balance to cover amount and gas fee";
+        }
+      } else {
+        // non-native: ensure native balance is available to pay gas
+        if (gasFeeInEth > selectedNativeBalance) {
+          newErrors.amount = `Insufficient ${selectedNativeSymbol} balance for gas fee`;
+        }
       }
-    } else if (Number(amount) + gasFeeInEth > Number(balance)) {
-      newErrors.amount = "Insufficient balance for gas fee";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const nativeBalanceMap: Record<string, string | undefined> = {
-    eth: activeWallet?.eth_balance,
-    btc: activeWallet?.btc_balance,
-    usdt: activeWallet?.eth_balance,
-    trc20: activeWallet?.trx_balance,
-    bnb: activeWallet?.bnb_balance,
-    trx: activeWallet?.trx_balance,
-  };
-
-  const selectedNativeBalance =
-    selectedToken && nativeBalanceMap[selectedToken]
-      ? Number(nativeBalanceMap[selectedToken])
-      : 0;
 
   // const handleShowQR = () => {
   //   if (!toAddress.trim()) {
@@ -266,16 +281,13 @@ function SendTokenModal({
 
   const handleSend = () => {
     if (!validate()) return;
-
-    const gasFeeInEth = gasFeeEth ? Number(gasFeeEth) : 0;
-    const totalCost = Number(amount || 0) + gasFeeInEth;
-
     dispatch(
       setTransactionData({
         toAddress,
         amount,
         gasFee: gasFeeEth || "0",
-        totalCost: totalCost.toString(),
+        // store totalCost as token-only for non-native, and amount+gas for native
+        totalCost: isNativeToken ? (Number(amount || 0) + gasFeeInEth).toString() : amount,
         selectedToken,
         marketValue,
       }),
@@ -418,17 +430,12 @@ function SendTokenModal({
                   <button
                     type="button"
                     onClick={() => {
-                      if (!selectedToken || !gasFeeEth) return;
+                      if (!selectedToken || gasFeeEth === null || gasLoading) return;
 
-                      const bal = Number(balance);
-                      const gas = Number(gasFeeEth);
-                      const isNativeGasToken =
-                        selectedToken === "eth" ||
-                        selectedToken === "bnb" ||
-                        selectedToken === "trx" ||
-                        selectedToken === "btc";
+                      const bal = Number(balance || 0);
+                      const gas = Number(gasFeeEth || 0);
 
-                      const maxSendable = isNativeGasToken ? bal - gas : bal;
+                      const maxSendable = isNativeToken ? bal - gas : bal;
                       const finalAmount = maxSendable > 0 ? maxSendable : 0;
 
                       setAmount(finalAmount > 0 ? formatBalance(finalAmount) : "0");
@@ -477,11 +484,13 @@ function SendTokenModal({
               </div>
 
               <div className="flex justify-between text-white text-base sm:text-lg font-medium">
-                <p>Total Cost</p>
+                <p>Total</p>
                 <p>
-                  {amount && gasFeeEth
-                    ? `${formatBalance(totalCost)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`
-                    : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
+                  {isNativeToken ? (
+                    amount || gasFeeEth ? `${formatBalance(Number(amount || 0) + gasFeeInEth)} ${selectedNativeSymbol}` : `0.00 ${selectedNativeSymbol}`
+                  ) : (
+                    amount || gasFeeEth ? `${formatBalance(Number(amount || 0))} ${selectedToken ? selectedToken.toUpperCase() : ""} + ${formatBalance(gasFeeInEth)} ${selectedNativeSymbol}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : ""}`
+                  )}
                 </p>
               </div>
             </div>

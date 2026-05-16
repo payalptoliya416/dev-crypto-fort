@@ -1,9 +1,13 @@
 import { IoClose } from "react-icons/io5";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { RootState } from "../../../redux/store/store";
 import toast from "react-hot-toast";
 import { swapToken } from "../../../api/transactionApi";
+import TokenDropdown, { type TokenOption } from "./TokenDropdown";
+import d1 from "@/assets/Ethereum.png";
+import d4 from "@/assets/USDC.png";
+import d5 from "@/assets/TRC-20.png";
 
 interface Props {
   open: boolean;
@@ -20,6 +24,18 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
 
   const [fromCurrency, setFromCurrency] = useState("");
   const [toCurrency, setToCurrency] = useState("");
+
+  const swapOptions: TokenOption[] = [
+    { value: "eth", label: "Ethereum", symbol: "ETH", icon: d1 },
+    { value: "usdt", label: "ERC-20", symbol: "USDT", icon: d5 },
+    { value: "usdc", label: "USDC (TRC20)", symbol: "USDC", icon: d4 },
+  ];
+
+  useEffect(() => {
+    if (fromCurrency && toCurrency && fromCurrency === toCurrency) {
+      setToCurrency("");
+    }
+  }, [fromCurrency, toCurrency]);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{
@@ -58,6 +74,11 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
     return Object.keys(newErrors).length === 0;
   };
 
+  const normalizeCurrency = (currency: string) => {
+    if (currency === "usdc") return "USDC";
+    return currency;
+  };
+
   const handleSwap = async () => {
     if (!validate()) return;
 
@@ -70,8 +91,8 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
 
       const payload = {
         wallet_id,
-        from_currency: fromCurrency,
-        to_currency: toCurrency,
+        from_currency: normalizeCurrency(fromCurrency),
+        to_currency: normalizeCurrency(toCurrency),
         amount: Number(amount),
       };
 
@@ -170,10 +191,10 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
               From Currency
             </label>
 
-            <select
+              <TokenDropdown
               value={fromCurrency}
-              onChange={(e) => {
-                setFromCurrency(e.target.value);
+              onChange={(value) => {
+                setFromCurrency(value);
                 if (errors.fromCurrency) {
                   setErrors((prev) => ({
                     ...prev,
@@ -181,13 +202,10 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
                   }));
                 }
               }}
-              className={`w-full bg-[#161F37] border rounded-xl px-5 py-3 text-white outline-none
-              ${errors.fromCurrency ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
-            >
-              <option value="">Select currency</option>
-              <option value="eth">Ethereum</option>
-              <option value="usdt">ERC-20</option>
-            </select>
+              options={swapOptions.filter((option) => option.value !== toCurrency)}
+              placeholder="Select currency"
+              hasError={Boolean(errors.fromCurrency)}
+            />
 
             {errors.fromCurrency && (
               <p className="text-[#ef4343] text-sm mt-1">
@@ -202,10 +220,10 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
               To Currency
             </label>
 
-            <select
+              <TokenDropdown
               value={toCurrency}
-              onChange={(e) => {
-                setToCurrency(e.target.value);
+              onChange={(value) => {
+                setToCurrency(value);
                 if (errors.toCurrency) {
                   setErrors((prev) => ({
                     ...prev,
@@ -213,13 +231,10 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
                   }));
                 }
               }}
-              className={`w-full bg-[#161F37] border rounded-xl px-5 py-3 text-white outline-none
-              ${errors.toCurrency ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
-            >
-              <option value="">Select currency</option>
-              <option value="eth">Ethereum</option>
-              <option value="usdt">ERC-20</option>
-            </select>
+              options={swapOptions.filter((option) => option.value !== fromCurrency)}
+              placeholder="Select currency"
+              hasError={Boolean(errors.toCurrency)}
+            />
 
             {errors.toCurrency && (
               <p className="text-[#ef4343] text-sm mt-1">{errors.toCurrency}</p>

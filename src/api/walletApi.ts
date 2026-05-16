@@ -7,6 +7,7 @@ export interface Wallet {
   tron_address?: string;
   bnb_address?: string;
   usdt_address?: string;
+  usdc_address?: string;
   trc20_address?: string;
   label: string | null;
   status: string;
@@ -14,6 +15,7 @@ export interface Wallet {
   eth_balance: string;
   btc_balance: string;
   usdt_balance: string;
+  usdc_balance?: string;
   trc20_balance?: string;
   bnb_balance?: string;
   trx_balance?: string;
@@ -74,7 +76,7 @@ export const checkUserPassword = (payload: {
 export interface ExportTransactionsPayload {
   wallet_id: number;
   format: "excel" | "pdf";
-  type: "all" | "eth" | "btc" | "usdt";
+  type: "all" | "eth" | "btc" | "usdt" | "usdc";
 }
 
 export interface ExportTransactionsResponse {
@@ -127,7 +129,7 @@ export interface Transaction {
 
 export interface GetTransactionsPayload {
   wallet_id: number;
-   type: "all" | "eth" | "btc" | "usdt";
+   type: "all" | "eth" | "btc" | "usdt" | "usdc";
 }
 
 export interface GetTransactionsResponse {
@@ -201,6 +203,7 @@ export interface CoinBalance {
   eth?: string;
   btc?: string;
   usdt?: string;
+  usdc?: string;
   bnb?: string;
   trx?: string;
   trc20?: string;

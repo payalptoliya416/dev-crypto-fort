@@ -111,7 +111,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   const handleExportTxReport = async (
     format: "excel" | "pdf",
-    exportType: "all" | "eth" | "btc" | "usdt" = "all",
+    exportType: "all" | "eth" | "btc" | "usdt" | "usdc" = "all",
   ) => {
     if (!activeWallet?.id) {
       toast.error("Wallet not found");
