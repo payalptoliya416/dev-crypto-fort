@@ -115,7 +115,15 @@ function AssetsTab() {
       );
     }
 
-    return updated;
+   return updated.sort((a, b) => {
+  const totalA =
+    Number(a.balance || 0) * Number(a.price || 1);
+
+  const totalB =
+    Number(b.balance || 0) * Number(b.price || 1);
+
+  return totalB - totalA;
+});
   });
 });
 
@@ -131,7 +139,7 @@ function AssetsTab() {
     btc: { name: "Bitcoin", symbol: "BTC", icon: d2 },
     eth: { name: "Ethereum", symbol: "ETH", icon: d1 },
     usdt: { name: "Tether", symbol: "USDT", icon: d5 },
-    usdc: { name: "USDC (TRC20)", symbol: "USDC", icon: d4 },
+    usdc: { name: "USDC (ERC20)", symbol: "USDC", icon: d4 },
     bnb: { name: "BNB", symbol: "BNB", icon: d3 },
     trx: { name: "TRON", symbol: "TRX", icon: d9 },
     trc20: { name: "USDT (TRC20)", symbol: "USDT", icon: d5 },
@@ -170,7 +178,17 @@ function AssetsTab() {
               icon: config?.icon || d1,
             };
           }) as Asset[];
-        setAssets(assetList);
+        const sortedAssets = assetList.sort((a, b) => {
+          const totalA =
+            Number(a.balance || 0) * Number(a.price || 1);
+
+          const totalB =
+            Number(b.balance || 0) * Number(b.price || 1);
+
+          return totalB - totalA;
+        });
+
+        setAssets(sortedAssets);
         setLoading(false);
       } catch (err: any) {
         toast.error(err?.message || "Failed to load balance");
@@ -306,7 +324,7 @@ function AssetsTab() {
                   setAssetActionOpen(false);
                   setSendOpen(true);
                 }}
-                className="py-3 rounded-xl bg-[#25C866] text-black font-semibold"
+                className="py-3 rounded-xl bg-[#25C866] text-black font-semibold cursor-pointer"
               >
                 Send
               </button>
@@ -315,7 +333,7 @@ function AssetsTab() {
                   setAssetActionOpen(false);
                   setReceiveOpen(true);
                 }}
-                className="py-3 rounded-xl border border-[#3C3D47] text-white"
+                className="py-3 rounded-xl border border-[#3C3D47] text-white cursor-pointer"
               >
                 Receive
               </button>

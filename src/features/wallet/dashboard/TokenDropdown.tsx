@@ -17,7 +17,7 @@ const tokenOptions: TokenOption[] = [
   { value: "eth", label: "Ethereum", symbol: "ETH", icon: d1 },
   { value: "trc20", label: "TRC-20", symbol: "USDT", icon: d5 },
   { value: "usdt", label: "ERC-20", symbol: "USDT", icon: d5 },
-  { value: "usdc", label: "USDC (TRC20)", symbol: "USDC", icon: d4 },
+  { value: "usdc", label: "USDC (ERC20)", symbol: "USDC", icon: d4 },
   { value: "btc", label: "Bitcoin", symbol: "BTC", icon: d2 },
   { value: "bnb", label: "Binance", symbol: "BNB", icon: d3 },
 ];

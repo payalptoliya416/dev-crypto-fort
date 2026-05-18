@@ -28,7 +28,7 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
   const swapOptions: TokenOption[] = [
     { value: "eth", label: "Ethereum", symbol: "ETH", icon: d1 },
     { value: "usdt", label: "ERC-20", symbol: "USDT", icon: d5 },
-    { value: "usdc", label: "USDC (TRC20)", symbol: "USDC", icon: d4 },
+    { value: "usdc", label: "USDC (ERC20)", symbol: "USDC", icon: d4 },
   ];
 
   useEffect(() => {

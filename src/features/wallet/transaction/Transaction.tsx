@@ -63,7 +63,7 @@ function TransactionPage() {
             ETH: { name: "Ethereum", icon: d1 },
             BTC: { name: "Bitcoin", icon: d2 },
             USDT: { name: "Tether", icon: d5 },
-            USDC: { name: "USDC (TRC20)", icon: d4 },
+            USDC: { name: "USDC (ERC20)", icon: d4 },
             TRX: { name: "Tron", icon: d9 },
             TRC20: { name: "Trc20", icon: d5 },
             BNB: { name: "Bnb", icon: d3 },
