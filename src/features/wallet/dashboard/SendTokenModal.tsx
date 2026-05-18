@@ -166,7 +166,8 @@ function SendTokenModal({
       try {
         setGasLoading(true);
 
-        const res = await getGasFee({ token: selectedToken, amount });
+        const res = await getGasFee();
+        // const res = await getGasFee({ token: selectedToken, amount });
         if (res.success && res.data) {
           const gasEth =
             res.data.gas_fee_eth ?? res.data.gas_eth ?? "0";
@@ -253,8 +254,9 @@ function SendTokenModal({
     } else {
       // gas balance checks
       if (isNativeToken) {
+          const formatedGasFee = Number(formatBalance(gasFeeInEth));
         // for native token sends, ensure balance covers amount + gas
-        if (Number(amount) + gasFeeInEth > Number(balance)) {
+        if (Number(amount) + formatedGasFee > Number(balance)) {
           newErrors.amount = "Insufficient balance to cover amount and gas fee";
         }
       } else {

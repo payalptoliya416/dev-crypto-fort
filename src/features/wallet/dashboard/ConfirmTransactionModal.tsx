@@ -95,10 +95,10 @@ function ConfirmTransactionModal({
       const tokenBalance = token && tokenBalanceMap[token] ? Number(tokenBalanceMap[token]) : 0;
       const parsedAmount = Number(amount || 0);
       const parsedGas = Number(gasFee || 0);
-
+      const formatedGasFee = Number(formatBalance(gasFee));
       // validations
-      if (isNativeToken) {
-        if (parsedAmount + parsedGas > tokenBalance) {
+      if (isNativeToken) {  
+        if (parsedAmount + formatedGasFee > tokenBalance) {
           toast.error("Insufficient balance to cover amount and gas fee");
           setLoading(false);
           return;
