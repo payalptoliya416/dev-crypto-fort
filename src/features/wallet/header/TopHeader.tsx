@@ -21,6 +21,7 @@ import { persistor } from "../../../redux/store/store";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { GoHistory } from "react-icons/go";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { RiDashboardFill } from "react-icons/ri";
 
 export default function TopHeader() {
   const navigate = useNavigate();
@@ -67,11 +68,11 @@ export default function TopHeader() {
     }
   };
 
-  const [isSmall, setIsSmall] = useState(window.innerWidth < 375);
+  const [isSmall, setIsSmall] = useState(window.innerWidth < 425);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSmall(window.innerWidth < 375);
+      setIsSmall(window.innerWidth < 425);
     };
 
     window.addEventListener("resize", handleResize);
@@ -109,8 +110,27 @@ export default function TopHeader() {
               className="pe-1 w-full max-w-[200px]"
             />
           </Link>
+          
           <Tooltip.Provider delayDuration={200}>
             <div className="flex items-center gap-2 sm:gap-[15px]">
+              <Tooltip.Root>
+          <Tooltip.Trigger asChild>
+            <Link
+              to="/dashboard"
+              className="w-10 sm:w-[42px] h-10 sm:h-[42px] border border-[#3C3D47] rounded-[10px] flex justify-center items-center cursor-pointer"
+            >
+              <RiDashboardFill size={20} className="text-[#7A7D83]" />
+            </Link>
+          </Tooltip.Trigger>
+
+          <Tooltip.Content
+            side="bottom"
+            className="bg-[#202A43] text-white text-xs px-3 py-2 rounded-md shadow-lg"
+          >
+            Dashboard
+          </Tooltip.Content>
+        </Tooltip.Root>
+
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
                   <button

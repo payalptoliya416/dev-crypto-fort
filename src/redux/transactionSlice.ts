@@ -8,6 +8,8 @@ interface TransactionState {
   totalCost: string;
   selectedToken: string;
   marketValue?: number | null;
+  isMaxAmount?: boolean;
+  is_full?: boolean;
 }
 
 const initialState: TransactionState = {
@@ -17,6 +19,8 @@ const initialState: TransactionState = {
   totalCost: "",
   selectedToken: "",
   marketValue: null,
+  isMaxAmount: false,
+  is_full: false,
 };
 
 const transactionSlice = createSlice({

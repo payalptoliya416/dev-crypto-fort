@@ -14,6 +14,7 @@ import d9 from "@/assets/tron.png";
 import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
 import { io } from "socket.io-client";
+import AssetPieChart from "./AssetPieChart";
 interface Asset {
   name: string;
   symbol: string;
@@ -111,7 +112,7 @@ function Balance() {
 
   const COIN_CONFIG: Record<
     string,
-    { name: string; symbol: string; icon: string }
+    { name: string; symbol: string; icon: string }  
   > = {
     btc: { name: "Bitcoin", symbol: "BTC", icon: d2 },
     eth: { name: "Ethereum", symbol: "ETH", icon: d1 },
@@ -140,36 +141,7 @@ function Balance() {
         const balances = balanceRes?.data?.balance || {};
         const savedPrices = localStorage.getItem("crypto_balance_prices");
         const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
-
-        //      const assetList: Asset[] = [
-        //   {
-        //     name: "Bitcoin",
-        //     symbol: "BTC",
-        //     balance: balances.btc,
-        //     price: priceMap.BTC?.price || "",
-        //     change: priceMap.BTC?.change ?? "",
-        //     up: priceMap.BTC?.up ?? true,
-        //     icon: d2,
-        //   },
-        //   {
-        //     name: "Ethereum",
-        //     symbol: "ETH",
-        //     balance: balances.eth,
-        //     price: priceMap.ETH?.price || "",
-        //     change: priceMap.ETH?.change ?? "",
-        //     up: priceMap.ETH?.up ?? true,
-        //     icon: d1,
-        //   },
-        //   {
-        //     name: "Tether",
-        //     symbol: "USDT",
-        //     balance: balances.usdt,
-        //     price: priceMap.USDT?.price || "",
-        //     change: priceMap.USDT?.change ?? "",
-        //     up: priceMap.USDT?.up ?? true,
-        //     icon: d5,
-        //   },
-        // ];
+      
         const assetList: Asset[] = Object.entries(balances)
           .filter(([_, value]) => value !== undefined)
           .map(([key, value]) => {
@@ -196,6 +168,18 @@ function Balance() {
 
     fetchBalance();
   }, [activeWallet?.id]);
+
+  const chartData = assets
+  .map((asset) => {
+    const balance = Number(asset.balance || 0);
+    const price = Number(asset.price || 0);
+
+    return {
+      name: asset.symbol,
+      value: balance * price,
+    };
+  })
+  .filter((item) => item.value > 0);
 
   const columns: Column<Asset>[] = [
     {
@@ -291,10 +275,12 @@ function Balance() {
   return (
     <DashboardLayout>
       <div className="w-full rounded-2xl bg-[#161F37] border border-[#3C3D47]">
-        <div className="px-5 pt-5 pb-[15px]">
+        <div className="px-2 sm:px-5 pt-5 pb-[15px]">
           <h3 className="tet-xl text-[#25C866] font-semibold mb-[15px]">
             Balance
           </h3>
+
+         <AssetPieChart data={chartData} />
         </div>
 
         {loading || !socketLoaded ? (

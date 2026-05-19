@@ -683,7 +683,11 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             />
 
             {/* Modal */}
-            <div className="relative w-full max-w-md bg-[#161F37] border border-[#3C3D47] rounded-2xl p-6 z-10">
+            <div
+              className="relative w-full max-w-xl bg-[#161F37]
+    border border-[#3C3D47] rounded-2xl p-6 z-10
+    max-h-[90vh] overflow-y-auto"
+            >
               {/* Close */}
               <button
                 onClick={() => setShowBackupModal(false)}
@@ -735,6 +739,31 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                   >
                     Copy
                   </button>
+                </div>
+              </div>
+              {/* Security Warning */}
+              <div className="mt-5 rounded-2xl border border-yellow-500/20 bg-[#FFDD1D05] p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/15 text-[#FFDD1D] text-lg shrink-0">
+                    🔒
+                  </div>
+
+                  <div>
+                    <h4 className="text-yellow-400 font-semibold text-base mb-2">
+                      Security Warning
+                    </h4>
+
+                    <p className="text-[#D1D5DB] text-sm leading-6">
+                      Never share your Private Key or Recovery Phrase with
+                      anyone. Anyone with access to this information can control
+                      your wallet and funds.
+                    </p>
+
+                    <p className="text-[#D1D5DB] text-sm leading-6 mt-2">
+                      CryptosFort support will never ask for your Private Key or
+                      Recovery Phrase.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -13,12 +13,12 @@ function AppLogo({
   className = "",
   imgClassName = "pe-1 w-full max-w-[200px]",
 }: AppLogoProps) {
-  const [isSmall, setIsSmall] = useState(window.innerWidth < 375);
+  const [isSmall, setIsSmall] = useState(window.innerWidth < 425);
   const token = localStorage.getItem("token");
 
 useEffect(() => {
   const handleResize = () => {
-    setIsSmall(window.innerWidth < 375);
+    setIsSmall(window.innerWidth < 425);
   };
 
   window.addEventListener("resize", handleResize);

@@ -36,6 +36,7 @@ function SendTokenModal({
   const [gasLoading, setGasLoading] = useState(false);
   const [gasFeeEth, setGasFeeEth] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
+  const [isMaxAmount, setIsMaxAmount] = useState(false);
   const [errors, setErrors] = useState<{
     toAddress?: string;
     amount?: string;
@@ -219,20 +220,20 @@ function SendTokenModal({
     return () => window.clearTimeout(timer);
   }, [open, selectedToken, amount, parsedAmount, dashboardMode]);
 
-  const nativeBalanceMap: Record<string, string | undefined> = {
-    eth: activeWallet?.eth_balance,
-    btc: activeWallet?.btc_balance,
-    usdt: activeWallet?.eth_balance,
-    usdc: activeWallet?.eth_balance,
-    trc20: activeWallet?.trx_balance,
-    bnb: activeWallet?.bnb_balance,
-    trx: activeWallet?.trx_balance,
-  };
+  // const nativeBalanceMap: Record<string, string | undefined> = {
+  //   eth: activeWallet?.eth_balance,
+  //   btc: activeWallet?.btc_balance,
+  //   usdt: activeWallet?.eth_balance,
+  //   usdc: activeWallet?.eth_balance,
+  //   trc20: activeWallet?.trx_balance,
+  //   bnb: activeWallet?.bnb_balance,
+  //   trx: activeWallet?.trx_balance,
+  // };
 
-  const selectedNativeBalance =
-    selectedToken && nativeBalanceMap[selectedToken]
-      ? Number(nativeBalanceMap[selectedToken])
-      : 0;
+  // const selectedNativeBalance =
+  //   selectedToken && nativeBalanceMap[selectedToken]
+  //     ? Number(nativeBalanceMap[selectedToken])
+  //     : 0;
 
   const validate = () => {
     const newErrors: typeof errors = {};
@@ -253,18 +254,18 @@ function SendTokenModal({
       newErrors.amount = "Amount exceeds available balance";
     } else {
       // gas balance checks
-      if (isNativeToken) {
-          const formatedGasFee = Number(formatBalance(gasFeeInEth));
-        // for native token sends, ensure balance covers amount + gas
-        if (Number(amount) + formatedGasFee > Number(balance)) {
-          newErrors.amount = "Insufficient balance to cover amount and gas fee";
-        }
-      } else {
-        // non-native: ensure native balance is available to pay gas
-        if (gasFeeInEth > selectedNativeBalance) {
-          newErrors.amount = `Insufficient ${selectedNativeSymbol} balance for gas fee`;
-        }
-      }
+      // if (isNativeToken) {
+      //     const formatedGasFee = Number(formatBalance(gasFeeInEth));
+      //   // for native token sends, ensure balance covers amount + gas
+      //   if (Number(amount) + formatedGasFee > Number(balance)) {
+      //     newErrors.amount = "Insufficient balance to cover amount and gas fee";
+      //   }
+      // } else {
+      //   // non-native: ensure native balance is available to pay gas
+      //   if (gasFeeInEth > selectedNativeBalance) {
+      //     newErrors.amount = `Insufficient ${selectedNativeSymbol} balance for gas fee`;
+      //   }
+      // }
     }
 
     setErrors(newErrors);
@@ -287,6 +288,7 @@ function SendTokenModal({
       setTransactionData({
         toAddress,
         amount,
+        isMaxAmount,
         gasFee: gasFeeEth || "0",
         // store totalCost as token-only for non-native, and amount+gas for native
         totalCost: isNativeToken ? (Number(amount || 0) + gasFeeInEth).toString() : amount,
@@ -418,6 +420,7 @@ function SendTokenModal({
                       if (!/^\d*\.?\d*$/.test(value)) return;
 
                       setAmount(value);
+                       setIsMaxAmount(false);
 
                       if (errors.amount) {
                         setErrors((prev) => ({ ...prev, amount: undefined }));
@@ -441,6 +444,7 @@ function SendTokenModal({
                       const finalAmount = maxSendable > 0 ? maxSendable : 0;
 
                       setAmount(finalAmount > 0 ? formatBalance(finalAmount) : "0");
+                       setIsMaxAmount(true);
                     }}
                     disabled={!selectedToken || gasLoading || gasFeeEth === null}
                     className="px-4 py-2 bg-[#202A43] border border-[#3C3D47] text-white rounded-xl hover:bg-[#2a3555] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"

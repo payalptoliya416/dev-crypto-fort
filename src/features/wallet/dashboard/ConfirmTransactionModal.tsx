@@ -24,7 +24,7 @@ function ConfirmTransactionModal({
   onSuccess,
 }: ConfirmTransactionModalProps) {
   // transaction data (includes gasFee)
-  const { toAddress, amount, selectedToken, marketValue, gasFee } = useSelector(
+  const { toAddress, amount, selectedToken, marketValue, gasFee , isMaxAmount } = useSelector(
     (state: RootState) => state.transaction,
   );
 
@@ -68,60 +68,61 @@ function ConfirmTransactionModal({
     try {
       setLoading(true);
 
-      const token = selectedToken?.toLowerCase();
-      const isNativeToken = token === "eth" || token === "bnb" || token === "trx" || token === "btc";
+      // const token = selectedToken?.toLowerCase();
+      // const isNativeToken = token === "eth" || token === "bnb" || token === "trx" || token === "btc";
 
-      const nativeBalanceMap: Record<string, string | undefined> = {
-        eth: activeWallet?.eth_balance,
-        btc: activeWallet?.btc_balance,
-        usdt: activeWallet?.eth_balance,
-        usdc: activeWallet?.eth_balance,
-        trc20: activeWallet?.trx_balance,
-        bnb: activeWallet?.bnb_balance,
-        trx: activeWallet?.trx_balance,
-      };
+      // const nativeBalanceMap: Record<string, string | undefined> = {
+      //   eth: activeWallet?.eth_balance,
+      //   btc: activeWallet?.btc_balance,
+      //   usdt: activeWallet?.eth_balance,
+      //   usdc: activeWallet?.eth_balance,
+      //   trc20: activeWallet?.trx_balance,
+      //   bnb: activeWallet?.bnb_balance,
+      //   trx: activeWallet?.trx_balance,
+      // };
 
-      const tokenBalanceMap: Record<string, string | undefined> = {
-        eth: activeWallet?.eth_balance,
-        btc: activeWallet?.btc_balance,
-        usdt: activeWallet?.usdt_balance,
-        usdc: (activeWallet as any)?.usdc_balance,
-        trc20: activeWallet?.trc20_balance,
-        bnb: activeWallet?.bnb_balance,
-        trx: activeWallet?.trx_balance,
-      };
+      // const tokenBalanceMap: Record<string, string | undefined> = {
+      //   eth: activeWallet?.eth_balance,
+      //   btc: activeWallet?.btc_balance,
+      //   usdt: activeWallet?.usdt_balance,
+      //   usdc: (activeWallet as any)?.usdc_balance,
+      //   trc20: activeWallet?.trc20_balance,
+      //   bnb: activeWallet?.bnb_balance,
+      //   trx: activeWallet?.trx_balance,
+      // };
 
-      const nativeBalance = token && nativeBalanceMap[token] ? Number(nativeBalanceMap[token]) : 0;
-      const tokenBalance = token && tokenBalanceMap[token] ? Number(tokenBalanceMap[token]) : 0;
-      const parsedAmount = Number(amount || 0);
-      const parsedGas = Number(gasFee || 0);
-      const formatedGasFee = Number(formatBalance(gasFee));
+      // const nativeBalance = token && nativeBalanceMap[token] ? Number(nativeBalanceMap[token]) : 0;
+      // const tokenBalance = token && tokenBalanceMap[token] ? Number(tokenBalanceMap[token]) : 0;
+      // const parsedAmount = Number(amount || 0);
+      // const parsedGas = Number(gasFee || 0);
+      // const formatedGasFee = Number(formatBalance(gasFee));
       // validations
-      if (isNativeToken) {  
-        if (parsedAmount + formatedGasFee > tokenBalance) {
-          toast.error("Insufficient balance to cover amount and gas fee");
-          setLoading(false);
-          return;
-        }
-      } else {
-        if (parsedAmount > tokenBalance) {
-          toast.error("Amount exceeds available token balance");
-          setLoading(false);
-          return;
-        }
+      // if (isNativeToken) {  
+      //   if (parsedAmount + formatedGasFee > tokenBalance) {
+      //     toast.error("Insufficient balance to cover amount and gas fee");
+      //     setLoading(false);
+      //     return;
+      //   }
+      // } else {
+      //   if (parsedAmount > tokenBalance) {
+      //     toast.error("Amount exceeds available token balance");
+      //     setLoading(false);
+      //     return;
+      //   }
 
-        if (parsedGas > nativeBalance) {
-          const nativeSymbol = token && (nativeBalanceMap[token] ? (token === "trc20" ? "TRX" : "ETH") : "ETH");
-          toast.error(`Insufficient ${nativeSymbol} balance to cover gas fee`);
-          setLoading(false);
-          return;
-        }
-      }
+      //   if (parsedGas > nativeBalance) {
+      //     const nativeSymbol = token && (nativeBalanceMap[token] ? (token === "trc20" ? "TRX" : "ETH") : "ETH");
+      //     toast.error(`Insufficient ${nativeSymbol} balance to cover gas fee`);
+      //     setLoading(false);
+      //     return;
+      //   }
+      // }
 
       const res = await sendTransaction({
         wallet_id: activeWallet.id,
         to_address: toAddress,
-        amount: String(parsedAmount) === String(tokenBalance) ? "all" : amount,
+        amount: isMaxAmount ? "all" : amount,
+        is_full: isMaxAmount ? true : false,
         type:
           selectedToken?.toLowerCase() === "usdc"
             ? "USDC"
