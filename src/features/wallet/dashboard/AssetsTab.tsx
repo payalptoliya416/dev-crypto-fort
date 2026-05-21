@@ -42,8 +42,6 @@ function AssetsTab() {
     (state: RootState) => state.activeWallet.wallet,
   );
 
-  
-
   useEffect(() => {
     const socket = io("https://socket.cryptosfort.com", {
       transports: ["websocket"],

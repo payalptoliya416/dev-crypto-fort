@@ -170,7 +170,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
               </p>
 
               <div className="flex items-center gap-2 min-w-0 sm:max-w-[70%]">
-                <p className="text-[#7A7D83] text-sm truncate flex-1 min-w-0">
+               <p className="text-[#7A7D83] text-sm flex-1 min-w-0 break-all">
                   {address || "--"}
                 </p>
 
