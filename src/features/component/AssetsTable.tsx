@@ -52,7 +52,7 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
                   </div>
                 </td>
 
-                <td className="py-[13px] px-5 text-[#7A7D83] text-base font-normal text-right">
+                <td className="py-[13px] px-5 text-[#FAFAFB] text-base font-normal text-right">
                   {asset.price}
                 </td>
 
@@ -62,7 +62,7 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
                       ${
                         asset.up
                           ? "bg-[#25C866] text-white"
-                          : "bg-[#C82525] text-white"
+                          : "bg-[#DC2626] text-white"
                       }`}
                   >
                     {asset.up ? (
@@ -100,7 +100,7 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets }) => {
                   ${
                     asset.up
                       ? "bg-[#25C866] text-white"
-                      : "bg-[#C82525] text-white"
+                      : "bg-[#DC2626] text-white"
                   }`}
               >
                 {asset.up ? (

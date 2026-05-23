@@ -1,9 +1,9 @@
-import d1 from "@/assets/Ethereum.png";
-import d2 from "@/assets/Bitcoin.png";
-import d4 from "@/assets/USDC.png";
-import d5 from "@/assets/TRC-20.png";
+import d1 from "@/assets/Ethereum.svg";
+import d2 from "@/assets/Bitcoin.svg";
+import d4 from "@/assets/USDC.svg";
+import d5 from "@/assets/TRC-20.svg";
 import d3 from "@/assets/Binance.png";
-import d9 from "@/assets/tron.png";
+import d9 from "@/assets/tron.svg";
 import up from "@/assets/up.svg";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import { formatBalance } from "../../component/format";
@@ -203,10 +203,10 @@ function AssetsTab() {
       key: "name",
       render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="w-8 h-8" />
+          <img src={row.icon} alt="icon" className="" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
-            <p className="text-xs text-[#7A7D83]">{row.symbol}</p>
+            <p className="text-xs text-[#FAFAFB]">{row.symbol}</p>
           </div>
         </div>
       ),
@@ -216,7 +216,7 @@ function AssetsTab() {
       key: "balance",
       align: "right",
       render: (row) => (
-        <p className="text-[#7A7D83] text-base font-normal">
+        <p className="text-[#FAFAFB] text-base font-normal">
           {formatBalance(row.balance)} {row.symbol}
         </p>
       ),
@@ -242,14 +242,37 @@ function AssetsTab() {
         const price = Number(cleaned);
 
         if (isNaN(price)) {
-          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+          return <p className="text-[#FAFAFB] text-base font-normal">--</p>;
         }
 
         const total = balance * price;
 
         return (
-          <p className="text-[#7A7D83] text-base font-normal">
+          <p className="text-[#FAFAFB] text-base font-normal">
             ${formatBalance(total, { isFiat: true })}
+          </p>
+        );
+      },
+    },
+    {
+      header: "Price",
+      key: "price",
+      align: "right",
+      width: "13%",
+      render: (row) => {
+        if (!row.price) {
+          return (
+            <div className="flex justify-end">
+              <div className="w-10 h-5 overflow-hidden">
+                <Loader />
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <p className="text-[#FAFAFB] text-base font-normal">
+            ${formatBalance(row.price, { isFiat: true })}
           </p>
         );
       },
@@ -273,7 +296,7 @@ function AssetsTab() {
         return (
           <span
             className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
-      ${row.up ? "bg-[#25C866]" : "bg-[#C82525]"} text-white`}
+      ${row.up ? "bg-[#16A34A]" : "bg-[#DC2626]"} text-white`}
           >
             <img
               src={up}

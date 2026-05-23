@@ -5,9 +5,9 @@ import type { RootState } from "../../../redux/store/store";
 import toast from "react-hot-toast";
 import { swapToken } from "../../../api/transactionApi";
 import TokenDropdown, { type TokenOption } from "./TokenDropdown";
-import d1 from "@/assets/Ethereum.png";
-import d4 from "@/assets/USDC.png";
-import d5 from "@/assets/TRC-20.png";
+import d1 from "@/assets/Ethereum.svg";
+import d4 from "@/assets/USDC.svg";
+import d5 from "@/assets/TRC-20.svg";
 
 interface Props {
   open: boolean;

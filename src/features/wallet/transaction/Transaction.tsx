@@ -5,12 +5,12 @@ import CommonTable, { type Column } from "../../component/CommonTable";
 import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
 import { getTransactions, type Transaction } from "../../../api/walletApi";
-import d1 from "@/assets/Ethereum.png";
-import d2 from "@/assets/Bitcoin.png";
+import d1 from "@/assets/Ethereum.svg";
+import d2 from "@/assets/Bitcoin.svg";
 import d3 from "@/assets/Binance.png";
-import d4 from "@/assets/USDC.png";
-import d5 from "@/assets/TRC-20.png";
-import d9 from "@/assets/tron.png";
+import d4 from "@/assets/USDC.svg";
+import d5 from "@/assets/TRC-20.svg";
+import d9 from "@/assets/tron.svg";
 import Loader from "../../component/Loader";
 import { TbCopy } from "react-icons/tb";
 
@@ -173,7 +173,7 @@ function TransactionPage() {
       key: "amount",
       align: "right",
       render: (row) => (
-        <p className="text-[#7A7D83] text-base font-normal">{row.amount}</p>
+        <p className="text-[#FAFAFB] text-base font-normal">{row.amount}</p>
       ),
     },
     {
@@ -198,7 +198,7 @@ function TransactionPage() {
               ? "bg-[#25C866] text-white"
               : row.status === "Pending"
                 ? "bg-[#DEC015] text-[#161F37]"
-                : "bg-[#C82525] text-white"
+                : "bg-[#DC2626] text-white"
           }`}
         >
           {row.status}

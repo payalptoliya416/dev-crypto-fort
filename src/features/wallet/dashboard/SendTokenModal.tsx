@@ -195,10 +195,8 @@ function SendTokenModal({
           symbol,
           base: "USD",
         });
-
         const priceString = response?.prices?.[0]?.price || "";
         const price = Number(String(priceString).replace(/[,\s]/g, ""));
-
         if (response.success && price > 0) {
           setMarketValue(price * parsedAmount);
         } else {
@@ -483,8 +481,8 @@ function SendTokenModal({
                 ) : (
                   <p>
                     {marketValue !== null
-                      ? `$${formatBalance(marketValue, { isFiat: true })}`
-                      : "--"}
+                ? `$${marketValue}`
+                : "--"}
                   </p>
                 )}
               </div>

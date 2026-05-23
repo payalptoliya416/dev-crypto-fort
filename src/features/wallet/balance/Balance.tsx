@@ -6,11 +6,11 @@ import Loader from "../../component/Loader";
 import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
 import { getBalance } from "../../../api/walletApi";
-import d1 from "@/assets/Ethereum.png";
-import d2 from "@/assets/Bitcoin.png";
+import d1 from "@/assets/Ethereum.svg";
+import d2 from "@/assets/Bitcoin.svg";
 import d3 from "@/assets/Binance.png";
-import d5 from "@/assets/TRC-20.png";
-import d9 from "@/assets/tron.png";
+import d5 from "@/assets/TRC-20.svg";
+import d9 from "@/assets/tron.svg";
 import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
 import { io } from "socket.io-client";
@@ -23,6 +23,7 @@ interface Asset {
   change: string;
   up: boolean;
   icon: string;
+  token_price?: string;
 }
 
 function Balance() {
@@ -59,8 +60,16 @@ function Balance() {
    
           if (!match) return asset;
 
-          const newPrice = Number(match.price);
+          const newPrice = Number(match?.price);
 
+          if (!match?.price || isNaN(newPrice)) {
+            return {
+              ...asset,
+              price: "",
+              change: "--",
+              up: false,
+            };
+          }
           const previousPrice = Number(
             storedPrices?.[asset.symbol]?.price || asset.price || 0,
           );
@@ -187,7 +196,7 @@ function Balance() {
       key: "name",
       render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="w-8 h-8" />
+          <img src={row.icon} alt="icon" className="" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
             <p className="text-xs text-[#7A7D83]">{row.symbol}</p>
@@ -200,15 +209,15 @@ function Balance() {
       key: "balance",
       align: "right",
       render: (row) => (
-        <p className="text-[#7A7D83] text-base font-normal">
+        <p className="text-[#FAFAFB] text-base font-normal">
           {formatBalance(row.balance)} {row.symbol}
         </p>
       ),
     },
 
     {
-      header: "Last Price",
-      key: "price",
+      header: "Amount",
+      key: "token_price",
       align: "right",
       width: "13%",
       render: (row) => {
@@ -227,25 +236,53 @@ function Balance() {
         const price = Number(cleaned);
 
         if (isNaN(price)) {
-          return <p className="text-[#7A7D83] text-base font-normal">--</p>;
+          return <p className="text-[#FAFAFB] text-base font-normal">--</p>;
         }
 
+        if (!row.change || row.change === "--") {
+  return (
+    <p className="text-[#FAFAFB] text-base font-medium">--</p>
+  );
+}
         const total = balance * price;
 
         return (
-          <p className="text-[#7A7D83] text-base font-normal">
+          <p className="text-[#FAFAFB] text-base font-normal">
             ${formatBalance(total, { isFiat: true })}
           </p>
         );
       },
     },
     {
+  header: "Price",
+  key: "price",
+  align: "right",
+  width: "13%",
+  render: (row) => {
+    if (!row.price) {
+      return (
+        <div className="flex justify-end">
+          <div className="w-10 h-5 overflow-hidden">
+            <Loader />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <p className="text-[#FAFAFB] text-base font-normal">
+        ${formatBalance(row.price, { isFiat: true })}
+      </p>
+    );
+  },
+},
+    {
       header: "Change",
       key: "change",
       align: "right",
       width: "13%",
       render: (row) => {
-        if (!row.change) {
+        if (!row.change || row.change === "--") {
           return (
             <div className="flex justify-end">
             <div className="w-10 h-5 overflow-hidden">
@@ -258,7 +295,7 @@ function Balance() {
         return (
           <span
             className={`px-[10px] py-[6px] rounded-[5px] text-sm font-medium inline-flex items-center gap-[5px]
-      ${row.up ? "bg-[#25C866]" : "bg-[#C82525]"} text-white`}
+      ${row.up ? "bg-[#25C866]" : "bg-[#DC2626]"} text-white`}
           >
             <img
               src={up}

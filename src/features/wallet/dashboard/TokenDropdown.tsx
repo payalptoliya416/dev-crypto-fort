@@ -1,8 +1,9 @@
-import d1 from "@/assets/Ethereum.png";
-import d2 from "@/assets/Bitcoin.png";
+import d1 from "@/assets/Ethereum.svg";
+import d2 from "@/assets/Bitcoin.svg";
 import d3 from "@/assets/Binance.png";
-import d4 from "@/assets/USDC.png";
-import d5 from "@/assets/TRC-20.png";
+import d4 from "@/assets/USDC.svg";
+import d5 from "@/assets/TRC-20.svg";
+import d9 from "@/assets/tron.svg";
 import { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 
@@ -20,6 +21,7 @@ const tokenOptions: TokenOption[] = [
   { value: "usdc", label: "USDC (ERC20)", symbol: "USDC", icon: d4 },
   { value: "btc", label: "Bitcoin", symbol: "BTC", icon: d2 },
   { value: "bnb", label: "Binance", symbol: "BNB", icon: d3 },
+  { value: "trx", label: "TRON", symbol: "TRX", icon: d9 },
 ];
 
 interface TokenDropdownProps {
@@ -29,6 +31,7 @@ interface TokenDropdownProps {
   placeholder?: string;
   options?: TokenOption[];
   excludeValues?: string[];
+  disabled?: boolean;
 }
 
 function TokenDropdown({
@@ -38,6 +41,7 @@ function TokenDropdown({
   placeholder = "Select token",
   options,
   excludeValues = [],
+   disabled = false,
 }: TokenDropdownProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -67,14 +71,23 @@ function TokenDropdown({
   return (
     <div ref={dropdownRef} className="relative w-full">
       <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        className={`w-full bg-[#161F37] border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none flex items-center justify-between gap-3 cursor-pointer ${
-          hasError ? "border-[#ef4343]" : "border-[#3C3D47]"
-        }`}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
+  type="button"
+  disabled={disabled}
+  onClick={() => {
+    if (!disabled) {
+      setOpen((current) => !current);
+    }
+  }}
+  className={`w-full bg-[#161F37] border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none flex items-center justify-between gap-3 ${
+    disabled
+      ? "opacity-60 cursor-not-allowed"
+      : "cursor-pointer"
+  } ${
+    hasError ? "border-[#ef4343]" : "border-[#3C3D47]"
+  }`}
+  aria-haspopup="listbox"
+  aria-expanded={open}
+>
         {selectedToken ? (
           <span className="flex items-center gap-3 min-w-0">
             <img

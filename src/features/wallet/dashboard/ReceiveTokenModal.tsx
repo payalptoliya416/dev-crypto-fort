@@ -72,7 +72,8 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
       setSelectedAddress(currentWallet.eth_address || "");
     } else if (selectedToken === "btc") {
       setSelectedAddress(currentWallet.btc_address || "");
-    } else if (selectedToken === "trc20") {
+    } else if (selectedToken === "trx" ||
+      selectedToken === "trc20") {
       setSelectedAddress(currentWallet.tron_address || "");
     } else if (selectedToken === "usdt" || selectedToken === "usdc") {
       setSelectedAddress(currentWallet.eth_address || "");
@@ -132,6 +133,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
             <TokenDropdown
               value={selectedToken}
               onChange={setSelectedToken}
+                disabled={!!defaultSelectedToken}
             />
           </div>
 
@@ -186,7 +188,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
             <p className="text-[#FFDD1D] text-base sm:text-lg font-medium">
             {selectedToken === "eth" && "Only send ETH / ERC-20 tokens to this address."}
             {selectedToken === "btc" && "Only send BTC to this address."}
-            {selectedToken === "trx" && "Only send TRC-20 tokens to this address."}
+            {(selectedToken === "trx" || selectedToken === "trc20") && "Only send TRC-20 tokens to this address."}
             {selectedToken === "trc20" && "Only send TRC-20 tokens to this address."}
             {selectedToken === "usdt" && "Only send USDT (ERC-20) to this address."}
             {selectedToken === "usdc" && "Only send USDC (ERC20) to this address."}

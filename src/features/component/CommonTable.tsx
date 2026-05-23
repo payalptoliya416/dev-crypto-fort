@@ -105,7 +105,7 @@ function CommonTable<T>({
           >
             {columns.map((col, i) => (
               <div key={i} className="flex justify-between mt-2">
-                <p className="text-[#7A7D83] text-sm">{col.header}</p>
+                <p className="text-[#FAFAFB] text-sm">{col.header}</p>
                 <div className="text-white text-sm font-medium">
                   {col.render ? col.render(row) : (row[col.key] as any)}
                 </div>
@@ -119,7 +119,7 @@ function CommonTable<T>({
       {totalItems > 0 && (
         <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 px-4 py-3 border border-t-0 border-[#3C3D47] rounded-b-xl bg-[#161F37]">
           {/* Left info */}
-          <p className="text-sm text-[#7A7D83]">
+          <p className="text-sm text-[#FAFAFB]">
             {from} – {to} of {totalItems} results
           </p>
 
