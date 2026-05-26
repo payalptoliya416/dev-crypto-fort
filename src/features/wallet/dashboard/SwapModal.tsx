@@ -3,11 +3,17 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import type { RootState } from "../../../redux/store/store";
 import toast from "react-hot-toast";
-import { swapToken } from "../../../api/transactionApi";
+import {
+  getGasFee,
+  getSwapQuote,
+  swapToken,
+} from "../../../api/transactionApi";
 import TokenDropdown, { type TokenOption } from "./TokenDropdown";
 import d1 from "@/assets/Ethereum.svg";
 import d4 from "@/assets/USDC.svg";
 import d5 from "@/assets/TRC-20.svg";
+import { formatBalance, formatBalanceDecimal } from "../../component/format";
+import Loader from "../../component/Loader";
 
 interface Props {
   open: boolean;
@@ -24,6 +30,44 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
 
   const [fromCurrency, setFromCurrency] = useState("");
   const [toCurrency, setToCurrency] = useState("");
+  const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{
+    fromCurrency?: string;
+    toCurrency?: string;
+    amount?: string;
+  }>({});
+  const [gasLoading, setGasLoading] = useState(false);
+  const [gasFeeEth, setGasFeeEth] = useState<string | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [receiveAmount, setReceiveAmount] = useState("");
+  const [debouncedAmount, setDebouncedAmount] = useState("");
+  const gasIncludedTokens = ["eth", "usdt", "usdc"];
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAmount(amount);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [amount]);
+
+  const getBalance = () => {
+    switch (fromCurrency) {
+      case "eth":
+        return activeWallet?.eth_balance || 0;
+
+      case "usdt":
+        return activeWallet?.usdt_balance || 0;
+
+      case "usdc":
+        return activeWallet?.usdc_balance || 0;
+
+      default:
+        return 0;
+    }
+  };
+
+  const availableBalance = Number(getBalance());
 
   const swapOptions: TokenOption[] = [
     { value: "eth", label: "Ethereum", symbol: "ETH", icon: d1 },
@@ -36,19 +80,15 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
       setToCurrency("");
     }
   }, [fromCurrency, toCurrency]);
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{
-    fromCurrency?: string;
-    toCurrency?: string;
-    amount?: string;
-  }>({});
+
   const resetForm = () => {
     setFromCurrency("");
     setToCurrency("");
     setAmount("");
     setErrors({});
+    setGasFeeEth(null);
   };
+
   const validate = () => {
     const newErrors: typeof errors = {};
 
@@ -75,9 +115,83 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
   };
 
   const normalizeCurrency = (currency: string) => {
-    if (currency === "usdc") return "USDC";
-    return currency;
+  return currency.toLowerCase();
+};
+
+  const fetchGasFee = async () => {
+    try {
+      setGasLoading(true);
+
+      const res = await getGasFee();
+      // const res = await getGasFee({ token: selectedToken, amount });
+      if (res.success && res.data) {
+        const gasEth = res.data.gas_fee_eth ?? res.data.gas_eth ?? "0";
+
+        setGasFeeEth(gasEth);
+      }
+    } catch {
+      console.error("Failed to get gas fee");
+    } finally {
+      setGasLoading(false);
+    }
   };
+
+  const fetchSwapQuote = async () => {
+    if (!fromCurrency || !toCurrency || !amount) {
+      setReceiveAmount("");
+      return;
+    }
+
+    try {
+      setQuoteLoading(true);
+
+      const res = await getSwapQuote({
+        from_currency: fromCurrency,
+        to_currency: toCurrency,
+        amount: Number(debouncedAmount),
+      });
+      if (res.success) {
+        setReceiveAmount(String(res.amount_out || 0));
+      }
+    } catch (error: any) {
+      const apiError =
+        error?.response?.data?.errors?.amount?.[0] ||
+        error?.response?.data?.message ||
+        error?.errors?.amount?.[0] ||
+        error?.message ||
+        "Failed to get quote";
+
+      setErrors((prev) => ({
+        ...prev,
+        amount: apiError,
+      }));
+
+      setReceiveAmount("");
+    } finally {
+      setQuoteLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (fromCurrency && toCurrency && amount) {
+        fetchSwapQuote();
+      } else {
+        setReceiveAmount("");
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [fromCurrency, toCurrency, debouncedAmount]);
+
+  useEffect(() => {
+    if (!open || !fromCurrency) {
+      setGasFeeEth(null);
+      return;
+    }
+
+    fetchGasFee();
+  }, [open, fromCurrency]);
 
   const handleSwap = async () => {
     if (!validate()) return;
@@ -93,7 +207,7 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
         wallet_id,
         from_currency: normalizeCurrency(fromCurrency),
         to_currency: normalizeCurrency(toCurrency),
-        amount: Number(amount),
+         amount: Number(debouncedAmount),
       };
 
       const res = await swapToken(payload);
@@ -153,6 +267,23 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
     }
   };
 
+  const nativeTokenSymbols: Record<string, string> = {
+    eth: "ETH",
+    trc20: "TRX",
+    usdt: "ETH",
+    usdc: "ETH",
+    btc: "BTC",
+    bnb: "BNB",
+    trx: "TRX",
+  };
+
+  const gasFeeInEth = gasFeeEth ? Number(gasFeeEth) : 0;
+
+  const selectedNativeSymbol =
+    fromCurrency && nativeTokenSymbols[fromCurrency]
+      ? nativeTokenSymbols[fromCurrency]
+      : "ETH";
+
   if (!open) return null;
 
   return (
@@ -191,7 +322,7 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
               From Currency
             </label>
 
-              <TokenDropdown
+            <TokenDropdown
               value={fromCurrency}
               onChange={(value) => {
                 setFromCurrency(value);
@@ -202,7 +333,9 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
                   }));
                 }
               }}
-              options={swapOptions.filter((option) => option.value !== toCurrency)}
+              options={swapOptions.filter(
+                (option) => option.value !== toCurrency,
+              )}
               placeholder="Select currency"
               hasError={Boolean(errors.fromCurrency)}
             />
@@ -213,14 +346,20 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
               </p>
             )}
           </div>
-
+          <div className="flex justify-between text-base text-[#7A7D83] mb-5 flex-wrap">
+            <p>Available Balance</p>
+            <p>
+              {formatBalance(Number(availableBalance || 0))}{" "}
+              {fromCurrency.toUpperCase()}
+            </p>
+          </div>
           {/* To Currency */}
           <div className="mb-5">
             <label className="text-base sm:text-lg text-[#7A7D83] mb-[10px] block">
               To Currency
             </label>
 
-              <TokenDropdown
+            <TokenDropdown
               value={toCurrency}
               onChange={(value) => {
                 setToCurrency(value);
@@ -231,7 +370,9 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
                   }));
                 }
               }}
-              options={swapOptions.filter((option) => option.value !== fromCurrency)}
+              options={swapOptions.filter(
+                (option) => option.value !== fromCurrency,
+              )}
               placeholder="Select currency"
               hasError={Boolean(errors.toCurrency)}
             />
@@ -243,30 +384,118 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
 
           {/* Amount */}
           <div>
-            <label className="text-base sm:text-lg text-[#7A7D83] mb-[10px] block">
+            <label className="text-base sm:text-lg text-[#7A7D83] block">
               Amount
             </label>
+            <div className="flex gap-2">
+              <input
+                value={amount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (!/^\d*\.?\d*$/.test(value)) return;
 
-            <input
-              value={amount}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (!/^\d*\.?\d*$/.test(value)) return;
+                  setAmount(value);
 
-                setAmount(value);
+                  if (errors.amount) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      amount: undefined,
+                    }));
+                  }
+                }}
+                placeholder="Enter amount"
+                className={`w-full bg-transparent border rounded-xl px-5 py-3 text-white outline-none
+                 ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!fromCurrency || gasFeeEth === null || gasLoading) return;
 
-                if (errors.amount) {
-                  setErrors((prev) => ({ ...prev, amount: undefined }));
-                }
-              }}
-              placeholder="Enter amount"
-              className={`w-full bg-transparent border rounded-xl px-5 py-3 text-white outline-none
-              ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
-            />
+                  const bal = Number(availableBalance || 0);
+                  const gas = Number(gasFeeEth || 0);
+
+                  const isNativeToken =
+                    gasIncludedTokens.includes(fromCurrency);
+
+                  const maxSendable = isNativeToken ? bal - gas : bal;
+
+                  const finalAmount = maxSendable > 0 ? maxSendable : 0;
+
+                  setAmount(
+                    finalAmount > 0 ? formatBalanceDecimal(finalAmount) : "0",
+                  );
+                  if (maxSendable <= 0) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      amount: "Insufficient balance after gas fee",
+                    }));
+
+                    return;
+                  }
+
+                  setErrors((prev) => ({
+                    ...prev,
+                    amount: undefined,
+                  }));
+                }}
+                disabled={!fromCurrency || gasLoading || gasFeeEth === null}
+                className="px-4 py-2 bg-[#202A43] border border-[#3C3D47] text-white rounded-xl hover:bg-[#2a3555] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                MAX
+              </button>
+            </div>
 
             {errors.amount && (
               <p className="text-[#ef4343] text-sm mt-1">{errors.amount}</p>
             )}
+
+            {toCurrency && (
+              <p className="text-[#25C866] text-sm mt-3">
+                {quoteLoading
+                  ? "Calculating..."
+                  : `You will get: ${formatBalanceDecimal(
+                      Number(receiveAmount || 0),
+                    )} ${toCurrency.toUpperCase()}`}
+              </p>
+            )}
+          </div>
+          <div className="mt-[25px] space-y-5 text-sm">
+            <div className="flex justify-between text-white text-base sm:text-lg font-medium">
+              <p>Gas Fee ({selectedNativeSymbol})</p>
+              {gasLoading ? (
+                <div className="w-10 h-5 overflow-hidden">
+                  <Loader />
+                </div>
+              ) : (
+                <p>
+                  {gasFeeEth
+                    ? `${formatBalance(gasFeeEth)} ${selectedNativeSymbol}`
+                    : "--"}
+                </p>
+              )}
+            </div>
+       <div className="flex justify-between text-white text-base sm:text-lg font-medium">
+  <p>Total</p>
+
+  <p>
+    {Number(amount) > 0 ? (
+      fromCurrency === "eth" ? (
+        `${formatBalance(
+          Number(amount || 0) + gasFeeInEth
+        )} ${selectedNativeSymbol}`
+      ) : (
+        `${formatBalance(
+          Number(amount || 0)
+        )} ${fromCurrency.toUpperCase()} + ${formatBalance(
+          gasFeeInEth
+        )} ${selectedNativeSymbol}`
+      )
+    ) : (
+      "--"
+    )}
+  </p>
+</div>
           </div>
 
           <button

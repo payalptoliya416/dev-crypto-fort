@@ -50,6 +50,7 @@ function SendTokenModal({
     selectedToken === "bnb" ||
     selectedToken === "trx" ||
     selectedToken === "btc";
+    
   const [balance, setBalance] = useState("0");
   const [marketValue, setMarketValue] = useState<number | null>(null);
   const [marketLoading, setMarketLoading] = useState(false);
@@ -371,14 +372,6 @@ function SendTokenModal({
                   placeholder="Enter recipient address"
                   className={`flex-1 min-w-0 bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none ${errors.toAddress ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
                 />
-                {/* <button
-                  type="button"
-                  onClick={handleShowQR}
-                  className=" px-3 py-3 rounded-xl bg-[#202A43] cursor-pointer
-                border border-[#3C3D47] flex justify-center items-center text-[#7D7E84]"
-                >
-                  <HiOutlineQrCode size={26} />
-                </button> */}
               </div>
               {errors.toAddress && (
                 <p className="text-[#ef4343] text-sm mt-1">
@@ -392,23 +385,6 @@ function SendTokenModal({
                 Amount
               </label>
 
-              {/* <input
-                value={amount}
-                onChange={(e) => {
-                  const value = e.target.value;
-
-                  if (!/^\d*\.?\d*$/.test(value)) return;
-
-                  setAmount(value);
-
-                  if (errors.amount) {
-                    setErrors((prev) => ({ ...prev, amount: undefined }));
-                  }
-                }}
-                placeholder="Amount"
-                inputMode="decimal"
-                className={`w-full bg-transparent border rounded-xl px-5 py-3 text-base sm:text-lg text-white outline-none ${errors.amount ? "border-[#ef4343]" : "border-[#3C3D47]"}`}
-              /> */}
                <div className="flex gap-2">
                   <input
                     value={amount}

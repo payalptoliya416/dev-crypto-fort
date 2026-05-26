@@ -69,3 +69,36 @@ export const swapToken = (payload: SwapPayload) => {
     body: payload,
   });
 };
+
+export interface SwapQuotePayload {
+  from_currency: string;
+  to_currency: string;
+  amount: number;
+}
+
+export interface SwapQuoteResponse {
+  success: boolean;
+  message?: string;
+
+  amount_in?: number;
+  amount_out?: number;
+
+  from_currency?: string;
+  to_currency?: string;
+
+  errors?: {
+    amount?: string[];
+  };
+}
+
+export const getSwapQuote = (
+  payload: SwapQuotePayload
+) => {
+  return privateApi<SwapQuoteResponse>(
+    "/swap/quote",
+    {
+      method: "POST",
+      body: payload,
+    }
+  );
+};
