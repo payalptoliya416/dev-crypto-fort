@@ -425,14 +425,18 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
                   setAmount(
                     finalAmount > 0 ? formatBalanceDecimal(finalAmount) : "0",
                   );
-                  if (maxSendable <= 0) {
-                    setErrors((prev) => ({
-                      ...prev,
-                      amount: "Insufficient balance after gas fee",
-                    }));
+                  // if (maxSendable <= 0) {
+                  //   setErrors((prev) => ({
+                  //     ...prev,
+                  //     amount: "Insufficient balance after gas fee",
+                  //   }));
 
-                    return;
-                  }
+                  //   return;
+                  // }
+                  
+                  setAmount(
+                    finalAmount > 0 ? formatBalanceDecimal(finalAmount) : "0",
+                  );
 
                   setErrors((prev) => ({
                     ...prev,
