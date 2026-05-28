@@ -167,7 +167,17 @@ function Balance() {
               icon: config?.icon || DEFAULT_ICON,
             };
           }) as Asset[];
-        setAssets(assetList);
+         const sortedAssets = assetList.sort((a, b) => {
+          const totalA =
+            Number(a.balance || 0) * Number(a.price || 0);
+
+          const totalB =
+            Number(b.balance || 0) * Number(b.price || 0);
+
+          return totalB - totalA;
+        });
+
+        setAssets(sortedAssets);
         setLoading(false);
       } catch (err: any) {
         toast.error(err?.message || "Failed to load balance");

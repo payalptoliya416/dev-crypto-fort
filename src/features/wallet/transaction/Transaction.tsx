@@ -228,6 +228,26 @@ function TransactionPage() {
         <p className="text-white text-base font-medium">{row.type}</p>
       ),
     },
+        {
+      header: "Status",
+      key: "status",
+      align: "right",
+      width: "13%",
+      render: (row) => (
+        <span
+          className={`px-[9px] py-[6px] rounded-[5px] text-sm font-medium inline-flex justify-center w-full max-w-[90px]
+          ${
+            row.status === "Confirmed"
+              ? "bg-[#25C866] text-white"
+              : row.status === "Pending"
+                ? "bg-[#DEC015] text-[#161F37]"
+                : "bg-[#DC2626] text-white"
+          }`}
+        >
+          {row.status}
+        </span>
+      ),
+    },
   ];
 
   return (
