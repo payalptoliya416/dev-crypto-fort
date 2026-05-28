@@ -17,6 +17,7 @@ import SendTokenModal from "./SendTokenModal";
 import ReceiveTokenModal from "./ReceiveTokenModal";
 import ConfirmTransactionModal from "./ConfirmTransactionModal";
 import toast from "react-hot-toast";
+import ImportTokenModal from "./ImportTokenModal";
 
 interface Asset {
   token: string;
@@ -38,6 +39,7 @@ function AssetsTab() {
   const [sendOpen, setSendOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -312,10 +314,16 @@ function AssetsTab() {
 
   return (
     <div className="w-full rounded-2xl bg-[#161F37] border border-[#3C3D47]">
-      <div className="px-5 pt-5 pb-[15px]">
-        <h3 className="tet-xl text-[#25C866] font-semibold mb-[15px]">
+      <div className="px-5 py-5 flex items-center justify-between flex-wrap gap-1">
+        <h3 className="text-base xl:text-xl text-[#25C866] font-semibold">
           Assets
         </h3>
+        <button
+          onClick={() => setImportOpen(true)}
+          className="bg-[#202A43] rounded-lg py-2 px-5 sm:px-6 flex items-center gap-[10px] text-white text-sm font-medium cursor-pointer"
+        >
+         Import Custom Token
+        </button>
       </div>
       {loading ? (
         <div className="flex justify-center items-center py-20">
@@ -363,6 +371,10 @@ function AssetsTab() {
         </div>
       )}
 
+      <ImportTokenModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+      />
       <SendTokenModal
         open={sendOpen}
         onClose={() => setSendOpen(false)}

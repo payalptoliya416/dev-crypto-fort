@@ -109,7 +109,7 @@ function TokenDropdown({
 
       {open && (
         <div
-          className="absolute left-0 right-0 mt-2 rounded-xl bg-[#131F3A] border border-[#2A3553] shadow-xl z-[1001] overflow-hidden"
+          className="absolute left-0 right-0 mt-2 rounded-xl bg-[#131F3A] border border-[#2A3553] shadow-xl z-[1001] max-h-[320px] overflow-y-auto"
           role="listbox"
         >
           {availableOptions.map((token) => (
