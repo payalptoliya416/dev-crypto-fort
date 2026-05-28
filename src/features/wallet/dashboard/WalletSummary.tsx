@@ -38,9 +38,7 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const handleCurrencyChange = (val: string) => {
     dispatch(setCurrency(val));
   };
-  // const ethBalanceNumber = Number(activeWallet?.eth_balance || 0);
-  // const totalValue = ethBalanceNumber * ethPrice;
-  // const formattedBalance = formatBalance(ethBalanceNumber);
+  
   const ethBalanceNumber = Number(activeWallet?.eth_balance || 0);
   const usdcBalanceNumber = Number(activeWallet?.usdc_balance || 0);
   const usdtBalanceNumber = Number(activeWallet?.usdt_balance || 0);

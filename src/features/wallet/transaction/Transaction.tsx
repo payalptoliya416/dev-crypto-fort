@@ -159,7 +159,7 @@ function TransactionPage() {
             <div className="flex items-center gap-2 flex-wrap mb-2">
               <p className="text-sm text-white font-medium mb-1">{row.name}</p>
 
-              {row.is_swap && (
+            {row.is_swap && (row.token_transfers?.length ?? 0) > 0 && (
                 <button
                   onClick={() => {
                     setSelectedSwap(row);
