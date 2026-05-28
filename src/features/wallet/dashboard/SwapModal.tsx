@@ -42,7 +42,8 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [receiveAmount, setReceiveAmount] = useState("");
   const [debouncedAmount, setDebouncedAmount] = useState("");
-  const gasIncludedTokens = ["eth", "usdt", "usdc"];
+  const gasIncludedTokens = ["eth"];
+  // const gasIncludedTokens = ["eth", "usdt", "usdc"];
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedAmount(amount);

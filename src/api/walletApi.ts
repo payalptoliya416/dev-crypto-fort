@@ -125,6 +125,9 @@ export interface Transaction {
   transaction_type: "Send" | "Receive";
   txreceipt_status: "Success" | "Failed" | "Pending";
   timestamp: string;
+
+  is_swap?: boolean;
+  token_transfers?: any[];
 }
 
 export interface GetTransactionsPayload {

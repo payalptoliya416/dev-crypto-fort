@@ -13,6 +13,7 @@ import d5 from "@/assets/TRC-20.svg";
 import d9 from "@/assets/tron.svg";
 import Loader from "../../component/Loader";
 import { TbCopy } from "react-icons/tb";
+import { IoClose } from "react-icons/io5";
 
 interface TransactionRow {
   name: string;
@@ -25,6 +26,10 @@ interface TransactionRow {
   icon: string;
   currency?: string;
   timestamp: string;
+  view?: string;
+
+  is_swap?: boolean;
+  token_transfers?: any[];
 }
 
 function TransactionPage() {
@@ -33,6 +38,8 @@ function TransactionPage() {
     (state: RootState) => state.activeWallet.wallet,
   );
   const [loading, setLoading] = useState(true);
+  const [openSwapModal, setOpenSwapModal] = useState(false);
+  const [selectedSwap, setSelectedSwap] = useState<TransactionRow | null>(null);
 
   useEffect(() => {
     if (!activeWallet?.id) return;
@@ -86,6 +93,9 @@ function TransactionPage() {
 
             icon: tokenData.icon,
             timestamp: tx.timestamp,
+
+            is_swap: tx.is_swap,
+            token_transfers: tx.token_transfers || [],
           };
         });
         setRows(mapped);
@@ -99,7 +109,6 @@ function TransactionPage() {
     fetchTransactions();
   }, [activeWallet?.id]);
 
-  
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -109,49 +118,83 @@ function TransactionPage() {
     }
   };
 
+  const getTokenIcon = (symbol: string) => {
+    const icons: Record<string, string> = {
+      ETH: d1,
+      BTC: d2,
+      USDT: d5,
+      USDC: d4,
+      TRX: d9,
+      BNB: d3,
+    };
+
+    return icons[symbol?.toUpperCase()] || d1;
+  };
+
   const columns: Column<TransactionRow>[] = [
     {
       header: "Name",
       key: "name",
       render: (row) => (
         <div className="flex items-start md:items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="w-8 h-8" />
+          <img src={row.icon} alt="icon" className="" />
           <div>
-            <p className="text-sm text-white font-medium mb-1">{row.name}</p>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-[#7A7D83]">
-                Tx: {row.hash.slice(0, 6)}...{row.hash.slice(-4)}
-              </p>
-              <TbCopy
-                className="text-[#7A7D83] cursor-pointer hover:text-white"
-                size={14}
-                onClick={() => handleCopy(row.hash)}
-              />
-            </div>
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <p className="text-sm text-white font-medium mb-1">{row.name}</p>
 
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-[#7A7D83]">
-                From: {row.from_address.slice(0, 6)}...{row.from_address.slice(-4)}
-              </p>
-              <TbCopy
-                className="text-[#7A7D83] cursor-pointer hover:text-white"
-                size={14}
-                onClick={() => handleCopy(row.from_address)}
-              />
+              {row.is_swap && (
+                <button
+                  onClick={() => {
+                    setSelectedSwap(row);
+                    setOpenSwapModal(true);
+                  }}
+                  className="
+                px-2 py-1 rounded-lg
+                text-[#25C866]
+                text-xs cursor-pointer
+                font-semibold
+                border border-[#25C8661A]
+              "
+                >
+                  View Swap
+                </button>
+              )}
             </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-[#7A7D83]">
+                  Tx: {row.hash.slice(0, 6)}...{row.hash.slice(-4)}
+                </p>
+                <TbCopy
+                  className="text-[#7A7D83] cursor-pointer hover:text-white"
+                  size={14}
+                  onClick={() => handleCopy(row.hash)}
+                />
+              </div>
 
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-[#7A7D83]">
-                To: {row.to_address.slice(0, 6)}...{row.to_address.slice(-4)}
-              </p>
-              <TbCopy
-                className="text-[#7A7D83] cursor-pointer hover:text-white"
-                size={14}
-                onClick={() => handleCopy(row.to_address)}
-              />
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-[#7A7D83]">
+                  From: {row.from_address.slice(0, 6)}...
+                  {row.from_address.slice(-4)}
+                </p>
+                <TbCopy
+                  className="text-[#7A7D83] cursor-pointer hover:text-white"
+                  size={14}
+                  onClick={() => handleCopy(row.from_address)}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-[#7A7D83]">
+                  To: {row.to_address.slice(0, 6)}...{row.to_address.slice(-4)}
+                </p>
+                <TbCopy
+                  className="text-[#7A7D83] cursor-pointer hover:text-white"
+                  size={14}
+                  onClick={() => handleCopy(row.to_address)}
+                />
+              </div>
             </div>
-          </div>
           </div>
         </div>
       ),
@@ -185,26 +228,6 @@ function TransactionPage() {
         <p className="text-white text-base font-medium">{row.type}</p>
       ),
     },
-    {
-      header: "Status",
-      key: "status",
-      align: "right",
-      width: "13%",
-      render: (row) => (
-        <span
-          className={`px-[9px] py-[6px] rounded-[5px] text-sm font-medium inline-flex justify-center w-full max-w-[90px]
-          ${
-            row.status === "Confirmed"
-              ? "bg-[#25C866] text-white"
-              : row.status === "Pending"
-                ? "bg-[#DEC015] text-[#161F37]"
-                : "bg-[#DC2626] text-white"
-          }`}
-        >
-          {row.status}
-        </span>
-      ),
-    },
   ];
 
   return (
@@ -228,6 +251,109 @@ function TransactionPage() {
           </div>
         ) : (
           <CommonTable data={rows} columns={columns} />
+        )}
+
+        {openSwapModal && (
+          <div className="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div
+              onClick={() => setOpenSwapModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Modal */}
+            <div
+              className=" relative w-full max-w-[520px]
+            rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 max-h-[85vh]
+            overflow-y-auto  scroll-thin"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-white text-lg font-semibold">
+                  Swap Transaction
+                </h3>
+                <button
+                  onClick={() => setOpenSwapModal(false)}
+                  className="w-9 h-9 rounded-full bg-[#202A43] flex items-center justify-center cursor-pointer"
+                >
+                  <IoClose className="text-white text-xl" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                {selectedSwap?.token_transfers?.map((token, index) => (
+                  <div
+                    key={index}
+                    className="
+                        bg-[#0F172A]
+                        border border-[#2E3A5C]
+                        rounded-2xl
+                        p-4
+                      "
+                  >
+                    {/* Top */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <img
+                        src={getTokenIcon(token.token_symbol)}
+                        alt="token"
+                      />
+
+                      <div>
+                        <p className="text-white font-semibold">
+                          {token.token_symbol}
+                        </p>
+
+                        <p className="text-[#7A7D83] text-xs">Token Transfer</p>
+                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[#7A7D83] text-sm">Amount</p>
+
+                      <p className="text-white font-semibold">
+                         {Number(token.amount).toString()} {token.token_symbol}
+                      </p>
+                    </div>
+
+                    {/* From */}
+                    <div className="flex items-center justify-between mb-3 gap-3">
+                      <p className="text-[#7A7D83] text-sm">From</p>
+
+                      <div className="flex items-center gap-2">
+                        <p className="text-white text-xs">
+                          {token.from_address.slice(0, 8)}...
+                          {token.from_address.slice(-6)}
+                        </p>
+
+                        <TbCopy
+                          className="text-[#7A7D83] cursor-pointer hover:text-white"
+                          size={14}
+                          onClick={() => handleCopy(token.from_address)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* To */}
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[#7A7D83] text-sm">To</p>
+
+                      <div className="flex items-center gap-2">
+                        <p className="text-white text-xs">
+                          {token.to_address.slice(0, 8)}...
+                          {token.to_address.slice(-6)}
+                        </p>
+
+                        <TbCopy
+                          className="text-[#7A7D83] cursor-pointer hover:text-white"
+                          size={14}
+                          onClick={() => handleCopy(token.to_address)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </DashboardLayout>

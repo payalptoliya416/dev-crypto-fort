@@ -50,6 +50,8 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [loading, setLoading] = useState(false);
   const [loading2FA, setLoading2FA] = useState(false);
   const [show2FAModal, setShow2FAModal] = useState(false);
+  const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [showRecoveryPhrase, setShowRecoveryPhrase] = useState(false);
 
   const fetch2FAStatus = async () => {
     try {
@@ -679,7 +681,11 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             {/* Overlay */}
             <div
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={() => setShowBackupModal(false)}
+              onClick={() => {
+              setShowBackupModal(false);
+              setShowPrivateKey(false);
+              setShowRecoveryPhrase(false);
+            }}
             />
 
             {/* Modal */}
@@ -690,8 +696,12 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             >
               {/* Close */}
               <button
-                onClick={() => setShowBackupModal(false)}
-                className="absolute top-3 right-3 text-white text-xl cursor-pointer"
+                onClick={() => {
+                setShowBackupModal(false);
+                setShowPrivateKey(false);
+                setShowRecoveryPhrase(false);
+              }}
+                className="absolute top-4 right-4 text-white text-xl cursor-pointer"
               >
                 ✕
               </button>
@@ -705,10 +715,33 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                 <p className="text-sm text-[#A1A1AA] mb-2">Private Key</p>
 
                 <div className="bg-[#0F172A] border border-[#2E3A5C] rounded-lg p-3 text-xs font-mono break-all text-white">
-                  {backupData.privateKey}
-                </div>
+  
+                    <p className="flex-1 break-all">
+                      {showPrivateKey
+                        ? backupData.privateKey
+                        : "••••••••••••••••••••••••••••••••••••"}
+                    </p>
 
-                <div className="flex justify-end mt-2">
+                  </div>
+
+                <div className="flex justify-end mt-2 gap-5">
+                  
+                   <button
+                    onClick={() => setShowPrivateKey(!showPrivateKey)}
+                    className="flex items-center gap-2 text-[#25C866] text-sm font-medium cursor-pointer"
+                  >
+                    {showPrivateKey ? (
+                      <>
+                        <IoEyeOffOutline size={18} />
+                        Hide
+                      </>
+                    ) : (
+                      <>
+                        <IoEyeOutline size={18} />
+                        Reveal First
+                      </>
+                    )}
+                  </button>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(backupData.privateKey);
@@ -726,10 +759,33 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                 <p className="text-sm text-[#A1A1AA] mb-2">Recovery Phrase</p>
 
                 <div className="bg-[#0F172A] border border-[#2E3A5C] rounded-lg p-3 text-sm leading-6 text-white">
-                  {backupData.recoveryPhrase}
+  
+                  <p className="flex-1">
+                    {showRecoveryPhrase
+                      ? backupData.recoveryPhrase
+                      : "•••• •••• •••• •••• •••• •••• •••• ••••"}
+                  </p>
                 </div>
 
-                <div className="flex justify-end mt-2">
+                <div className="flex justify-end mt-2 gap-5">
+                    <button
+                    onClick={() =>
+                      setShowRecoveryPhrase(!showRecoveryPhrase)
+                    }
+                    className="flex items-center gap-2 text-[#25C866] text-sm font-medium cursor-pointer"
+                  >
+                    {showRecoveryPhrase ? (
+                    <>
+                      <IoEyeOffOutline size={18} />
+                      Hide
+                    </>
+                  ) : (
+                    <>
+                      <IoEyeOutline size={18} />
+                      Reveal First
+                    </>
+                  )}
+                  </button>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(backupData.recoveryPhrase);

@@ -216,7 +216,7 @@ function Balance() {
     },
 
     {
-      header: "Amount",
+      header: "Value",
       key: "token_price",
       align: "right",
       width: "13%",
