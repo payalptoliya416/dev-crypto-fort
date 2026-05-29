@@ -65,19 +65,32 @@ function TransactionPage() {
           }
         };
         const mapped: TransactionRow[] = res.data.map((tx: Transaction) => {
-          const symbol = tx.currency?.toUpperCase() || "ETH";
+         const currency = tx.currency?.toUpperCase() || "ETH";
 
-          const tokenMap: Record<string, { name: string; icon: string }> = {
-            ETH: { name: "Ethereum", icon: d1 },
-            BTC: { name: "Bitcoin", icon: d2 },
-            USDT: { name: "Tether", icon: d5 },
-            USDC: { name: "USDC (ERC20)", icon: d4 },
-            TRX: { name: "Tron", icon: d9 },
-            TRC20: { name: "Trc20", icon: d5 },
-            BNB: { name: "Bnb", icon: d3 },
-          };
+        const tokenMap: Record<string, { name: string; icon: string }> = {
+          ETH: { name: "Ethereum", icon: d1 },
+          BTC: { name: "Bitcoin", icon: d2 },
+          USDT: { name: "Tether", icon: d5 },
+          USDC: { name: "USDC (ERC20)", icon: d4 },
+          TRX: { name: "Tron", icon: d9 },
+          TRC20: { name: "Trc20", icon: d5 },
+          BNB: { name: "Bnb", icon: d3 },
+        };
 
-          const tokenData = tokenMap[symbol] || tokenMap["ETH"];
+        const isCustomToken = !tokenMap[currency];
+
+        const symbol = isCustomToken ? "ETH" : currency;
+
+       const tokenData = isCustomToken
+      ? {
+          name:
+            tx.currency
+              ? tx.currency.charAt(0).toUpperCase() +
+                tx.currency.slice(1).toLowerCase()
+              : "Token",
+          icon: d1,
+        }
+      : tokenMap[currency];
 
           return {
             name: tokenData.name,

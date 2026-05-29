@@ -32,6 +32,7 @@ function SendTokenModal({
   const [selectedToken, setSelectedToken] = useState("");
   const { assets } = useWalletAssets();
   const selectedAsset = assets.find((asset) => asset.token === selectedToken);
+  console.log("selectedAsset",)
   const selectedTokenBalance = selectedAsset?.balance ?? "0";
   const [gasLoading, setGasLoading] = useState(false);
   const [gasFeeEth, setGasFeeEth] = useState<string | null>(null);
@@ -64,30 +65,41 @@ function SendTokenModal({
   };
 
   const selectedNativeSymbol =
-    selectedToken && nativeTokenSymbols[selectedToken]
-      ? nativeTokenSymbols[selectedToken]
-      : "ETH";
+    selectedAsset?.network?.toLowerCase().includes("tron")
+      ? "TRX"
+      : selectedAsset?.network?.toLowerCase().includes("btc")
+        ? "BTC"
+        : selectedAsset?.network?.toLowerCase().includes("bnb")
+          ? "BNB"
+          : selectedToken && nativeTokenSymbols[selectedToken]
+            ? nativeTokenSymbols[selectedToken]
+            : "ETH";
 
-  const getApiSymbol = (token: string) => {
-    switch (token.toLowerCase()) {
-      case "btc":
-        return "BTC";
-      case "eth":
-        return "ETH";
-      case "usdt":
-        return "USDT";
-      case "usdc":
-        return "USDC";
-      case "bnb":
-        return "BNB";
-      case "trx":
-        return "TRX";
-      case "trc20":
-        return "TRC20";
-      default:
-        return "ETH";
-    }
-  };
+  // const getApiSymbol = (token: string) => {
+  //   const matchedAsset = assets.find((asset) => asset.token === token);
+  //   if (matchedAsset?.symbol) {
+  //     return matchedAsset.symbol;
+  //   }
+
+  //   switch (token.toLowerCase()) {
+  //     case "btc":
+  //       return "BTC";
+  //     case "eth":
+  //       return "ETH";
+  //     case "usdt":
+  //       return "USDT";
+  //     case "usdc":
+  //       return "USDC";
+  //     case "bnb":
+  //       return "BNB";
+  //     case "trx":
+  //       return "TRX";
+  //     case "trc20":
+  //       return "TRC20";
+  //     default:
+  //       return "ETH";
+  //   }
+  // };
 
   const parsedAmount = Number(String(amount).replace(/[,\s]/g, "")) || 0;
 
@@ -151,7 +163,6 @@ function SendTokenModal({
         setGasLoading(true);
 
         const res = await getGasFee();
-        // const res = await getGasFee({ token: selectedToken, amount });
         if (res.success && res.data) {
           const gasEth =
             res.data.gas_fee_eth ?? res.data.gas_eth ?? "0";
@@ -171,13 +182,21 @@ function SendTokenModal({
         return;
       }
 
-      const symbol = getApiSymbol(selectedToken);
+      const nativeSymbols = ["BTC", "ETH", "USDT", "USDC", "BNB", "TRX"];
+
+      const assetSymbol = selectedAsset?.symbol?.toUpperCase() || "";
+
+      const symbol = nativeSymbols.includes(assetSymbol)
+        ? assetSymbol
+        : "USDT";
+
       setMarketLoading(true);
       try {
         const response = await getPrices({
           symbol,
           base: "USD",
         });
+        console.log("response",response)
         const priceString = response?.prices?.[0]?.price || "";
         const price = Number(String(priceString).replace(/[,\s]/g, ""));
         if (response.success && price > 0) {
@@ -200,21 +219,6 @@ function SendTokenModal({
 
     return () => window.clearTimeout(timer);
   }, [open, selectedToken, amount, parsedAmount, dashboardMode]);
-
-  // const nativeBalanceMap: Record<string, string | undefined> = {
-  //   eth: activeWallet?.eth_balance,
-  //   btc: activeWallet?.btc_balance,
-  //   usdt: activeWallet?.eth_balance,
-  //   usdc: activeWallet?.eth_balance,
-  //   trc20: activeWallet?.trx_balance,
-  //   bnb: activeWallet?.bnb_balance,
-  //   trx: activeWallet?.trx_balance,
-  // };
-
-  // const selectedNativeBalance =
-  //   selectedToken && nativeBalanceMap[selectedToken]
-  //     ? Number(nativeBalanceMap[selectedToken])
-  //     : 0;
 
   const validate = () => {
     const newErrors: typeof errors = {};
@@ -339,7 +343,7 @@ function SendTokenModal({
               <p>Available Balance</p>
               <p>
                 {selectedToken
-                  ? `${selectedTokenBalance} ${selectedAsset?.symbol || selectedToken.toUpperCase()}`
+                  ? `${formatBalance(selectedTokenBalance)} ${selectedAsset?.symbol || selectedToken.toUpperCase()}`
                   : "0.00"}
               </p>
             </div>

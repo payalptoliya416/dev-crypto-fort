@@ -32,6 +32,7 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
+  console.log("activeWallet",activeWallet)
   const dispatch = useDispatch();
   const currency = useSelector((state: RootState) => state.currency.value);
 
@@ -43,10 +44,18 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const usdcBalanceNumber = Number(activeWallet?.usdc_balance || 0);
   const usdtBalanceNumber = Number(activeWallet?.usdt_balance || 0);
 
-  const totalValue =
-    ethBalanceNumber * ethPrice +
-    usdcBalanceNumber +
-    usdtBalanceNumber;
+const customTokenTotal =
+  activeWallet?.custom_tokens?.reduce(
+    (sum: number, token: any) =>
+      sum + Number(token.balance || 0),
+    0
+  ) || 0;
+
+const totalValue =
+  ethBalanceNumber * ethPrice +
+  usdcBalanceNumber +
+  usdtBalanceNumber +
+  customTokenTotal;
 
   const formattedBalance = formatBalance(ethBalanceNumber);
   const formattedTotal = formatBalance(totalValue, { isFiat: true });

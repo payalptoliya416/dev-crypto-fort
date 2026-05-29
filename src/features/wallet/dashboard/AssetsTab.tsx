@@ -28,12 +28,38 @@ interface Asset {
   change: string;
   up: boolean;
   icon: string;
-  value?:string;
+  network?: string;
+  contractAddress?: string;
+  value?: string;
 }
+
+const CUSTOM_TOKENS_KEY = "custom_wallet_tokens";
+
+const getStoredCustomAssets = (): Asset[] => {
+  try {
+    const stored = localStorage.getItem(CUSTOM_TOKENS_KEY);
+    if (!stored) return [];
+
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const getAssetIconByNetwork = (network?: string) => {
+  const normalizedNetwork = network?.toLowerCase() || "";
+
+  if (normalizedNetwork.includes("tron")) return d9;
+  if (normalizedNetwork.includes("btc")) return d2;
+  if (normalizedNetwork.includes("bnb")) return d3;
+
+  return d1;
+};
 
 function AssetsTab() {
   const [loading, setLoading] = useState(true);
-  
+
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assetActionOpen, setAssetActionOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
@@ -69,18 +95,29 @@ function AssetsTab() {
         const updated = prevAssets.map((asset) => {
           const match = data.prices.find(
             (p: any) =>
-              String(p.symbol).toUpperCase() === String(asset.symbol).toUpperCase(),
+              String(p.symbol).toUpperCase() ===
+              String(asset.symbol).toUpperCase(),
           );
-
-          const newPrice = match?.price != null
-            ? Number(match.price)
-            : Number(asset.price || 0);
+          const usdtData = data.prices.find(
+            (p: any) => String(p.symbol).toUpperCase() === "USDT",
+          );
+          const newPrice =
+            match?.price != null
+              ? Number(match.price)
+              : usdtData?.price != null
+                ? Number(usdtData.price)
+                : Number(asset.price || 0);
 
           const previousPrice = Number(
             storedPrices?.[asset.symbol]?.price || asset.price || 0,
           );
-          let changePercent = asset.change;
-          let isUp = asset.up;
+          let changePercent =
+            match?.price != null
+              ? asset.change
+              : storedPrices?.USDT?.change || "0.00%";
+
+          let isUp =
+            match?.price != null ? asset.up : (storedPrices?.USDT?.up ?? true);
 
           if (previousPrice > 0) {
             const diff = ((newPrice - previousPrice) / previousPrice) * 100;
@@ -88,45 +125,48 @@ function AssetsTab() {
             isUp = diff >= 0;
           }
 
+          const hasSocketPrice = !!match;
+
+          const fallbackPrice =
+            storedPrices?.USDT?.price || usdtData?.price?.toString() || "1";
+
           return {
             ...asset,
-            price: newPrice.toString(),
-            change: changePercent,
-            up: isUp,
+            price: hasSocketPrice ? String(match.price) : fallbackPrice,
+
+            change: hasSocketPrice
+              ? changePercent
+              : storedPrices?.USDT?.change || "0.00%",
+
+            up: hasSocketPrice ? isUp : (storedPrices?.USDT?.up ?? true),
           };
         });
 
-    if (updated.length > 0) {
-      const priceMap: any = {};
+        if (updated.length > 0) {
+          const priceMap: any = {};
 
-      updated.forEach((a) => {
-        const prevStored = storedPrices?.[a.symbol];
+          updated.forEach((a) => {
+            const prevStored = storedPrices?.[a.symbol];
 
-        priceMap[a.symbol] = {
-          price: a.price,
-          prevPrice: prevStored?.price || a.price,
-          change: a.change,
-          up: a.up,
-        };
+            priceMap[a.symbol] = {
+              price: a.price,
+              prevPrice: prevStored?.price || a.price,
+              change: a.change,
+              up: a.up,
+            };
+          });
+          localStorage.setItem("crypto_prices", JSON.stringify(priceMap));
+        }
+
+        return updated.sort((a, b) => {
+          const totalA = Number(a.balance || 0) * Number(a.price || 1);
+
+          const totalB = Number(b.balance || 0) * Number(b.price || 1);
+
+          return totalB - totalA;
+        });
       });
-
-      localStorage.setItem(
-        "crypto_prices",
-        JSON.stringify(priceMap),
-      );
-    }
-
-   return updated.sort((a, b) => {
-  const totalA =
-    Number(a.balance || 0) * Number(a.price || 1);
-
-  const totalB =
-    Number(b.balance || 0) * Number(b.price || 1);
-
-  return totalB - totalA;
-});
-  });
-});
+    });
 
     return () => {
       socket.disconnect();
@@ -162,7 +202,7 @@ function AssetsTab() {
         const savedPrices = localStorage.getItem("crypto_prices");
         const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
 
-        const assetList: Asset[] = Object.entries(balances)
+        const nativeAssets: Asset[] = Object.entries(balances)
           .filter(([_, value]) => value !== undefined)
           .map(([key, value]) => {
             const config = COIN_CONFIG[key];
@@ -179,12 +219,62 @@ function AssetsTab() {
               icon: config?.icon || d1,
             };
           }) as Asset[];
-        const sortedAssets = assetList.sort((a, b) => {
-          const totalA =
-            Number(a.balance || 0) * Number(a.price || 1);
 
-          const totalB =
-            Number(b.balance || 0) * Number(b.price || 1);
+        const storedCustomAssets = getStoredCustomAssets().map((asset) => {
+          const usdtData = priceMap["USDT"];
+
+          return {
+            ...asset,
+            price: priceMap[asset.symbol]?.price || usdtData?.price || "1",
+            change:
+              priceMap[asset.symbol]?.change || usdtData?.change || "0.00%",
+            up: priceMap[asset.symbol]?.up ?? usdtData?.up ?? true,
+            icon: asset.icon || getAssetIconByNetwork(asset.network),
+          };
+        });
+        const nativeAssetMap = new Map(
+          nativeAssets.map((asset) => [asset.token, asset]),
+        );
+        const mergedAssets = nativeAssets.map((asset) => {
+          const matchingCustomAsset = storedCustomAssets.find(
+            (customAsset) =>
+              customAsset.contractAddress === asset.token ||
+              customAsset.token === asset.token,
+          );
+
+          if (!matchingCustomAsset) return asset;
+
+          return {
+            ...asset,
+            name: matchingCustomAsset.name || asset.name,
+            symbol: matchingCustomAsset.symbol || asset.symbol,
+            price: matchingCustomAsset.price || asset.price,
+            change: matchingCustomAsset.change || asset.change,
+            up: matchingCustomAsset.up,
+            icon: matchingCustomAsset.icon || asset.icon,
+            network: matchingCustomAsset.network,
+            contractAddress: matchingCustomAsset.contractAddress,
+          };
+        });
+
+        storedCustomAssets
+          .filter((customAsset) => {
+            const customTokenKey =
+              customAsset.contractAddress || customAsset.token;
+            return !nativeAssetMap.has(customTokenKey);
+          })
+          .forEach((customAsset) => {
+            mergedAssets.push({
+              ...customAsset,
+              icon:
+                customAsset.icon || getAssetIconByNetwork(customAsset.network),
+            });
+          });
+
+        const sortedAssets = mergedAssets.sort((a, b) => {
+          const totalA = Number(a.balance || 0) * Number(a.price || 1);
+
+          const totalB = Number(b.balance || 0) * Number(b.price || 1);
 
           return totalB - totalA;
         });
@@ -198,6 +288,19 @@ function AssetsTab() {
     };
 
     fetchBalance();
+
+    const handleCustomTokenImport = () => {
+      fetchBalance();
+    };
+
+    window.addEventListener("custom-token-imported", handleCustomTokenImport);
+
+    return () => {
+      window.removeEventListener(
+        "custom-token-imported",
+        handleCustomTokenImport,
+      );
+    };
   }, [activeWallet?.id]);
 
   const columns: Column<Asset>[] = [
@@ -234,9 +337,9 @@ function AssetsTab() {
         if (!row.price) {
           return (
             <div className="flex justify-end">
-            <div className="w-10 h-5 overflow-hidden">
-              <Loader />
-            </div>
+              <div className="w-10 h-5 overflow-hidden">
+                <Loader />
+              </div>
             </div>
           );
         }
@@ -289,9 +392,9 @@ function AssetsTab() {
         if (!row.change) {
           return (
             <div className="flex justify-end">
-            <div className="w-10 h-5 overflow-hidden">
-              <Loader />
-            </div>
+              <div className="w-10 h-5 overflow-hidden">
+                <Loader />
+              </div>
             </div>
           );
         }
@@ -323,7 +426,7 @@ function AssetsTab() {
           onClick={() => setImportOpen(true)}
           className="bg-[#202A43] rounded-lg py-2 px-5 sm:px-6 flex items-center gap-[10px] text-white text-sm font-medium cursor-pointer"
         >
-         Import Custom Token
+          Import Token
         </button>
       </div>
       {loading ? (
@@ -331,10 +434,14 @@ function AssetsTab() {
           <Loader />
         </div>
       ) : (
-        <CommonTable data={assets} columns={columns} onRowClick={(asset) => {
-          setSelectedAsset(asset);
-          setAssetActionOpen(true);
-        }} />
+        <CommonTable
+          data={assets}
+          columns={columns}
+          onRowClick={(asset) => {
+            setSelectedAsset(asset);
+            setAssetActionOpen(true);
+          }}
+        />
       )}
 
       {assetActionOpen && selectedAsset && (
@@ -344,9 +451,12 @@ function AssetsTab() {
             className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
           />
           <div className="relative w-full max-w-[420px] rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]">
-            <h3 className="text-[#25C866] font-semibold text-lg mb-4">{selectedAsset.name}</h3>
+            <h3 className="text-[#25C866] font-semibold text-lg mb-4">
+              {selectedAsset.name}
+            </h3>
             <p className="text-[#7A7D83] mb-4">
-              Balance: {formatBalance(selectedAsset.balance)} {selectedAsset.symbol}
+              Balance: {formatBalance(selectedAsset.balance)}{" "}
+              {selectedAsset.symbol}
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button

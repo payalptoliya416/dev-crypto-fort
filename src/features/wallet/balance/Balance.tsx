@@ -56,20 +56,31 @@ function Balance() {
       setAssets((prevAssets) => {
         const updated = prevAssets.map((asset) => {
   
-          const match = data.prices.find((p: any) => p.symbol === asset.symbol);
-   
-          if (!match) return asset;
+          const match = data.prices.find(
+          (p: any) =>
+            String(p.symbol).toUpperCase() ===
+            String(asset.symbol).toUpperCase()
+        );
 
-          const newPrice = Number(match?.price);
+        const usdtData = data.prices.find(
+          (p: any) =>
+            String(p.symbol).toUpperCase() === "USDT"
+        );
 
-          if (!match?.price || isNaN(newPrice)) {
-            return {
-              ...asset,
-              price: "",
-              change: "--",
-              up: false,
-            };
+        const hasSocketPrice = !!match;
+
+          const effectivePrice = match?.price ?? usdtData?.price;
+
+          if (!effectivePrice) {
+            return asset;
           }
+
+          const newPrice = Number(effectivePrice);
+
+          if (isNaN(newPrice)) {
+            return asset;
+          }
+
           const previousPrice = Number(
             storedPrices?.[asset.symbol]?.price || asset.price || 0,
           );
@@ -82,12 +93,21 @@ function Balance() {
             isUp = diff >= 0;
           }
 
-          return {
-            ...asset,
-            price: newPrice.toString(),
-            change: changePercent,
-            up: isUp,
-          };
+                return {
+          ...asset,
+          balance: asset.balance,
+          price: hasSocketPrice
+            ? String(match.price)
+            : (usdtData?.price?.toString() || "1"),
+
+          change: hasSocketPrice
+            ? changePercent
+            : "0.00%",
+
+          up: hasSocketPrice
+            ? isUp
+            : true,
+        };
         });
 
         if (updated.length > 0) {
@@ -161,9 +181,9 @@ function Balance() {
               name: config?.name || key.toUpperCase(),
               symbol,
               balance: value,
-              price: priceMap[symbol]?.price || "",
-              change: priceMap[symbol]?.change ?? "",
-              up: priceMap[symbol]?.up ?? true,
+              price: priceMap[symbol]?.price || priceMap["USDT"]?.price || "",
+              change: priceMap[symbol]?.change ?? priceMap["USDT"]?.change ?? "",
+              up: priceMap[symbol]?.up ?? priceMap["USDT"]?.up ?? true,
               icon: config?.icon || DEFAULT_ICON,
             };
           }) as Asset[];
@@ -249,11 +269,11 @@ function Balance() {
           return <p className="text-[#FAFAFB] text-base font-normal">--</p>;
         }
 
-        if (!row.change || row.change === "--") {
-  return (
-    <p className="text-[#FAFAFB] text-base font-medium">--</p>
-  );
-}
+//         if (!row.change || row.change === "--") {
+//   return (
+//     <p className="text-[#FAFAFB] text-base font-medium">--</p>
+//   );
+// }
         const total = balance * price;
 
         return (

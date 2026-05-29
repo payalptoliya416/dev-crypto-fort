@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { getWallets } from "../../../api/walletApi";
 import TokenDropdown from "./TokenDropdown";
 import { useWalletAssets } from "../hooks/useWalletAssets";
+// import { formatBalance } from "../../component/format";
 
 interface ReceiveTokenModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedToken, setSelectedToken] = useState("eth");
   const { assets } = useWalletAssets();
+  const selectedAsset = assets.find((asset) => asset.token === selectedToken);
   const [selectedAddress, setSelectedAddress] = useState("");
   const address = selectedAddress;
 
@@ -61,7 +63,37 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
     fetchWallets();
   }, [open]);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (!wallets.length || !activeWallet?.id) return;
+
+  //   const currentWallet = wallets.find(
+  //     (wallet) => wallet.id === activeWallet.id,
+  //   );
+
+  //   if (!currentWallet) return;
+
+  //   const network = selectedAsset?.network?.toLowerCase() || "";
+
+  //   if (network.includes("tron")) {
+  //     setSelectedAddress(currentWallet.tron_address || "");
+  //   } else if (network.includes("btc")) {
+  //     setSelectedAddress(currentWallet.btc_address || "");
+  //   } else if (selectedToken === "btc") {
+  //     setSelectedAddress(currentWallet.btc_address || "");
+  //   } else if (selectedToken === "trx" || selectedToken === "trc20") {
+  //     setSelectedAddress(currentWallet.tron_address || "");
+  //   } else if (selectedToken === "usdt" || selectedToken === "usdc" || selectedToken === "bnb") {
+  //     setSelectedAddress(currentWallet.eth_address || "");
+  //   } else if (selectedToken === "eth") {
+  //     setSelectedAddress(currentWallet.eth_address || "");
+  //   } else if (selectedAsset?.token) {
+  //     setSelectedAddress(currentWallet.eth_address || "");
+  //   } else {
+  //     setSelectedAddress("");
+  //   }
+  // }, [selectedToken, selectedAsset?.network, selectedAsset?.token, wallets, activeWallet]);
+
+    useEffect(() => {
     if (!wallets.length || !activeWallet?.id) return;
 
     const currentWallet = wallets.find(
@@ -70,21 +102,27 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
 
     if (!currentWallet) return;
 
-    if (selectedToken === "eth") {
-      setSelectedAddress(currentWallet.eth_address || "");
+    const network = selectedAsset?.network?.toLowerCase() || "";
+
+    if (network.includes("tron")) {
+      setSelectedAddress(currentWallet.tron_address || "");
+    } else if (network.includes("btc")) {
+      setSelectedAddress(currentWallet.btc_address || "");
     } else if (selectedToken === "btc") {
       setSelectedAddress(currentWallet.btc_address || "");
-    } else if (selectedToken === "trx" ||
-      selectedToken === "trc20") {
+    } else if (selectedToken === "trx" || selectedToken === "trc20") {
       setSelectedAddress(currentWallet.tron_address || "");
-    } else if (selectedToken === "usdt" || selectedToken === "usdc") {
-      setSelectedAddress(currentWallet.eth_address || "");
-    } else if (selectedToken === "bnb") {
-      setSelectedAddress(currentWallet.eth_address || "");
     } else {
-      setSelectedAddress("");
+      const tokenKey = `${selectedToken.toLowerCase()}_address`;
+      if (currentWallet[tokenKey as keyof WalletAddressData]) {
+        setSelectedAddress(
+          currentWallet[tokenKey as keyof WalletAddressData] as string
+        );
+      } else {
+        setSelectedAddress(currentWallet.eth_address || "");
+      }
     }
-  }, [selectedToken, wallets, activeWallet]);
+  }, [selectedToken, selectedAsset?.network, wallets, activeWallet]);
 
   const handleCopy = async () => {
     if (!address) {
@@ -145,6 +183,13 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
             />
           </div>
 
+          {/* <div className="mb-4 rounded-xl border border-[#3C3D47] bg-[#202A43] px-4 py-3">
+            <p className="text-[#7A7D83] text-sm mb-1">Available Balance</p>
+            <p className="text-white text-base sm:text-lg font-semibold">
+              {selectedAsset ? `${formatBalance(selectedAsset.balance)} ${selectedAsset.symbol}` : "0.00"}
+            </p>
+          </div> */}
+
           <div className="flex justify-center mb-[30px]">
             <div className="border border-[#3C3D47] rounded-xl bg-[#202A43] p-4 sm:p-[26px] flex items-center justify-center">
               {loadingQR ? (
@@ -192,15 +237,23 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
             </div>
           </div>
 
-          <div className="border border-[#FFDD1D1A] bg-[#FFDD1D05] rounded-[6px] px-[15px] py-3 w-full sm:w-max">
-            <p className="text-[#FFDD1D] text-base sm:text-lg font-medium">
+          <div className="border border-[#FFDD1D1A] bg-[#FFDD1D05] rounded-[6px] px-[15px] py-3 w-full break-words whitespace-normal">
+          <p className="text-[#FFDD1D] text-base sm:text-lg font-medium">
             {selectedToken === "eth" && "Only send ETH / ERC-20 tokens to this address."}
             {selectedToken === "btc" && "Only send BTC to this address."}
-            {(selectedToken === "trx" || selectedToken === "trc20") && "Only send TRC-20 tokens to this address."}
-            {selectedToken === "trc20" && "Only send TRC-20 tokens to this address."}
+            {(selectedToken === "trx" || selectedToken === "trc20") &&
+              "Only send TRC-20 tokens to this address."}
             {selectedToken === "usdt" && "Only send USDT (ERC-20) to this address."}
-            {selectedToken === "usdc" && "Only send USDC (ERC20) to this address."}
+            {selectedToken === "usdc" && "Only send USDC (ERC-20) to this address."}
             {selectedToken === "bnb" && "Only send BNB tokens to this address."}
+
+            {!["eth", "btc", "trx", "trc20", "usdt", "usdc", "bnb"].includes(
+              selectedToken
+            ) &&
+              `Only send ${
+                selectedAsset?.symbol?.toUpperCase() ||
+                selectedToken?.toUpperCase()
+              } tokens to this address.`}
           </p>
           </div>
           {/* <button

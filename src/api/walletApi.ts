@@ -20,6 +20,13 @@ export interface Wallet {
   bnb_balance?: string;
   trx_balance?: string;
   bep20_balance?: string;
+   custom_tokens?: {
+    id: number;
+    symbol: string;
+    balance: string;
+    network: string;
+    contract_address: string;
+  }[];
 }
 
 export interface WalletListResponse {

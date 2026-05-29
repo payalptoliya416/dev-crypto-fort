@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { IoClose } from "react-icons/io5";
+import { IoCheckmarkDone, IoClose } from "react-icons/io5";
 import { isAddress } from "ethers";
 import { importToken } from "../../../api/customToken";
 import type { RootState } from "../../../redux/store/store";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import ButtonLoader from "../../component/ButtonLoader";
+import d1 from "@/assets/Ethereum.svg";
+import d9 from "@/assets/tron.svg";
+
 interface ImportTokenModalProps {
   open: boolean;
   onClose: () => void;
@@ -22,7 +25,7 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const handleImport = async () => {
     try {
       setLoading(true);
@@ -50,24 +53,58 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
       if (res.data) {
         setTokenDetails(res.data);
       }
-
       if (res.success) {
+        setShowSuccessModal(true);
+      }
+      if (res.success) {
+        // const importedAsset = {
+        //   token: res.data.contract_address,
+        //   name: res.data.name,
+        //   symbol: res.data.symbol,
+        //   balance: String(res.data.balance ?? "0"),
+        //   network: res.data.network,
+        //   contractAddress: res.data.contract_address,
+        //   icon: res.data.network?.toLowerCase().includes("tron") ? d9 : d1,
+        // };
+
+        // const storedCustomTokens = (() => {
+        //   try {
+        //     const parsed = JSON.parse(localStorage.getItem("custom_wallet_tokens") || "[]");
+        //     return Array.isArray(parsed) ? parsed : [];
+        //   } catch {
+        //     return [];
+        //   }
+        // })();
+
+        // const mergedCustomTokens = [
+        //   importedAsset,
+        //   ...storedCustomTokens.filter((token: any) => token.contractAddress !== importedAsset.contractAddress),
+        // ];
+
+        // localStorage.setItem("custom_wallet_tokens", JSON.stringify(mergedCustomTokens));
+        window.dispatchEvent(new CustomEvent("custom-token-imported"));
+
         toast.success(res.message || "Token imported successfully");
-        console.log(res.data);
       } else {
         toast.error(res.message || "Failed to import token");
       }
     } catch (error: any) {
-      const response = error?.data;
+    const response = error;
+      const errorMessage =
+      response?.errors?.contract_address?.[0] ||
+      response?.message ||
+      error?.message ||
+      "Something went wrong";
+    setIsError(true);
+  
+    if (response?.data) {
+      setTokenDetails(response.data);
+    }
+    setMessage(errorMessage);
 
-      setIsError(true);
-
-      if (response) {
-        setTokenDetails(response);
-      }
-
-      setMessage(response?.message || error?.message || "Something went wrong");
-    } finally {
+  toast.error(errorMessage);
+   
+  } finally {
       setLoading(false);
     }
   };
@@ -84,6 +121,8 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
   if (!open) return null;
 
   return (
+    <>
+    {!showSuccessModal && (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
         onClick={resetModal}
@@ -102,12 +141,12 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
 
         <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-4 sm:p-6 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] max-h-[90vh] overflow-y-auto">
           <h3 className="text-[#25C866] font-medium text-xl mb-2">
-            Import Custom Token
+            Import Token
           </h3>
           <p className="text-sm text-[#7A7D83] mb-5">
             Paste a token contract address to import into your wallet.
           </p>
-
+         {!tokenDetails && (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[#9AA5B9] mb-2">
@@ -142,67 +181,107 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
             >
               {loading ? <ButtonLoader /> : "Import token"}
             </button>
-            {message && (
-              <div
-                className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium ${
-                  isError
-                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                    : "bg-green-500/10 text-green-400 border border-green-500/20"
-                }`}
-              >
-                <span>{message}</span>
-              </div>
-            )}
-            {tokenDetails && (
-              <div className="mt-4 rounded-2xl border border-[#2E3A5C] bg-[#111A33] p-5">
-                <div className="flex items-center gap-3 pb-4 border-b border-[#2E3A5C]">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25C866]/15">
-                    <span className="text-[#25C866] text-lg font-bold">
-                      {tokenDetails.symbol?.charAt(0) || "T"}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold text-lg">
-                      {tokenDetails.name}
-                    </h4>
-                    <p className="text-[#9AA5B9] text-sm">
-                      {tokenDetails.symbol}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#9AA5B9]">Network</span>
-                    <span className="text-white font-medium uppercase">
-                      {tokenDetails.network}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#9AA5B9]">Balance</span>
-                    <span className="text-[#25C866] font-semibold">
-                      {Number(tokenDetails.balance).toFixed(4)}
-                    </span>
-                  </div>
-
-                  <div>
-                    <p className="text-[#9AA5B9] mb-2">Contract Address</p>
-
-                    <div className="rounded-lg bg-[#0D1428] border border-[#2E3A5C] p-3">
-                      <p className="text-white text-sm break-all">
-                        {tokenDetails.contract_address}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            
           </div>
+         )}
         </div>
       </div>
     </div>
+    )}
+    {showSuccessModal && tokenDetails && (
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/50" />
+
+        <div className="relative w-full max-w-md rounded-2xl bg-[#161F37] border border-[#3C3D47] p-6">
+
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-[#25C866]/15 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-[#25C866] flex items-center justify-center">
+                <IoCheckmarkDone className="text-white text-3xl" />
+              </div>
+            </div>
+          </div>
+
+          <h3 className="text-center text-white text-xl font-semibold">
+            Token Imported Successfully
+          </h3>
+
+          <p className="text-center text-[#9AA5B9] mt-2">
+            Your token has been added to the wallet.
+          </p>
+
+         <div className="mt-6">
+
+  <div className="flex items-center gap-3 mb-5 pb-4 border-b border-[#2E3A5C]">
+    <img
+      src={
+        tokenDetails.network?.toLowerCase().includes("tron")
+          ? d9
+          : d1
+      }
+      alt={tokenDetails.symbol}
+      className="w-14 h-14"
+    />
+
+    <div>
+      <h4 className="text-white text-lg font-semibold">
+        {tokenDetails.name}
+      </h4>
+
+      <p className="text-[#9AA5B9]">
+        {tokenDetails.symbol}
+      </p>
+    </div>
+  </div>
+
+  <div className="space-y-4">
+
+    <div className="flex justify-between">
+      <span className="text-[#9AA5B9]">Network</span>
+      <span className="text-white uppercase">
+        {tokenDetails.network}
+      </span>
+    </div>
+
+    <div className="flex justify-between">
+      <span className="text-[#9AA5B9]">Balance</span>
+      <span className="text-[#25C866] font-semibold">
+        {Number(tokenDetails.balance).toFixed(4)}
+      </span>
+    </div>
+
+    <div className="flex justify-between">
+      <span className="text-[#9AA5B9]">Symbol</span>
+      <span className="text-white">
+        {tokenDetails.symbol}
+      </span>
+    </div>
+
+    <div>
+      <p className="text-[#9AA5B9] mb-2">
+        Contract Address
+      </p>
+
+      <div className="rounded-lg bg-[#0D1428] border border-[#2E3A5C] p-3">
+        <p className="text-white text-sm break-all">
+          {tokenDetails.contract_address}
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+          <button
+            onClick={resetModal}
+            className="w-full mt-6 py-3 rounded-xl bg-[#25C866] text-white font-semibold"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

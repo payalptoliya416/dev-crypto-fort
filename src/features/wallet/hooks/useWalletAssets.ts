@@ -15,6 +15,8 @@ export interface WalletAsset {
   symbol: string;
   icon: string;
   balance: string;
+  network?: string;
+  contractAddress?: string;
 }
 
 const COIN_CONFIG: Record<string, { name: string; symbol: string; icon: string }> = {
@@ -27,6 +29,30 @@ const COIN_CONFIG: Record<string, { name: string; symbol: string; icon: string }
   trc20: { name: "USDT (TRC20)", symbol: "USDT", icon: d5 },
 };
 
+const CUSTOM_TOKENS_KEY = "custom_wallet_tokens";
+
+const getStoredCustomAssets = (): WalletAsset[] => {
+  try {
+    const stored = localStorage.getItem(CUSTOM_TOKENS_KEY);
+    if (!stored) return [];
+
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const getAssetIconByNetwork = (network?: string) => {
+  const normalizedNetwork = network?.toLowerCase() || "";
+
+  if (normalizedNetwork.includes("tron")) return d9;
+  if (normalizedNetwork.includes("btc")) return d2;
+  if (normalizedNetwork.includes("bnb")) return d3;
+
+  return d1;
+};
+
 export function useWalletAssets() {
   const activeWallet = useSelector((state: RootState) => state.activeWallet.wallet);
   const [assets, setAssets] = useState<WalletAsset[]>([]);
@@ -34,12 +60,14 @@ export function useWalletAssets() {
 
   useEffect(() => {
     if (!activeWallet?.id) return;
+
     const fetchBalance = async () => {
       setLoading(true);
       try {
         const balanceRes = await getBalance({ wallet_id: activeWallet.id, type: "all" });
         const balances = balanceRes?.data?.balance || {};
-        const assetList: WalletAsset[] = Object.entries(balances)
+
+        const nativeAssets: WalletAsset[] = Object.entries(balances)
           .filter(([_, value]) => value !== undefined)
           .map(([key, value]) => {
             const config = COIN_CONFIG[key];
@@ -52,14 +80,61 @@ export function useWalletAssets() {
               icon: config?.icon || d1,
             };
           });
-        setAssets(assetList);
+
+        const storedCustomAssets = getStoredCustomAssets().map((asset) => ({
+          ...asset,
+          icon: asset.icon || getAssetIconByNetwork(asset.network),
+        }));
+
+        const nativeAssetMap = new Map(nativeAssets.map((asset) => [asset.token, asset]));
+        const mergedAssets = nativeAssets.map((asset) => {
+          const matchingCustomAsset = storedCustomAssets.find((customAsset) =>
+            customAsset.contractAddress === asset.token || customAsset.token === asset.token,
+          );
+
+          if (!matchingCustomAsset) return asset;
+
+          return {
+            ...asset,
+            name: matchingCustomAsset.name || asset.name,
+            symbol: matchingCustomAsset.symbol || asset.symbol,
+            icon: matchingCustomAsset.icon || asset.icon,
+            network: matchingCustomAsset.network || asset.network,
+            contractAddress: matchingCustomAsset.contractAddress || asset.contractAddress,
+          };
+        });
+
+        storedCustomAssets
+          .filter((customAsset) => {
+            const customTokenKey = customAsset.contractAddress || customAsset.token;
+            return !nativeAssetMap.has(customTokenKey);
+          })
+          .forEach((customAsset) => {
+            mergedAssets.push({
+              ...customAsset,
+              icon: customAsset.icon || getAssetIconByNetwork(customAsset.network),
+            });
+          });
+
+        setAssets(mergedAssets);
       } catch {
         setAssets([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchBalance();
+
+    const handleCustomTokenImport = () => {
+      fetchBalance();
+    };
+
+    window.addEventListener("custom-token-imported", handleCustomTokenImport);
+
+    return () => {
+      window.removeEventListener("custom-token-imported", handleCustomTokenImport);
+    };
   }, [activeWallet?.id]);
 
   return { assets, loading };
