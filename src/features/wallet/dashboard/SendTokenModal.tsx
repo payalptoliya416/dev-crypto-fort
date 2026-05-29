@@ -1,14 +1,14 @@
 import { IoClose } from "react-icons/io5";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { getGasFee } from "../../../api/transactionApi";
 import { getPrices } from "../../../api/publicApi";
 import Loader from "../../component/Loader";
 import { setTransactionData } from "../../../redux/transactionSlice";
 import QRCode from "react-qr-code";
-import type { RootState } from "../../../redux/store/store";
 import { formatBalance } from "../../component/format";
 import TokenDropdown from "./TokenDropdown";
+import { useWalletAssets } from "../hooks/useWalletAssets";
 interface SendTokenModalProps {
   open: boolean;
   onClose: () => void;
@@ -26,13 +26,13 @@ function SendTokenModal({
   defaultAmount,
   dashboardMode = false,
 }: SendTokenModalProps) {
-  const activeWallet = useSelector(
-    (state: RootState) => state.activeWallet.wallet,
-  );
   const dispatch = useDispatch();
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedToken, setSelectedToken] = useState("");
+  const { assets } = useWalletAssets();
+  const selectedAsset = assets.find((asset) => asset.token === selectedToken);
+  const selectedTokenBalance = selectedAsset?.balance ?? "0";
   const [gasLoading, setGasLoading] = useState(false);
   const [gasFeeEth, setGasFeeEth] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
@@ -50,8 +50,6 @@ function SendTokenModal({
     selectedToken === "bnb" ||
     selectedToken === "trx" ||
     selectedToken === "btc";
-    
-  const [balance, setBalance] = useState("0");
   const [marketValue, setMarketValue] = useState<number | null>(null);
   const [marketLoading, setMarketLoading] = useState(false);
 
@@ -134,22 +132,6 @@ function SendTokenModal({
       setAmount(formattedAmount);
     }
   }, [open, dashboardMode, defaultAmount, selectedToken, gasFeeEth, amount]);
-
-  useEffect(() => {
-    if (!selectedToken || !activeWallet) return;
-
-    const balanceMap: Record<string, string | undefined> = {
-      eth: activeWallet.eth_balance,
-      btc: activeWallet.btc_balance,
-      usdt: activeWallet.usdt_balance,
-      usdc: (activeWallet as any).usdc_balance,
-      trc20: activeWallet.trc20_balance,
-      bnb: activeWallet.bnb_balance,
-      trx: activeWallet.trx_balance,
-    };
-
-     setBalance(balanceMap[selectedToken] ?? "0");
-  }, [selectedToken, activeWallet]);
 
   useEffect(() => {
     if (!open) {
@@ -249,7 +231,7 @@ function SendTokenModal({
       newErrors.amount = "Amount is required";
     } else if (Number(amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
-    } else if (Number(amount) > Number(balance)) {
+    } else if (Number(amount) > Number(selectedTokenBalance)) {
       newErrors.amount = "Amount exceeds available balance";
     } else {
       // gas balance checks
@@ -342,6 +324,12 @@ function SendTokenModal({
                   }
                 }}
                 hasError={Boolean(errors.selectedToken)}
+                options={assets.map(asset => ({
+                  value: asset.token,
+                  label: asset.name,
+                  symbol: asset.symbol,
+                  icon: asset.icon,
+                }))}
               />
               {errors.selectedToken && (
                 <p className="text-[#ef4343] text-sm mt-1">{errors.selectedToken}</p>
@@ -351,7 +339,7 @@ function SendTokenModal({
               <p>Available Balance</p>
               <p>
                 {selectedToken
-                  ? `${balance} ${selectedToken.toUpperCase()}`
+                  ? `${selectedTokenBalance} ${selectedAsset?.symbol || selectedToken.toUpperCase()}`
                   : "0.00"}
               </p>
             </div>
@@ -411,7 +399,7 @@ function SendTokenModal({
                     onClick={() => {
                       if (!selectedToken || gasFeeEth === null || gasLoading) return;
 
-                      const bal = Number(balance || 0);
+                      const bal = Number(selectedTokenBalance || 0);
                       const gas = Number(gasFeeEth || 0);
 
                       const maxSendable = isNativeToken ? bal - gas : bal;

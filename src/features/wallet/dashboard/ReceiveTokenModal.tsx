@@ -7,6 +7,7 @@ import type { RootState } from "../../../redux/store/store";
 import { useEffect, useState } from "react";
 import { getWallets } from "../../../api/walletApi";
 import TokenDropdown from "./TokenDropdown";
+import { useWalletAssets } from "../hooks/useWalletAssets";
 
 interface ReceiveTokenModalProps {
   open: boolean;
@@ -28,6 +29,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
   const [wallets, setWallets] = useState<WalletAddressData[]>([]);
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedToken, setSelectedToken] = useState("eth");
+  const { assets } = useWalletAssets();
   const [selectedAddress, setSelectedAddress] = useState("");
   const address = selectedAddress;
 
@@ -133,7 +135,13 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
             <TokenDropdown
               value={selectedToken}
               onChange={setSelectedToken}
-                disabled={!!defaultSelectedToken}
+              disabled={!!defaultSelectedToken}
+              options={assets.map(asset => ({
+                value: asset.token,
+                label: asset.name,
+                symbol: asset.symbol,
+                icon: asset.icon,
+              }))}
             />
           </div>
 
