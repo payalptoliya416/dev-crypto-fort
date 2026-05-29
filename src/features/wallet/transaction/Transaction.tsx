@@ -245,7 +245,7 @@ function TransactionPage() {
         <p className="text-white text-base font-medium">{row.type}</p>
       ),
     },
-        {
+    {
       header: "Status",
       key: "status",
       align: "right",

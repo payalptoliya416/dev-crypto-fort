@@ -319,12 +319,12 @@ function AssetsTab() {
         <h3 className="text-base xl:text-xl text-[#25C866] font-semibold">
           Assets
         </h3>
-        {/* <button
+        <button
           onClick={() => setImportOpen(true)}
           className="bg-[#202A43] rounded-lg py-2 px-5 sm:px-6 flex items-center gap-[10px] text-white text-sm font-medium cursor-pointer"
         >
          Import Custom Token
-        </button> */}
+        </button>
       </div>
       {loading ? (
         <div className="flex justify-center items-center py-20">
