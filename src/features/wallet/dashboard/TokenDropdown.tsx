@@ -6,6 +6,7 @@ import d5 from "@/assets/TRC-20.svg";
 import d9 from "@/assets/tron.svg";
 import { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { getDisplayTokenIcon } from "../utils/tokenIconUtils";
 
 export interface TokenOption {
   value: string;
@@ -47,7 +48,10 @@ function TokenDropdown({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const availableOptions = (options ?? tokenOptions).filter(
     (token) => !excludeValues.includes(token.value),
-  );
+  ).map((token) => ({
+    ...token,
+    icon: getDisplayTokenIcon(token.value, token.icon),
+  }));
   const selectedToken = availableOptions.find((token) => token.value === value) ||
     (options ?? tokenOptions).find((token) => token.value === value);
 

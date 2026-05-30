@@ -18,6 +18,7 @@ import ReceiveTokenModal from "./ReceiveTokenModal";
 import ConfirmTransactionModal from "./ConfirmTransactionModal";
 import toast from "react-hot-toast";
 import ImportTokenModal from "./ImportTokenModal";
+import { getDisplayTokenIcon } from "../utils/tokenIconUtils";
 
 interface Asset {
   token: string;
@@ -47,17 +48,11 @@ const getStoredCustomAssets = (): Asset[] => {
   }
 };
 
-const getAssetIconByNetwork = (network?: string) => {
-  const normalizedNetwork = network?.toLowerCase() || "";
-
-  if (normalizedNetwork.includes("tron")) return d9;
-  if (normalizedNetwork.includes("btc")) return d2;
-  if (normalizedNetwork.includes("bnb")) return d3;
-
-  return d1;
-};
-
-function AssetsTab() {
+function AssetsTab({
+  refreshWallets,
+}: {
+  refreshWallets: () => Promise<void>;
+}) {
   const [loading, setLoading] = useState(true);
 
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -216,7 +211,7 @@ function AssetsTab() {
               price: priceMap[symbol]?.price || "",
               change: priceMap[symbol]?.change ?? "",
               up: priceMap[symbol]?.up ?? true,
-              icon: config?.icon || d1,
+              icon: getDisplayTokenIcon(key, config?.icon || d1),
             };
           }) as Asset[];
 
@@ -229,7 +224,7 @@ function AssetsTab() {
             change:
               priceMap[asset.symbol]?.change || usdtData?.change || "0.00%",
             up: priceMap[asset.symbol]?.up ?? usdtData?.up ?? true,
-            icon: asset.icon || getAssetIconByNetwork(asset.network),
+            icon: getDisplayTokenIcon(asset.token, asset.icon),
           };
         });
         const nativeAssetMap = new Map(
@@ -266,8 +261,7 @@ function AssetsTab() {
           .forEach((customAsset) => {
             mergedAssets.push({
               ...customAsset,
-              icon:
-                customAsset.icon || getAssetIconByNetwork(customAsset.network),
+              icon: getDisplayTokenIcon(customAsset.token, customAsset.icon),
             });
           });
 
@@ -485,6 +479,7 @@ function AssetsTab() {
       <ImportTokenModal
         open={importOpen}
         onClose={() => setImportOpen(false)}
+          refreshWallets={refreshWallets}
       />
       <SendTokenModal
         open={sendOpen}

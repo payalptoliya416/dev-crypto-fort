@@ -15,6 +15,7 @@ import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
 import { io } from "socket.io-client";
 import AssetPieChart from "./AssetPieChart";
+import { getDisplayTokenIcon } from "../utils/tokenIconUtils";
 interface Asset {
   name: string;
   symbol: string;
@@ -184,7 +185,7 @@ function Balance() {
               price: priceMap[symbol]?.price || priceMap["USDT"]?.price || "",
               change: priceMap[symbol]?.change ?? priceMap["USDT"]?.change ?? "",
               up: priceMap[symbol]?.up ?? priceMap["USDT"]?.up ?? true,
-              icon: config?.icon || DEFAULT_ICON,
+              icon: getDisplayTokenIcon(key, config?.icon || DEFAULT_ICON),
             };
           }) as Asset[];
          const sortedAssets = assetList.sort((a, b) => {

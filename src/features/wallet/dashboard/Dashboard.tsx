@@ -42,7 +42,7 @@ function Dashboard() {
     <>
       <DashboardLayout>
         <WalletSummary refreshWallets={refreshWallets} />
-        <AssetsTab/>
+        <AssetsTab refreshWallets={refreshWallets} />
       </DashboardLayout>
     </>
   )

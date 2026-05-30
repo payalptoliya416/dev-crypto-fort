@@ -8,6 +8,7 @@ import d3 from "@/assets/Binance.png";
 import d4 from "@/assets/USDC.svg";
 import d5 from "@/assets/TRC-20.svg";
 import d9 from "@/assets/tron.svg";
+import { getDisplayTokenIcon } from "../utils/tokenIconUtils";
 
 export interface WalletAsset {
   token: string;
@@ -43,16 +44,6 @@ const getStoredCustomAssets = (): WalletAsset[] => {
   }
 };
 
-const getAssetIconByNetwork = (network?: string) => {
-  const normalizedNetwork = network?.toLowerCase() || "";
-
-  if (normalizedNetwork.includes("tron")) return d9;
-  if (normalizedNetwork.includes("btc")) return d2;
-  if (normalizedNetwork.includes("bnb")) return d3;
-
-  return d1;
-};
-
 export function useWalletAssets() {
   const activeWallet = useSelector((state: RootState) => state.activeWallet.wallet);
   const [assets, setAssets] = useState<WalletAsset[]>([]);
@@ -83,7 +74,7 @@ export function useWalletAssets() {
 
         const storedCustomAssets = getStoredCustomAssets().map((asset) => ({
           ...asset,
-          icon: asset.icon || getAssetIconByNetwork(asset.network),
+          icon: getDisplayTokenIcon(asset.token, asset.icon),
         }));
 
         const nativeAssetMap = new Map(nativeAssets.map((asset) => [asset.token, asset]));
@@ -112,7 +103,7 @@ export function useWalletAssets() {
           .forEach((customAsset) => {
             mergedAssets.push({
               ...customAsset,
-              icon: customAsset.icon || getAssetIconByNetwork(customAsset.network),
+              icon: getDisplayTokenIcon(customAsset.token, customAsset.icon),
             });
           });
 

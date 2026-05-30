@@ -14,6 +14,7 @@ import d9 from "@/assets/tron.svg";
 import Loader from "../../component/Loader";
 import { TbCopy } from "react-icons/tb";
 import { IoClose } from "react-icons/io5";
+import { getDisplayTokenIcon } from "../utils/tokenIconUtils";
 
 interface TransactionRow {
   name: string;
@@ -81,16 +82,19 @@ function TransactionPage() {
 
         const symbol = isCustomToken ? "ETH" : currency;
 
-       const tokenData = isCustomToken
-      ? {
-          name:
-            tx.currency
-              ? tx.currency.charAt(0).toUpperCase() +
-                tx.currency.slice(1).toLowerCase()
-              : "Token",
-          icon: d1,
-        }
-      : tokenMap[currency];
+      const tokenData = isCustomToken
+  ? {
+      name:
+        tx.currency
+          ? tx.currency.charAt(0).toUpperCase() +
+            tx.currency.slice(1).toLowerCase()
+          : "Token",
+      icon: getDisplayTokenIcon(
+        tx.currency?.toLowerCase() || "",
+        d1
+      ),
+    }
+  : tokenMap[currency];
 
           return {
             name: tokenData.name,

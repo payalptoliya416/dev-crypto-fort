@@ -11,19 +11,19 @@ import d9 from "@/assets/tron.svg";
 
 interface ImportTokenModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: () => void;  refreshWallets: () => Promise<void>;
+
 }
 
-function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
+function ImportTokenModal({ open, onClose,  refreshWallets}: ImportTokenModalProps) {
   const [contractAddress, setContractAddress] = useState("");
   const [addressError, setAddressError] = useState("");
   const validAddress = isAddress(contractAddress.trim());
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
+  
   const [tokenDetails, setTokenDetails] = useState<any>(null);
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const handleImport = async () => {
@@ -48,13 +48,13 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
         wallet_id: activeWallet.id,
         contract_address: address,
       });
-      setMessage(res.message);
-      setIsError(!res.success);
       if (res.data) {
         setTokenDetails(res.data);
       }
       if (res.success) {
+          await refreshWallets(); 
         setShowSuccessModal(true);
+          setShowSuccessModal(true);
       }
       if (res.success) {
         // const importedAsset = {
@@ -95,12 +95,10 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
       response?.message ||
       error?.message ||
       "Something went wrong";
-    setIsError(true);
   
     if (response?.data) {
       setTokenDetails(response.data);
     }
-    setMessage(errorMessage);
 
   toast.error(errorMessage);
    
@@ -113,8 +111,6 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
     setContractAddress("");
     setAddressError("");
     setTokenDetails(null);
-    setMessage("");
-    setIsError(false);
     onClose();
   };
 
@@ -274,7 +270,7 @@ function ImportTokenModal({ open, onClose }: ImportTokenModalProps) {
 
           <button
             onClick={resetModal}
-            className="w-full mt-6 py-3 rounded-xl bg-[#25C866] text-white font-semibold"
+            className="w-full mt-6 py-3 rounded-xl bg-[#25C866] text-white font-semibold cursor-pointer"
           >
             Done
           </button>
