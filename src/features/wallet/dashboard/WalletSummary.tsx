@@ -32,7 +32,6 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
-  console.log("activeWallet",activeWallet)
   const dispatch = useDispatch();
   const currency = useSelector((state: RootState) => state.currency.value);
 

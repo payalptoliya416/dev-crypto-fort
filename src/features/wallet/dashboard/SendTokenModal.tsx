@@ -32,7 +32,6 @@ function SendTokenModal({
   const [selectedToken, setSelectedToken] = useState("");
   const { assets } = useWalletAssets();
   const selectedAsset = assets.find((asset) => asset.token === selectedToken);
-  console.log("selectedAsset",)
   const selectedTokenBalance = selectedAsset?.balance ?? "0";
   const [gasLoading, setGasLoading] = useState(false);
   const [gasFeeEth, setGasFeeEth] = useState<string | null>(null);
@@ -196,7 +195,6 @@ function SendTokenModal({
           symbol,
           base: "USD",
         });
-        console.log("response",response)
         const priceString = response?.prices?.[0]?.price || "";
         const price = Number(String(priceString).replace(/[,\s]/g, ""));
         if (response.success && price > 0) {
