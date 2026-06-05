@@ -5,6 +5,7 @@ import CommonTable, { type Column } from "../../component/CommonTable";
 import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
 import { getTransactions, type Transaction } from "../../../api/walletApi";
+import custom_tokn from "@/assets/custom_tokn.svg";
 import d1 from "@/assets/Ethereum.svg";
 import d2 from "@/assets/Bitcoin.svg";
 import d3 from "@/assets/Binance.png";
@@ -66,7 +67,7 @@ function TransactionPage() {
           }
         };
         const mapped: TransactionRow[] = res.data.map((tx: Transaction) => {
-         const currency = tx.currency?.toUpperCase() || "ETH";
+         const currency = tx.currency || "ETH";
 
         const tokenMap: Record<string, { name: string; icon: string }> = {
           ETH: { name: "Ethereum", icon: d1 },
@@ -79,8 +80,6 @@ function TransactionPage() {
         };
 
         const isCustomToken = !tokenMap[currency];
-
-        const symbol = isCustomToken ? "ETH" : currency;
 
       const tokenData = isCustomToken
   ? {
@@ -103,7 +102,7 @@ function TransactionPage() {
             to_address: tx.to_address,
             hash: tx.hash,
 
-            amount: `${tx.amount} ${symbol}`,
+            amount: `${tx.amount} ${currency}`,
 
             type: tx.transaction_type === "Send" ? "Sent" : "Received",
 
@@ -146,7 +145,7 @@ function TransactionPage() {
       BNB: d3,
     };
 
-    return icons[symbol?.toUpperCase()] || d1;
+    return icons[symbol?.toUpperCase()] || custom_tokn;
   };
 
   const filteredRows = rows.filter((row) => {
@@ -250,7 +249,7 @@ function TransactionPage() {
       key: "amount",
       align: "right",
       render: (row) => (
-        <p className="text-[#FAFAFB] text-base font-normal">{row.amount}</p>
+        <p className="text-[#FAFAFB] text-base font-normal !capitalize text-end">{row.amount}</p>
       ),
     },
     {
