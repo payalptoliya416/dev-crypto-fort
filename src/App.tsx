@@ -21,6 +21,8 @@ import TwoFactorSetup from "./features/wallet/auth/TwoFactorSetup";
 import Verify2FA from "./features/wallet/auth/Verify2FA";
 import LoginVerify2FA from "./features/wallet/auth/LoginVerify2FA";
 import UserProtectedRoute from "./routes/UserProtectedRoute";
+import CustomTokenList from "./admin/pages/customToken/CustomTokenList";
+import CustomTokenDetails from "./admin/pages/customToken/CustomTokenDetails";
 
 function App() {
   return (
@@ -63,7 +65,9 @@ function App() {
             <Route element={<AdminLayout />}>
               <Route path="transaction" element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
-              <Route path="users/user-details" element={<InnerUsers />} />
+              <Route path="users/user-details" element={<InnerUsers />} />    
+              <Route path="custom-tokens" element={<CustomTokenList />} />    
+              <Route path="custom-tokens/details" element={<CustomTokenDetails />} />
             </Route>
           </Route>
 

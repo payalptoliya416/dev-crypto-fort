@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import logo from "@/assets/logo_svg.svg";
 import { FiRepeat, FiUsers } from "react-icons/fi";
+import { MdOutlineAddCircleOutline } from "react-icons/md";
 
 function AdminSidebar() {
   return (
@@ -37,6 +38,20 @@ function AdminSidebar() {
         >
           <FiRepeat size={18} />
           Transaction
+        </NavLink>
+        <NavLink
+          to="/admin/custom-tokens"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition
+            ${
+              isActive
+                ? "bg-[#1C2E4A] text-white"
+                : "text-gray-400 hover:bg-[#15243D] hover:text-white"
+            }`
+          }
+        >
+        <MdOutlineAddCircleOutline size={18} />
+          Add Custom Token
         </NavLink>
       </nav>
     </div>

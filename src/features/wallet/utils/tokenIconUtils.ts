@@ -1,4 +1,4 @@
-import customTokenIcon from "@/assets/custom_tokn.png";
+import customTokenIcon from "@/assets/custom_tokn.svg";
 import d1 from "@/assets/Ethereum.svg";
 import d2 from "@/assets/Bitcoin.svg";
 import d3 from "@/assets/Binance.png";

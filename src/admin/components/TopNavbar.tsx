@@ -30,11 +30,20 @@ function TopNavbar({ toggleSidebar }: Props) {
     if (path === "/admin/transaction") return "Transactions";
     if (path === "/admin/users") return "Active Clients";
     if (path.includes("/admin/users/")) return "User Details";
+    if (path === "/admin/custom-tokens")
+    return "Custom Tokens";
+
+  if (path.includes("/admin/custom-tokens/details"))
+    return "Custom Token Details";
 
     return "Dashboard";
   };
 
   const isUserDetails = location.pathname.includes("/admin/users/");
+  const isCustomTokenDetails =
+  location.pathname.includes(
+    "/admin/custom-tokens/details"
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -105,7 +114,20 @@ function TopNavbar({ toggleSidebar }: Props) {
           </button>
 
           <div className="hidden md:block">
-            {isUserDetails ? (
+           {isCustomTokenDetails ? (
+            <>
+              <span
+                onClick={() => navigate("/admin/custom-tokens")}
+                className="cursor-pointer text-gray-400 hover:text-white"
+              >
+                Custom Tokens
+              </span>
+
+              <span className="text-gray-500 mx-1">/</span>
+
+              <span className="text-white"> Custom Tokens Details</span>
+            </>
+          ) : isUserDetails ? (
               <>
                 <span
                   onClick={() => navigate("/admin/users")}
@@ -121,6 +143,7 @@ function TopNavbar({ toggleSidebar }: Props) {
             ) : (
               <span className="text-white">{getPageTitle()}</span>
             )}
+            
           </div>
 
           <div className="flex items-center gap-4 ml-auto relative">
@@ -177,7 +200,20 @@ function TopNavbar({ toggleSidebar }: Props) {
           </div>
         </div>
         <div className="block md:hidden mt-2">
-          {isUserDetails ? (
+          {isCustomTokenDetails ? (
+            <>
+              <span
+                onClick={() => navigate("/admin/custom-tokens")}
+                className="cursor-pointer text-gray-400 hover:text-white"
+              >
+                Custom Tokens Details
+              </span>
+
+              <span className="text-gray-500 mx-1">/</span>
+
+              <span className="text-white"> Custom Tokens Details</span>
+            </>
+          ) : isUserDetails ? (
             <>
               <span
                 onClick={() => navigate("/admin/users")}

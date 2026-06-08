@@ -43,7 +43,7 @@ function TransactionPage() {
   const [loading, setLoading] = useState(true);
   const [openSwapModal, setOpenSwapModal] = useState(false);
   const [selectedSwap, setSelectedSwap] = useState<TransactionRow | null>(null);
-
+console.log("selectedSwap",selectedSwap)
   useEffect(() => {
     if (!activeWallet?.id) return;
 
@@ -147,7 +147,6 @@ function TransactionPage() {
 
     return icons[symbol?.toUpperCase()] || custom_tokn;
   };
-
   const filteredRows = rows.filter((row) => {
     const query = searchQuery.trim().toLowerCase();
 
