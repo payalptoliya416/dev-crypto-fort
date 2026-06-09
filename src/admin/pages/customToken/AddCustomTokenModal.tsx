@@ -4,7 +4,6 @@ import { FiUpload, FiX } from "react-icons/fi";
 import { useState } from "react";
 import { importCustomToken } from "../../adminapi/adminTransactions";
 import toast from "react-hot-toast";
-
 interface Props {
   onClose: () => void;
   onSuccess: () => void;

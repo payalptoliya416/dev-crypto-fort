@@ -53,14 +53,14 @@ export const getDisplayTokenIcon = (
   tokenValue: string,
   providedIcon?: string
 ): string => {
-  // If it's a custom token, always use custom_tokn.svg regardless of provided icon
-  if (isCustomToken(tokenValue)) {
-    return customTokenIcon;
-  }
-
-  // For default tokens, use the provided icon or look up from config
+  // Use a provided icon when available, even for custom tokens.
   if (providedIcon && providedIcon !== customTokenIcon) {
     return providedIcon;
+  }
+
+  // For custom tokens without a provided icon, fall back to the default custom token image.
+  if (isCustomToken(tokenValue)) {
+    return customTokenIcon;
   }
 
   return getTokenIcon(tokenValue, providedIcon);

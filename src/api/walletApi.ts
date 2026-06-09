@@ -26,6 +26,7 @@ export interface Wallet {
     balance: string;
     network: string;
     contract_address: string;
+    token_image_url?: string;
   }[];
 }
 
@@ -126,7 +127,9 @@ export interface Transaction {
   amount: string;
   gas_price: string;
   gas_used: string;
-  currency? : string;
+  currency?: string;
+  is_eth?: boolean;
+  token_image_url?: string;
   block_number: number;
   nonce: string;
   transaction_type: "Send" | "Receive";

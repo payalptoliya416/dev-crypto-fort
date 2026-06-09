@@ -5,12 +5,12 @@ import CommonTable, { type Column } from "../../component/CommonTable";
 import Loader from "../../component/Loader";
 import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
-import { getBalance } from "../../../api/walletApi";
 import d1 from "@/assets/Ethereum.svg";
 import d2 from "@/assets/Bitcoin.svg";
 import d3 from "@/assets/Binance.png";
 import d5 from "@/assets/TRC-20.svg";
 import d9 from "@/assets/tron.svg";
+import d4 from "@/assets/USDC.svg";
 import up from "@/assets/up.svg";
 import { formatBalance } from "../../component/format";
 import { io } from "socket.io-client";
@@ -25,6 +25,7 @@ interface Asset {
   up: boolean;
   icon: string;
   token_price?: string;
+    marketSymbol?: string;
 }
 
 function Balance() {
@@ -57,11 +58,14 @@ function Balance() {
       setAssets((prevAssets) => {
         const updated = prevAssets.map((asset) => {
   
-          const match = data.prices.find(
-          (p: any) =>
-            String(p.symbol).toUpperCase() ===
-            String(asset.symbol).toUpperCase()
-        );
+         const socketSymbol =
+  asset.marketSymbol || asset.symbol;
+
+const match = data.prices.find(
+  (p: any) =>
+    String(p.symbol).toUpperCase() ===
+    String(socketSymbol).toUpperCase()
+);
 
         const usdtData = data.prices.find(
           (p: any) =>
@@ -93,22 +97,35 @@ function Balance() {
             changePercent = `${diff.toFixed(2)}%`;
             isUp = diff >= 0;
           }
+          const fallbackSymbol =
+            asset.marketSymbol || "USDT";
 
-                return {
-          ...asset,
-          balance: asset.balance,
-          price: hasSocketPrice
-            ? String(match.price)
-            : (usdtData?.price?.toString() || "1"),
+          return {
+            ...asset,
+            balance: asset.balance,
 
-          change: hasSocketPrice
-            ? changePercent
-            : "0.00%",
+            price: hasSocketPrice
+              ? String(match.price)
+              : (
+                  storedPrices?.[fallbackSymbol]?.price ||
+                  usdtData?.price?.toString() ||
+                  "1"
+                ),
 
-          up: hasSocketPrice
-            ? isUp
-            : true,
-        };
+            change: hasSocketPrice
+              ? changePercent
+              : (
+                  storedPrices?.[fallbackSymbol]?.change ||
+                  "0.00%"
+                ),
+
+            up: hasSocketPrice
+              ? isUp
+              : (
+                  storedPrices?.[fallbackSymbol]?.up ??
+                  true
+                ),
+          };
         });
 
         if (updated.length > 0) {
@@ -131,7 +148,17 @@ function Balance() {
           );
         }
 
-        return updated;
+       return updated.sort((a, b) => {
+        const totalA =
+          Number(a.balance || 0) *
+          Number(a.price || 0);
+
+        const totalB =
+          Number(b.balance || 0) *
+          Number(b.price || 0);
+
+        return totalB - totalA;
+      });
       });
     });
 
@@ -150,6 +177,7 @@ function Balance() {
     bnb: { name: "BNB", symbol: "BNB", icon: d3 },
     trx: { name: "TRON", symbol: "TRX", icon: d9 },
     trc20: { name: "USDT (TRC20)", symbol: "USDT", icon: d5 },
+    usdc: { name: "USDC (ERC20)", symbol: "USDC", icon: d4 },
   };
 
   const DEFAULT_ICON = d1;
@@ -163,15 +191,46 @@ function Balance() {
       }
       try {
         setLoading(true);
-        const balanceRes = await getBalance({
-          wallet_id: activeWallet.id,
-          type: "all",
-        });
+        // const balanceRes = await getBalance({
+        //   wallet_id: activeWallet.id,
+        //   type: "all",
+        // });
+        // const balances = balanceRes?.data?.balance || {};
+        const balances = {
+        eth: activeWallet.eth_balance,
+        btc: activeWallet.btc_balance,
+        usdt: activeWallet.usdt_balance,
+        usdc: activeWallet.usdc_balance,
+        bnb: activeWallet.bnb_balance,
+        trx: activeWallet.trx_balance,
+        trc20: activeWallet.trc20_balance,
+      };
 
-        const balances = balanceRes?.data?.balance || {};
         const savedPrices = localStorage.getItem("crypto_balance_prices");
         const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
-      
+        const customAssets: Asset[] =
+  activeWallet.custom_tokens?.map((token: any) => {
+    const marketSymbol = token.is_eth ? "ETH" : "USDT";
+
+    return {
+      name: token.name,
+      symbol: token.symbol,
+      balance: token.balance,
+
+      marketSymbol,
+
+      price: priceMap[marketSymbol]?.price || "0",
+      change: priceMap[marketSymbol]?.change || "0.00%",
+      up: priceMap[marketSymbol]?.up ?? true,
+
+      icon:
+        token.token_image_url &&
+        token.token_image_url.trim() !== ""
+          ? token.token_image_url
+          : getDisplayTokenIcon(token.symbol, DEFAULT_ICON),
+    };
+  }) || [];
+  
         const assetList: Asset[] = Object.entries(balances)
           .filter(([_, value]) => value !== undefined)
           .map(([key, value]) => {
@@ -188,16 +247,28 @@ function Balance() {
               icon: getDisplayTokenIcon(key, config?.icon || DEFAULT_ICON),
             };
           }) as Asset[];
-         const sortedAssets = assetList.sort((a, b) => {
-          const totalA =
-            Number(a.balance || 0) * Number(a.price || 0);
+        //  const sortedAssets = assetList.sort((a, b) => {
+        //   const totalA =
+        //     Number(a.balance || 0) * Number(a.price || 0);
 
-          const totalB =
-            Number(b.balance || 0) * Number(b.price || 0);
+        //   const totalB =
+        //     Number(b.balance || 0) * Number(b.price || 0);
 
-          return totalB - totalA;
-        });
+        //   return totalB - totalA;
+        // });
+            const sortedAssets = [...assetList, ...customAssets].sort(
+              (a, b) => {
+                const totalA =
+                  Number(a.balance || 0) *
+                  Number(a.price || 0);
 
+                const totalB =
+                  Number(b.balance || 0) *
+                  Number(b.price || 0);
+
+                return totalB - totalA;
+              }
+            );
         setAssets(sortedAssets);
         setLoading(false);
       } catch (err: any) {
@@ -227,7 +298,7 @@ function Balance() {
       key: "name",
       render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="" />
+          <img src={row.icon} alt="icon" className="w-[30px]" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
             <p className="text-xs text-[#7A7D83]">{row.symbol}</p>

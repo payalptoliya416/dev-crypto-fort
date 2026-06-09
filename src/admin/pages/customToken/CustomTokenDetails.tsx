@@ -3,6 +3,8 @@ import { useLocation, useParams } from "react-router-dom";
 import CommonTable from "../../components/CommonTable";
 import type { Column } from "../../components/CommonTable";
 import { getCustomTokenDetails } from "../../adminapi/adminTransactions";
+import { TbCopy } from "react-icons/tb";
+import toast from "react-hot-toast";
 
 interface Token {
   id: number;
@@ -29,9 +31,9 @@ interface User {
 }
 
 function CustomTokenDetails() {
-const location = useLocation();
+  const location = useLocation();
 
-const tokenId = location.state?.tokenId;
+  const tokenId = location.state?.tokenId;
   const [token, setToken] = useState<Token | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,35 +50,25 @@ const tokenId = location.state?.tokenId;
 
       if (!tokenId) return;
 
-      const res = await getCustomTokenDetails(
-        tokenId,
-        pageNumber,
-        ""
-      );
-      const mappedUsers: User[] = (res.data.users || []).map(
-        (user) => ({
-            id: user.balance_id,
-            balance_id: user.balance_id,
-            wallet_id: user.wallet_id,
-            eth_address: user.eth_address,
-            user_id: user.user_id,
-            user_name: user.user_name,
-            user_email: user.user_email,
-            balance: user.balance,
-            updated_at: user.updated_at,
-        })
-        );
+      const res = await getCustomTokenDetails(tokenId, pageNumber, "");
+      const mappedUsers: User[] = (res.data.users || []).map((user) => ({
+        id: user.balance_id,
+        balance_id: user.balance_id,
+        wallet_id: user.wallet_id,
+        eth_address: user.eth_address,
+        user_id: user.user_id,
+        user_name: user.user_name,
+        user_email: user.user_email,
+        balance: user.balance,
+        updated_at: user.updated_at,
+      }));
 
       setToken(res.data.token);
       setUsers(mappedUsers);
 
-      setPage(
-        res.data.pagination.current_page || 1
-      );
+      setPage(res.data.pagination.current_page || 1);
 
-      setLastPage(
-        res.data.pagination.last_page || 1
-      );
+      setLastPage(res.data.pagination.last_page || 1);
     } catch (error) {
       console.log(error);
     } finally {
@@ -88,12 +80,25 @@ const tokenId = location.state?.tokenId;
     fetchTokenDetails();
   }, [tokenId]);
 
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied!");
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
+
   const columns: Column<User>[] = [
     {
       header: "ETH Address",
       accessor: (row) => (
-        <span className="text-xs text-gray-300">
+        <span
+          onClick={() => handleCopy(row.eth_address)}
+          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2 items-center"
+        >
           {truncateAddress(row.eth_address)}
+          <TbCopy />
         </span>
       ),
     },
@@ -103,10 +108,7 @@ const tokenId = location.state?.tokenId;
     },
     {
       header: "Updated At",
-      accessor: (row) =>
-        new Date(
-          row.updated_at
-        ).toLocaleString(),
+      accessor: (row) => new Date(row.updated_at).toLocaleString(),
     },
   ];
 
@@ -126,37 +128,25 @@ const tokenId = location.state?.tokenId;
                 {token.name}
               </h2>
 
-              <p className="text-[#25C866] mt-1">
-                {token.symbol}
-              </p>
+              <p className="text-[#25C866] mt-1">{token.symbol}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
             <div>
-              <p className="text-gray-400 text-sm">
-                Network
-              </p>
+              <p className="text-gray-400 text-sm">Network</p>
 
-              <p className="text-white mt-1 uppercase">
-                {token.network}
-              </p>
+              <p className="text-white mt-1 uppercase">{token.network}</p>
             </div>
 
             <div>
-              <p className="text-gray-400 text-sm">
-                Decimals
-              </p>
+              <p className="text-gray-400 text-sm">Decimals</p>
 
-              <p className="text-white mt-1">
-                {token.decimals}
-              </p>
+              <p className="text-white mt-1">{token.decimals}</p>
             </div>
 
             <div className="md:col-span-2">
-              <p className="text-gray-400 text-sm">
-                Contract Address
-              </p>
+              <p className="text-gray-400 text-sm">Contract Address</p>
 
               <p className="text-white mt-1 break-all">
                 {token.contract_address}
@@ -179,9 +169,7 @@ const tokenId = location.state?.tokenId;
           loading={loading}
           page={page}
           lastPage={lastPage}
-          onPageChange={(p) =>
-            fetchTokenDetails(p)
-          }
+          onPageChange={(p) => fetchTokenDetails(p)}
         />
       </div>
     </div>

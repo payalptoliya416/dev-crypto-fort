@@ -5,6 +5,7 @@ import d5 from "@/assets/TRC-20.svg";
 import d3 from "@/assets/Binance.png";
 import d9 from "@/assets/tron.svg";
 import up from "@/assets/up.svg";
+import custom_tokn from "@/assets/custom_tokn.svg";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import { formatBalance } from "../../component/format";
 import { useEffect, useState } from "react";
@@ -32,6 +33,7 @@ interface Asset {
   network?: string;
   contractAddress?: string;
   value?: string;
+  marketSymbol?: string;
 }
 
 const CUSTOM_TOKENS_KEY = "custom_wallet_tokens";
@@ -88,10 +90,12 @@ function AssetsTab({
 
       setAssets((prevAssets) => {
         const updated = prevAssets.map((asset) => {
+          const socketSymbol = asset.marketSymbol || asset.symbol;
+
           const match = data.prices.find(
             (p: any) =>
               String(p.symbol).toUpperCase() ===
-              String(asset.symbol).toUpperCase(),
+              String(socketSymbol).toUpperCase(),
           );
           const usdtData = data.prices.find(
             (p: any) => String(p.symbol).toUpperCase() === "USDT",
@@ -122,18 +126,25 @@ function AssetsTab({
 
           const hasSocketPrice = !!match;
 
-          const fallbackPrice =
-            storedPrices?.USDT?.price || usdtData?.price?.toString() || "1";
+          const fallbackSymbol =
+  asset.marketSymbol ||
+  (asset.symbol === "ETH" ? "ETH" : "USDT");
+
+        const fallbackPrice =
+          storedPrices?.[fallbackSymbol]?.price ||
+          "1";
 
           return {
             ...asset,
             price: hasSocketPrice ? String(match.price) : fallbackPrice,
 
             change: hasSocketPrice
-              ? changePercent
-              : storedPrices?.USDT?.change || "0.00%",
+            ? changePercent
+            : storedPrices?.[fallbackSymbol]?.change || "0.00%",
 
-            up: hasSocketPrice ? isUp : (storedPrices?.USDT?.up ?? true),
+          up: hasSocketPrice
+            ? isUp
+            : (storedPrices?.[fallbackSymbol]?.up ?? true),
           };
         });
 
@@ -188,12 +199,21 @@ function AssetsTab({
       // if we have cached prices, continue — no socketLoaded state needed
       try {
         setLoading(true);
-        const balanceRes = await getBalance({
-          wallet_id: activeWallet.id,
-          type: "all",
-        });
+        // const balanceRes = await getBalance({
+        //   wallet_id: activeWallet.id,
+        //   type: "all",
+        // });
 
-        const balances = balanceRes?.data?.balance || {};
+        // const balances = balanceRes?.data?.balance || {};
+        const balances = {
+      eth: activeWallet.eth_balance,
+      btc: activeWallet.btc_balance,
+      usdt: activeWallet.usdt_balance,
+      usdc: activeWallet.usdc_balance,
+      trx: activeWallet.trx_balance,
+      bnb: activeWallet.bnb_balance,
+      trc20: activeWallet.trc20_balance,
+    };
         const savedPrices = localStorage.getItem("crypto_prices");
         const priceMap = savedPrices ? JSON.parse(savedPrices) : {};
 
@@ -211,10 +231,36 @@ function AssetsTab({
               price: priceMap[symbol]?.price || "",
               change: priceMap[symbol]?.change ?? "",
               up: priceMap[symbol]?.up ?? true,
-              icon: getDisplayTokenIcon(key, config?.icon || d1),
+              icon: getDisplayTokenIcon(key, config?.icon || custom_tokn),
             };
           }) as Asset[];
 
+    const customAssets: Asset[] =
+  activeWallet.custom_tokens?.map((token: any) => {
+    const marketSymbol = token.is_eth ? "ETH" : "USDT";
+
+    return {
+      token: token.symbol.toLowerCase(),
+      name: token.name,
+      symbol: token.symbol,
+      balance: token.balance,
+
+      marketSymbol, // 👈 add
+
+      price: priceMap[marketSymbol]?.price || "0",
+      change: priceMap[marketSymbol]?.change || "0.00%",
+      up: priceMap[marketSymbol]?.up ?? true,
+
+     icon:
+        token.token_image_url &&
+        token.token_image_url.trim() !== ""
+          ? token.token_image_url
+    : getDisplayTokenIcon(token.symbol, custom_tokn),
+      network: token.network,
+      contractAddress: token.contract_address,
+    };
+  }) || [];
+  
         const storedCustomAssets = getStoredCustomAssets().map((asset) => {
           const usdtData = priceMap["USDT"];
 
@@ -265,14 +311,27 @@ function AssetsTab({
             });
           });
 
-        const sortedAssets = mergedAssets.sort((a, b) => {
-          const totalA = Number(a.balance || 0) * Number(a.price || 1);
+        // const sortedAssets = mergedAssets.sort((a, b) => {
+        //   const totalA = Number(a.balance || 0) * Number(a.price || 1);
 
-          const totalB = Number(b.balance || 0) * Number(b.price || 1);
+        //   const totalB = Number(b.balance || 0) * Number(b.price || 1);
 
-          return totalB - totalA;
-        });
+        //   return totalB - totalA;
+        // });
+        
+        const sortedAssets = [...nativeAssets, ...customAssets].sort(
+          (a, b) => {
+            const totalA =
+              Number(a.balance || 0) *
+              Number(a.price || 1);
 
+            const totalB =
+              Number(b.balance || 0) *
+              Number(b.price || 1);
+
+            return totalB - totalA;
+          }
+        );
         setAssets(sortedAssets);
         setLoading(false);
       } catch (err: any) {
@@ -303,7 +362,7 @@ function AssetsTab({
       key: "name",
       render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="" />
+          <img src={row.icon} alt="icon" className="w-[30px]" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
             <p className="text-xs text-[#FAFAFB]">{row.symbol}</p>

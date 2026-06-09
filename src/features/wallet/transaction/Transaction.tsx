@@ -81,19 +81,23 @@ console.log("selectedSwap",selectedSwap)
 
         const isCustomToken = !tokenMap[currency];
 
-      const tokenData = isCustomToken
-  ? {
-      name:
-        tx.currency
-          ? tx.currency.charAt(0).toUpperCase() +
-            tx.currency.slice(1).toLowerCase()
-          : "Token",
-      icon: getDisplayTokenIcon(
-        tx.currency?.toLowerCase() || "",
-        d1
-      ),
-    }
-  : tokenMap[currency];
+const displayIcon =
+          tx.token_image_url ||
+          getDisplayTokenIcon(tx.currency?.toLowerCase() || "", custom_tokn);
+
+        const tokenData = isCustomToken
+          ? {
+              name:
+                tx.currency
+                  ? tx.currency.charAt(0).toUpperCase() +
+                    tx.currency.slice(1).toLowerCase()
+                  : "Token",
+              icon: displayIcon,
+            }
+          : {
+              ...tokenMap[currency],
+              icon: tx.token_image_url || tokenMap[currency].icon,
+            };
 
           return {
             name: tokenData.name,
@@ -135,7 +139,7 @@ console.log("selectedSwap",selectedSwap)
     }
   };
 
-  const getTokenIcon = (symbol: string) => {
+  const getTokenIcon = (token: any) => {
     const icons: Record<string, string> = {
       ETH: d1,
       BTC: d2,
@@ -145,6 +149,15 @@ console.log("selectedSwap",selectedSwap)
       BNB: d3,
     };
 
+    if (token?.token_image_url && token.token_image_url.trim() !== "") {
+      return token.token_image_url;
+    }
+
+    if (token?.is_eth) {
+      return d1;
+    }
+
+    const symbol = token?.token_symbol || token?.symbol || "";
     return icons[symbol?.toUpperCase()] || custom_tokn;
   };
   const filteredRows = rows.filter((row) => {
@@ -169,7 +182,7 @@ console.log("selectedSwap",selectedSwap)
       key: "name",
       render: (row) => (
         <div className="flex items-start md:items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="" />
+          <img src={row.icon} alt="icon" className="w-[30px] object-cover" />
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-2">
               <p className="text-sm text-white font-medium mb-1">{row.name}</p>
@@ -360,8 +373,9 @@ console.log("selectedSwap",selectedSwap)
                     {/* Top */}
                     <div className="flex items-center gap-3 mb-4">
                       <img
-                        src={getTokenIcon(token.token_symbol)}
+                        src={getTokenIcon(token)}
                         alt="token"
+                        className="w-[30px]"
                       />
 
                       <div>

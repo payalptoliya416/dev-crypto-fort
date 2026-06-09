@@ -3,11 +3,12 @@ import { FiPlus, FiSearch } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import CommonTable from "../../components/CommonTable";
 import type { Column } from "../../components/CommonTable";
-import { BiEditAlt } from "react-icons/bi";
 import { getCustomTokens } from "../../adminapi/adminTransactions";
 import AddCustomTokenModal from "./AddCustomTokenModal";
 import { FaUsers } from "react-icons/fa";
 import { TooltipWrapper } from "../../components/TooltipWrapper";
+import toast from "react-hot-toast";
+import { TbCopy } from "react-icons/tb";
 
 interface CustomToken {
   id: number;
@@ -66,7 +67,16 @@ function CustomTokenList() {
     }, 500);
 
     return () => clearTimeout(debounce);
-  }, [search]); 
+  }, [search]);
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied!");
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
 
   const columns: Column<CustomToken>[] = [
     {
@@ -90,8 +100,12 @@ function CustomTokenList() {
     {
       header: "Contract Address",
       accessor: (row) => (
-        <span className="text-xs text-gray-300">
+        <span
+          onClick={() => handleCopy(row.contractAddress)}
+          className="text-xs cursor-pointer hover:text-[#25C866] flex gap-2 items-center"
+        >
           {truncateAddress(row.contractAddress)}
+          <TbCopy />
         </span>
       ),
     },
@@ -101,17 +115,17 @@ function CustomTokenList() {
         <div className="flex gap-3">
           <TooltipWrapper content="View Details">
             <button
-                onClick={() =>
-          navigate("/admin/custom-tokens/details", {
-            state: {
-              tokenId: row.id,
-            },
-          })
-        }
-          className="text-blue-400 cursor-pointer"
-        >
-          <FaUsers size={24} className="text-[#25C866]"/>
-        </button>
+              onClick={() =>
+                navigate("/admin/custom-tokens/details", {
+                  state: {
+                    tokenId: row.id,
+                  },
+                })
+              }
+              className="text-blue-400 cursor-pointer"
+            >
+              <FaUsers size={24} className="text-[#25C866]" />
+            </button>
           </TooltipWrapper>
         </div>
       ),
