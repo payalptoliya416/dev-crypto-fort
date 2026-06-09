@@ -97,7 +97,7 @@ function TokenDropdown({
             <img
               src={selectedToken.icon}
               alt=""
-              className="rounded-full shrink-0"
+              className="rounded-full shrink-0 w-[30px]"
             />
             <span className="truncate">{selectedToken.label}</span>
           </span>
@@ -133,7 +133,7 @@ function TokenDropdown({
               <img
                 src={token.icon}
                 alt=""
-                className="rounded-full shrink-0"
+                className="rounded-full shrink-0 w-[30px]"
               />
               <span className="min-w-0">
                 <span className="block text-white text-base">

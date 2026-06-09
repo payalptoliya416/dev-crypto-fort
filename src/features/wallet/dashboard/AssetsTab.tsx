@@ -240,7 +240,7 @@ function AssetsTab({
     const marketSymbol = token.is_eth ? "ETH" : "USDT";
 
     return {
-      token: token.symbol.toLowerCase(),
+      token: token.contract_address?.toLowerCase() || token.symbol.toLowerCase(),
       name: token.name,
       symbol: token.symbol,
       balance: token.balance,
@@ -363,7 +363,7 @@ function AssetsTab({
       key: "name",
       render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="w-[30px]" />
+          <img src={row.icon} alt="icon" className="w-[30px] rounded-full" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
             <p className="text-xs text-[#FAFAFB]">{row.symbol}</p>

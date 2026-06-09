@@ -300,7 +300,7 @@ const match = data.prices.find(
       key: "name",
       render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="w-[30px]" />
+          <img src={row.icon} alt="icon" className="w-[30px] rounded-full" />
           <div>
             <p className="text-sm text-white font-medium mb-1">{row.name}</p>
             <p className="text-xs text-[#7A7D83]">{row.symbol}</p>

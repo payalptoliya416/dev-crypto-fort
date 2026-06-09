@@ -186,7 +186,9 @@ function SendTokenModal({
       const assetSymbol = selectedAsset?.symbol?.toUpperCase() || "";
 
       const symbol = nativeSymbols.includes(assetSymbol)
-        ? assetSymbol
+      ? assetSymbol
+      : selectedAsset?.is_eth
+        ? "ETH"
         : "USDT";
 
       setMarketLoading(true);
@@ -273,9 +275,9 @@ function SendTokenModal({
         amount,
         isMaxAmount,
         gasFee: gasFeeEth || "0",
-        // store totalCost as token-only for non-native, and amount+gas for native
         totalCost: isNativeToken ? (Number(amount || 0) + gasFeeInEth).toString() : amount,
         selectedToken,
+         tokenSymbol: selectedAsset?.symbol || "",
         marketValue,
       }),
     );
@@ -455,11 +457,15 @@ function SendTokenModal({
 
               <div className="flex justify-between text-white text-base sm:text-lg font-medium">
                 <p>Total</p>
-                <p>
+               <p>
                   {isNativeToken ? (
-                    amount || gasFeeEth ? `${formatBalance(Number(amount || 0) + gasFeeInEth)} ${selectedNativeSymbol}` : `0.00 ${selectedNativeSymbol}`
+                    amount || gasFeeEth
+                      ? `${formatBalance(Number(amount || 0) + gasFeeInEth)} ${selectedNativeSymbol}`
+                      : `0.00 ${selectedNativeSymbol}`
                   ) : (
-                    amount || gasFeeEth ? `${formatBalance(Number(amount || 0))} ${selectedToken ? selectedToken.toUpperCase() : ""} + ${formatBalance(gasFeeInEth)} ${selectedNativeSymbol}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : ""}`
+                    amount || gasFeeEth
+                      ? `${formatBalance(Number(amount || 0))} ${selectedAsset?.symbol || ""} + ${formatBalance(gasFeeInEth)} ${selectedNativeSymbol}`
+                      : `0.00 ${selectedAsset?.symbol || ""}`
                   )}
                 </p>
               </div>

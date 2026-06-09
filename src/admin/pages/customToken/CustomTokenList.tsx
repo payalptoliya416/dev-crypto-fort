@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiSearch } from "react-icons/fi";
+import { FiEye, FiPlus, FiSearch } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import CommonTable from "../../components/CommonTable";
 import type { Column } from "../../components/CommonTable";
 import { getCustomTokens } from "../../adminapi/adminTransactions";
 import AddCustomTokenModal from "./AddCustomTokenModal";
-import { FaUsers } from "react-icons/fa";
 import { TooltipWrapper } from "../../components/TooltipWrapper";
 import toast from "react-hot-toast";
 import { TbCopy } from "react-icons/tb";
@@ -85,7 +84,7 @@ function CustomTokenList() {
         <img
           src={row.icon}
           alt={row.name}
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-[30px] rounded-full"
         />
       ),
     },
@@ -124,7 +123,7 @@ function CustomTokenList() {
               }
               className="text-blue-400 cursor-pointer"
             >
-              <FaUsers size={24} className="text-[#25C866]" />
+              <FiEye size={18} className="text-[#25C866]" />
             </button>
           </TooltipWrapper>
         </div>

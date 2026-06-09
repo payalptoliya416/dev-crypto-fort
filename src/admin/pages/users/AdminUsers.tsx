@@ -164,6 +164,7 @@ function AdminUsers() {
         <div className="flex items-center gap-4">
           <TooltipWrapper content="View Details">
             <FiEye
+            size={18}
               onClick={() =>
                 navigate("/admin/users/user-details", {
                   state: { accounts: row.otherAccounts },

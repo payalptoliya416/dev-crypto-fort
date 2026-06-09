@@ -24,10 +24,9 @@ function ConfirmTransactionModal({
   onSuccess,
 }: ConfirmTransactionModalProps) {
   // transaction data (includes gasFee)
-  const { toAddress, amount, selectedToken, marketValue, gasFee , isMaxAmount } = useSelector(
+  const { toAddress, amount, selectedToken, marketValue, gasFee , isMaxAmount ,  tokenSymbol, } = useSelector(
     (state: RootState) => state.transaction,
   );
-
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -126,7 +125,7 @@ function ConfirmTransactionModal({
         type:
           selectedToken?.toLowerCase() === "usdc"
             ? "USDC"
-            : selectedToken as any,
+            : tokenSymbol as any,
       });
 
       if (res.success) {
@@ -202,7 +201,7 @@ function ConfirmTransactionModal({
             {/* Token */}
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
               <p className="text-white text-base sm:text-lg font-medium">Token:</p>
-              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">{selectedToken ? selectedToken.toUpperCase() : "ETH"}</p>
+              <p className="text-[#7A7D83] text-base sm:text-lg font-medium">{tokenSymbol || selectedToken?.toUpperCase() || "ETH"}</p>
             </div>
 
             {/* From (static wallet for now) */}
@@ -233,7 +232,9 @@ function ConfirmTransactionModal({
             <div className="flex justify-between items-center border-b border-[#3C3D47] pb-5">
               <p className="text-white text-base sm:text-lg font-medium">Amount:</p>
               <p className="text-[#7A7D83] text-base sm:text-lg font-medium">
-                {amount ? `${formatBalance(amount)} ${selectedToken ? selectedToken.toUpperCase() : "ETH"}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : "ETH"}`}
+                {amount
+  ? `${formatBalance(amount)} ${tokenSymbol || selectedToken?.toUpperCase() || "ETH"}`
+  : `0.00 ${tokenSymbol || selectedToken?.toUpperCase() || "ETH"}`}
               </p>
             </div>
 
@@ -263,7 +264,7 @@ function ConfirmTransactionModal({
                     return parsedAmount || parsedGas ? `${formatBalance(parsedAmount + parsedGas)} ${selectedToken ? selectedToken.toUpperCase() : 'ETH'}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : 'ETH'}`;
                   }
 
-                  return amount || gasFee ? `${formatBalance(parsedAmount)} ${selectedToken ? selectedToken.toUpperCase() : ''} + ${formatBalance(parsedGas)} ${selectedToken ? (selectedToken.toUpperCase() === 'TRC20' ? 'TRX' : 'ETH') : 'ETH'}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : ''}`;
+                  return amount || gasFee ? `${formatBalance(parsedAmount)} ${tokenSymbol || ''} + ${formatBalance(parsedGas)} ${selectedToken ? (selectedToken.toUpperCase() === 'TRC20' ? 'TRX' : 'ETH') : 'ETH'}` : `0.00 ${selectedToken ? selectedToken.toUpperCase() : ''}`;
                 })()}
               </p>
             </div>

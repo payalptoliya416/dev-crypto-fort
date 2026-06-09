@@ -18,6 +18,7 @@ export interface WalletAsset {
   balance: string;
   network?: string;
   contractAddress?: string;
+  is_eth?: boolean;
 }
 
 const COIN_CONFIG: Record<string, { name: string; symbol: string; icon: string }> = {
@@ -75,11 +76,45 @@ export function useWalletAssets() {
         const storedCustomAssets = getStoredCustomAssets().map((asset) => ({
           ...asset,
           icon: getDisplayTokenIcon(asset.token, asset.icon),
+          is_eth: asset.is_eth ?? false,
         }));
+
+        const serverCustomAssets = activeWallet?.custom_tokens?.map((token: any) => ({
+          token: token.contract_address?.toLowerCase() || token.symbol?.toLowerCase() || "",
+          name: token.name,
+          symbol: token.symbol,
+          balance: token.balance,
+          icon: getDisplayTokenIcon(token.contract_address || token.symbol || "", token.token_image_url),
+          network: token.network,
+          contractAddress: token.contract_address,
+          is_eth: token.is_eth,
+        })) || [];
+
+        const mergedCustomAssetsMap = new Map<string, WalletAsset>();
+
+        [...storedCustomAssets, ...serverCustomAssets].forEach((asset) => {
+          const key = (
+            asset.contractAddress || asset.token || asset.symbol || ""
+          ).toString().toLowerCase();
+          if (!key) return;
+
+          const existing = mergedCustomAssetsMap.get(key);
+
+          if (!existing) {
+            mergedCustomAssetsMap.set(key, asset);
+          } else if (
+            asset.contractAddress &&
+            !existing.contractAddress
+          ) {
+            mergedCustomAssetsMap.set(key, asset);
+          }
+        });
+
+        const customAssets = Array.from(mergedCustomAssetsMap.values());
 
         const nativeAssetMap = new Map(nativeAssets.map((asset) => [asset.token, asset]));
         const mergedAssets = nativeAssets.map((asset) => {
-          const matchingCustomAsset = storedCustomAssets.find((customAsset) =>
+          const matchingCustomAsset = customAssets.find((customAsset) =>
             customAsset.contractAddress === asset.token || customAsset.token === asset.token,
           );
 
@@ -92,12 +127,15 @@ export function useWalletAssets() {
             icon: matchingCustomAsset.icon || asset.icon,
             network: matchingCustomAsset.network || asset.network,
             contractAddress: matchingCustomAsset.contractAddress || asset.contractAddress,
+            is_eth: matchingCustomAsset.is_eth ?? asset.is_eth,
           };
         });
 
-        storedCustomAssets
+        customAssets
           .filter((customAsset) => {
-            const customTokenKey = customAsset.contractAddress || customAsset.token;
+            const customTokenKey = (
+              customAsset.contractAddress || customAsset.token || ""
+            ).toString();
             return !nativeAssetMap.has(customTokenKey);
           })
           .forEach((customAsset) => {
@@ -107,7 +145,19 @@ export function useWalletAssets() {
             });
           });
 
-        setAssets(mergedAssets);
+        const uniqueAssetsMap = new Map<string, WalletAsset>();
+        mergedAssets.forEach((asset) => {
+          const key = (
+            asset.contractAddress || asset.token || asset.symbol || asset.name || ""
+          )
+            .toString()
+            .toLowerCase();
+          if (!uniqueAssetsMap.has(key)) {
+            uniqueAssetsMap.set(key, asset);
+          }
+        });
+
+        setAssets(Array.from(uniqueAssetsMap.values()));
       } catch {
         setAssets([]);
       } finally {

@@ -84,20 +84,15 @@ function TransactionPage() {
         const displayIcon =
           tx.token_image_url ||
           getDisplayTokenIcon(tx.currency?.toLowerCase() || "", custom_tokn);
-
-        const tokenData = isCustomToken
-          ? {
-              name:
-                tx.currency
-                  ? tx.currency.charAt(0).toUpperCase() +
-                    tx.currency.slice(1).toLowerCase()
-                  : "Token",
-              icon: displayIcon,
-            }
-          : {
-              ...tokenMap[currency],
-              icon: tx.token_image_url || tokenMap[currency].icon,
-            };
+          const tokenData = isCustomToken
+            ? {
+                name: tx.currency || "Token",
+                icon: displayIcon,
+              }
+            : {
+                ...tokenMap[currency],
+                icon: tx.token_image_url || tokenMap[currency].icon,
+              };
 
           return {
             name: tokenData.name,
@@ -186,7 +181,7 @@ function TransactionPage() {
       key: "name",
       render: (row) => (
         <div className="flex items-start md:items-center gap-[10px]">
-          <img src={row.icon} alt="icon" className="w-[30px] object-cover" />
+          <img src={row.icon} alt="icon" className="w-[30px] rounded-full" />
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-2">
               <p className="text-sm text-white font-medium mb-1">{row.name}</p>
@@ -379,7 +374,7 @@ function TransactionPage() {
                       <img
                         src={getTokenIcon(token)}
                         alt="token"
-                        className="w-[30px]"
+                        className="w-[30px] rounded-full"
                       />
 
                       <div>

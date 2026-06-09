@@ -7,6 +7,7 @@ interface TransactionState {
   gasFee: string;
   totalCost: string;
   selectedToken: string;
+  tokenSymbol: string;
   marketValue?: number | null;
   isMaxAmount?: boolean;
   is_full?: boolean;
@@ -18,6 +19,7 @@ const initialState: TransactionState = {
   gasFee: "",
   totalCost: "",
   selectedToken: "",
+  tokenSymbol: "",
   marketValue: null,
   isMaxAmount: false,
   is_full: false,
@@ -36,6 +38,7 @@ const transactionSlice = createSlice({
     resetTransaction() {
       return initialState;
     },
+    
   },
 });
 
