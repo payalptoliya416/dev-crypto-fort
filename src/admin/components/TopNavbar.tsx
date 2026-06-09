@@ -206,7 +206,7 @@ function TopNavbar({ toggleSidebar }: Props) {
                 onClick={() => navigate("/admin/custom-tokens")}
                 className="cursor-pointer text-gray-400 hover:text-white"
               >
-                Custom Tokens Details
+                Custom Tokens
               </span>
 
               <span className="text-gray-500 mx-1">/</span>

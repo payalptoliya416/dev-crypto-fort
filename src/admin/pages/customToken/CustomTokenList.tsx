@@ -136,11 +136,11 @@ function CustomTokenList() {
       <div>
         <div className="bg-[#16233A] border border-[#24324D] shadow-lg rounded-[10px]">
           <div className="flex justify-between items-center p-5 border-b border-[#24324D]">
-            <h3 className="text-lg font-semibold text-white">Custom Tokens</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Custom Tokens</h3>
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#25C866] text-white font-medium hover:opacity-90 cursor-pointer"
+              className="flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg bg-[#25C866] text-white font-medium hover:opacity-90 cursor-pointer text-sm sm:text-base"
             >
               <FiPlus /> Import Token
             </button>

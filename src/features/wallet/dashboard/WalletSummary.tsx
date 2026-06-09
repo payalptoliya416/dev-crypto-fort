@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import CurrencyDropdown from "./CurrencyDropdown";
-import vector from "@/assets/vector.png";
 import { FiUpload } from "react-icons/fi";
 import { HiOutlineDownload } from "react-icons/hi";
 import { LuArrowLeftRight } from "react-icons/lu";
@@ -40,8 +39,6 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
 
-  const ethBalanceNumber = Number(activeWallet?.eth_balance || 0);
-
   const totalValue =
   Number(activeWallet?.eth_balance || 0) * (priceMap["ETH"] || 0) +
   Number(activeWallet?.btc_balance || 0) * (priceMap["BTC"] || 0) +
@@ -68,7 +65,6 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
 
   const finalTotal =
   totalValue + customTokenTotal;
-  const formattedBalance = formatBalance(ethBalanceNumber);
   const formattedTotal = formatBalance(finalTotal, { isFiat: true });
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -258,12 +254,6 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
                   <h2 className="text-[#25C866] text-3xl xl:text-5xl font-semibold mb-[15px]">
                     {getSymbol(currency)}{formattedTotal}
                   </h2>
-                  <div className="flex justify-between items-center flex-wrap gap-4">
-                    <div className="flex items-center gap-[10px] text-white text-xl">
-                      <img src={vector} alt="vector" />
-                      <span>{formattedBalance} ETH</span>
-                    </div>
-                  </div>
                 </>
               )}
             </div>
