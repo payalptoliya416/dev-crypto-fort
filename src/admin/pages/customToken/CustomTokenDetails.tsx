@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import CommonTable from "../../components/CommonTable";
 import type { Column } from "../../components/CommonTable";
 import { getCustomTokenDetails } from "../../adminapi/adminTransactions";

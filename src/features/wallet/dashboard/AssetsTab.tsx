@@ -252,9 +252,10 @@ function AssetsTab({
       up: priceMap[marketSymbol]?.up ?? true,
 
      icon:
-        token.token_image_url &&
-        token.token_image_url.trim() !== ""
-          ? token.token_image_url
+    token.is_eth &&
+    token.token_image_url &&
+    token.token_image_url.trim() !== ""
+    ? token.token_image_url
     : getDisplayTokenIcon(token.symbol, custom_tokn),
       network: token.network,
       contractAddress: token.contract_address,

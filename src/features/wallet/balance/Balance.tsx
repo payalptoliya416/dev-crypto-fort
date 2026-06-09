@@ -16,6 +16,7 @@ import { formatBalance } from "../../component/format";
 import { io } from "socket.io-client";
 import AssetPieChart from "./AssetPieChart";
 import { getDisplayTokenIcon } from "../utils/tokenIconUtils";
+import custom_tokn from "@/assets/custom_tokn.svg";
 interface Asset {
   name: string;
   symbol: string;
@@ -180,7 +181,7 @@ const match = data.prices.find(
     usdc: { name: "USDC (ERC20)", symbol: "USDC", icon: d4 },
   };
 
-  const DEFAULT_ICON = d1;
+  const DEFAULT_ICON = custom_tokn;
 
   useEffect(() => {
     if (!activeWallet?.id) return;
@@ -224,12 +225,13 @@ const match = data.prices.find(
       up: priceMap[marketSymbol]?.up ?? true,
 
       icon:
-        token.token_image_url &&
-        token.token_image_url.trim() !== ""
-          ? token.token_image_url
-          : getDisplayTokenIcon(token.symbol, DEFAULT_ICON),
-    };
-  }) || [];
+      token.is_eth &&
+      token.token_image_url &&
+      token.token_image_url.trim() !== ""
+        ? token.token_image_url
+        : getDisplayTokenIcon(token.symbol, DEFAULT_ICON),
+      };
+      }) || [];
   
         const assetList: Asset[] = Object.entries(balances)
           .filter(([_, value]) => value !== undefined)

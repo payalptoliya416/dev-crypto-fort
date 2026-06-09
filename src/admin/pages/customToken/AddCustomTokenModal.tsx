@@ -197,7 +197,7 @@ const handleSubmit = async (values: FormValues) => {
                 type="button"
                 disabled={loading}
                 onClick={onClose}
-                className="px-6 py-3 rounded-xl bg-[#374151] text-white hover:bg-[#4B5563] disabled:opacity-50"
+                className="px-3 md:px-6 py-2 md:py-3 rounded-xl bg-[#374151] text-white hover:bg-[#4B5563] disabled:opacity-50"
                 >
                 Cancel
                 </button>
@@ -205,7 +205,7 @@ const handleSubmit = async (values: FormValues) => {
                 <button
                 type="submit"
                 disabled={loading}
-                className={`px-6 py-3 rounded-xl text-white font-semibold transition
+                className={`px-3 md:px-6 py-2 md:py-3 rounded-xl text-white font-semibold transition
                 ${
                     loading
                     ? "bg-green-400 cursor-not-allowed opacity-70"

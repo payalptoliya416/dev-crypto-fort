@@ -43,7 +43,7 @@ function TransactionPage() {
   const [loading, setLoading] = useState(true);
   const [openSwapModal, setOpenSwapModal] = useState(false);
   const [selectedSwap, setSelectedSwap] = useState<TransactionRow | null>(null);
-console.log("selectedSwap",selectedSwap)
+
   useEffect(() => {
     if (!activeWallet?.id) return;
 
@@ -81,7 +81,7 @@ console.log("selectedSwap",selectedSwap)
 
         const isCustomToken = !tokenMap[currency];
 
-const displayIcon =
+        const displayIcon =
           tx.token_image_url ||
           getDisplayTokenIcon(tx.currency?.toLowerCase() || "", custom_tokn);
 
@@ -153,9 +153,13 @@ const displayIcon =
       return token.token_image_url;
     }
 
-    if (token?.is_eth) {
-      return d1;
-    }
+     if (
+    token?.is_eth &&
+    token?.token_image_url &&
+    token.token_image_url.trim() !== ""
+  ) {
+    return token.token_image_url;
+  }
 
     const symbol = token?.token_symbol || token?.symbol || "";
     return icons[symbol?.toUpperCase()] || custom_tokn;

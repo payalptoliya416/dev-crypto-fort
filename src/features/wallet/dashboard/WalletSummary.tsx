@@ -27,7 +27,6 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
-  const [ethPrice, setEthPrice] = useState(0);
   const [isPriceLoading, setIsPriceLoading] = useState(true);
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
@@ -39,25 +38,38 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
     dispatch(setCurrency(val));
   };
   
-  const ethBalanceNumber = Number(activeWallet?.eth_balance || 0);
-  const usdcBalanceNumber = Number(activeWallet?.usdc_balance || 0);
-  const usdtBalanceNumber = Number(activeWallet?.usdt_balance || 0);
+  const [priceMap, setPriceMap] = useState<Record<string, number>>({});
 
-const customTokenTotal =
+  const ethBalanceNumber = Number(activeWallet?.eth_balance || 0);
+
+  const totalValue =
+  Number(activeWallet?.eth_balance || 0) * (priceMap["ETH"] || 0) +
+  Number(activeWallet?.btc_balance || 0) * (priceMap["BTC"] || 0) +
+  Number(activeWallet?.usdt_balance || 0) * (priceMap["USDT"] || 0) +
+  Number(activeWallet?.usdc_balance || 0) * (priceMap["USDC"] || 0) +
+  Number(activeWallet?.bnb_balance || 0) * (priceMap["BNB"] || 0) +
+  Number(activeWallet?.trx_balance || 0) * (priceMap["TRX"] || 0) +
+  Number(activeWallet?.trc20_balance || 0) * (priceMap["USDT"] || 0);
+
+  const customTokenTotal =
   activeWallet?.custom_tokens?.reduce(
-    (sum: number, token: any) =>
-      sum + Number(token.balance || 0),
+    (sum: number, token: any) => {
+      const tokenPrice = token.is_eth
+        ? (priceMap["ETH"] || 0)
+        : (priceMap["USDT"] || 0);
+
+      return (
+        sum +
+        Number(token.balance || 0) * tokenPrice
+      );
+    },
     0
   ) || 0;
 
-const totalValue =
-  ethBalanceNumber * ethPrice +
-  usdcBalanceNumber +
-  usdtBalanceNumber +
-  customTokenTotal;
-
+  const finalTotal =
+  totalValue + customTokenTotal;
   const formattedBalance = formatBalance(ethBalanceNumber);
-  const formattedTotal = formatBalance(totalValue, { isFiat: true });
+  const formattedTotal = formatBalance(finalTotal, { isFiat: true });
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     // Check if prices are already stored in localStorage
@@ -66,8 +78,8 @@ const totalValue =
     if (cachedPrices) {
       try {
         const parsedPrices: Record<string, any> = JSON.parse(cachedPrices);
-        if (parsedPrices[currency]?.price) {
-          setEthPrice(parseFloat(parsedPrices[currency].price) || 0);
+        if (parsedPrices[currency]) {
+          setPriceMap(parsedPrices[currency]);
           setIsPriceLoading(false);
           return;
         }
@@ -78,9 +90,11 @@ const totalValue =
 
     const fetchPrice = async () => {
       setIsPriceLoading(true);
+
       try {
+        const symbols = ["ETH", "BTC", "USDT", "BNB", "TRX", "TRC20", "USDC"];
         const response = await getPrices({
-          symbols: "ETH",
+          symbols: symbols.join(","),
           base: currency,
         });
 
@@ -90,23 +104,38 @@ const totalValue =
           Array.isArray(response.prices) &&
           response.prices.length > 0
         ) {
-          const price = parseFloat(response.prices[0].price) || 0;
-          setEthPrice(price);
+          const prices: Record<string, number> = {};
 
-          // cache karo
+          response.prices.forEach((item: any) => {
+            const symbol = String(item.symbol || "").trim().toUpperCase();
+            prices[symbol] = Number(item.price) || 0;
+          });
+
+          if (currency === "USD") {
+            prices["USDT"] = prices["USDT"] || 1;
+            prices["USDC"] = prices["USDC"] || 1;
+          }
+
+          setPriceMap(prices);
           const cachedPrices: Record<string, any> = {};
           try {
             const existing = localStorage.getItem("ethPricesByCurrency");
             if (existing) Object.assign(cachedPrices, JSON.parse(existing));
           } catch {}
-          cachedPrices[currency] = { price: response.prices[0].price };
+          cachedPrices[currency] = prices;
           localStorage.setItem("ethPricesByCurrency", JSON.stringify(cachedPrices));
         } else {
-          setEthPrice(0);
+          setPriceMap({
+            USDT: currency === "USD" ? 1 : 0,
+            USDC: currency === "USD" ? 1 : 0,
+          });
         }
       } catch (error) {
-        console.error("Error fetching prices");
-        setEthPrice(0);
+        console.error("Error fetching prices", error);
+        setPriceMap({
+          USDT: currency === "USD" ? 1 : 0,
+          USDC: currency === "USD" ? 1 : 0,
+        });
       } finally {
         setIsPriceLoading(false);
       }
