@@ -243,3 +243,9 @@ body {
   @apply px-[19px] py-4 md:py-[21px] text-sm text-gray-300 font-medium 
          border border-[#24324D] whitespace-nowrap bg-[#16233A];
 }
+
+
+/* --------------------wallet chart----for dashbord */
+.recharts-surface:focus {
+  outline: none !important;
+}

@@ -34,3 +34,36 @@ export const importWallet = (
     body,
   });
 };
+
+// Types
+export interface BalanceHistoryPayload {
+  user_id: number | string;
+  wallet_id: number | string;
+}
+
+export interface BalanceHistoryItem {
+  balance: string;
+  recorded_at: string;
+}
+
+export interface BalanceHistoryResponse {
+  success: boolean;
+  user_id: number;
+  wallet_id: number;
+  data: {
+    [symbol: string]: BalanceHistoryItem[];
+  };
+}
+
+// API
+export const getBalanceHistory = (
+  payload: BalanceHistoryPayload
+) => {
+  return privateApi<BalanceHistoryResponse>(
+    "/balances/history",
+    {
+      method: "POST",
+      body: payload,
+    }
+  );
+};

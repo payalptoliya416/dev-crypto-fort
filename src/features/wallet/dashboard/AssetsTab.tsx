@@ -64,6 +64,7 @@ function AssetsTab({
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -76,7 +77,9 @@ function AssetsTab({
     socket.on("connect", () => {
       // connected
     });
-
+  socket.on("priceHistory", (data) => {
+      console.log(data);
+    });
     socket.on("connect_error", (error) => {
       console.warn("Socket connect error:", error);
     });
@@ -133,7 +136,7 @@ function AssetsTab({
         const fallbackPrice =
           storedPrices?.[fallbackSymbol]?.price ||
           "1";
-
+        
           return {
             ...asset,
             price: hasSocketPrice ? String(match.price) : fallbackPrice,
@@ -470,26 +473,42 @@ function AssetsTab({
     },
   ];
 
+  const filteredAssets = assets.filter((asset) =>
+          asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
   return (
     <div className="w-full rounded-2xl bg-[#161F37] border border-[#3C3D47]">
-      <div className="px-5 py-5 flex items-center justify-between flex-wrap gap-1">
-        <h3 className="text-base xl:text-xl text-[#25C866] font-semibold">
-          Assets
-        </h3>
-        <button
-          onClick={() => setImportOpen(true)}
-          className="bg-[#202A43] rounded-lg py-2 px-5 sm:px-6 flex items-center gap-[10px] text-white text-sm font-medium cursor-pointer"
-        >
-          Import Token
-        </button>
-      </div>
+  <div className="px-5 py-5 flex items-center justify-between flex-wrap gap-3">
+  <h3 className="text-base xl:text-xl text-[#25C866] font-semibold">
+    Assets
+  </h3>
+
+  <div className="flex items-center gap-3 flex-wrap">
+    <input
+      type="text"
+      placeholder="Search BTC, ETH..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="bg-[#202A43] border border-[#3C3D47] rounded-lg px-3 py-2 text-white text-sm outline-none w-[220px]"
+    />
+
+    <button
+      onClick={() => setImportOpen(true)}
+      className="bg-[#202A43] rounded-lg py-2 px-5 sm:px-6 flex items-center gap-[10px] text-white text-sm font-medium cursor-pointer"
+    >
+      Import Token
+    </button>
+  </div>
+</div>
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <Loader />
         </div>
       ) : (
         <CommonTable
-          data={assets}
+          data={filteredAssets}
           columns={columns}
           onRowClick={(asset) => {
             setSelectedAsset(asset);
