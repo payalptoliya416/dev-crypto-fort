@@ -222,24 +222,30 @@ const chartData = useMemo(() => {
       if (!latestBalance) return;
 
       // const balanceT = latestBalance._t;
-      let matchedPrice: any = null;
-      const before = prices
-        .map((p: any) => ({ ...p, _t: parseTime(p.recorded_at) }))
-        .filter((p: any) => p._t <= bucketTime)
-        .sort((a: any, b: any) => b._t - a._t);
+     const balanceTime = latestBalance._t;
 
-      if (before.length) matchedPrice = before[0];
-      else {
-        matchedPrice = prices.reduce((closest: any, current: any) => {
-          const curT = parseTime(current.recorded_at);
-          if (!closest) return current;
-          const closestT = parseTime(closest.recorded_at);
-          return Math.abs(curT - bucketTime) < Math.abs(closestT - bucketTime)
-            ? current
-            : closest;
-        }, prices[0]);
-      }
-      if (!matchedPrice) return;
+const matchedPrice = prices
+  .map((p: any) => ({
+    ...p,
+    _t: parseTime(p.recorded_at),
+  }))
+  .filter((p: any) => {
+    const diff =
+      Math.abs(p._t - balanceTime);
+
+    // 1 hour thi vadhu gap hoy to reject
+    return diff <= 60 * 60 * 1000;
+  })
+  .sort(
+    (a: any, b: any) =>
+      Math.abs(a._t - balanceTime) -
+      Math.abs(b._t - balanceTime)
+  )[0];
+
+if (!matchedPrice) {
+  return;
+}
+
 
       total += Number(latestBalance.balance) * Number(matchedPrice.price || 0);
     });
