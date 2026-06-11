@@ -20,6 +20,7 @@ export interface Wallet {
   bnb_balance?: string;
   trx_balance?: string;
   bep20_balance?: string;
+  created_date?: string;
    custom_tokens?: {
     id: number;
     symbol: string;

@@ -503,7 +503,10 @@ const match = data.prices.find(
 
          <AssetPieChart data={chartData} />
         </div>
-   <div className="flex items-center justify-end gap-3 flex-wrap mb-[15px] px-3 sm:px-5">
+          {loading || !socketLoaded ? (
+            <></>)
+            :
+          ( <div className="flex items-center justify-end gap-3 flex-wrap mb-[15px] px-3 sm:px-5">
         
           <input
             type="text"
@@ -512,7 +515,8 @@ const match = data.prices.find(
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-[#202A43] border border-[#3C3D47] rounded-lg px-3 py-2 text-white text-sm outline-none w-[220px]"
           />
-        </div>
+           </div>)
+          }
         {loading || !socketLoaded ? (
           <div className="flex justify-center items-center py-20">
             <Loader />
