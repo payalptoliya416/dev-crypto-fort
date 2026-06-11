@@ -221,12 +221,11 @@ const chartData = useMemo(() => {
       const latestBalance = candidateBalances[0];
       if (!latestBalance) return;
 
-      const balanceT = latestBalance._t;
+      // const balanceT = latestBalance._t;
       let matchedPrice: any = null;
-
       const before = prices
         .map((p: any) => ({ ...p, _t: parseTime(p.recorded_at) }))
-        .filter((p: any) => p._t <= balanceT)
+        .filter((p: any) => p._t <= bucketTime)
         .sort((a: any, b: any) => b._t - a._t);
 
       if (before.length) matchedPrice = before[0];
@@ -235,7 +234,7 @@ const chartData = useMemo(() => {
           const curT = parseTime(current.recorded_at);
           if (!closest) return current;
           const closestT = parseTime(closest.recorded_at);
-          return Math.abs(curT - balanceT) < Math.abs(closestT - balanceT)
+          return Math.abs(curT - bucketTime) < Math.abs(closestT - bucketTime)
             ? current
             : closest;
         }, prices[0]);
@@ -268,23 +267,6 @@ const chartData = useMemo(() => {
   period,
 ]);
 
-// const portfolioChange = useMemo(() => {
-//   if (chartData.length < 2) return 0;
-
-//   const previousTotal =
-//     Number(chartData[0]?.value || 0);
-
-//   const currentTotal = finalTotal;
-
-//   if (!previousTotal) return 0;
-
-//   return (
-//     ((currentTotal - previousTotal) /
-//       previousTotal) *
-//     100
-//   );
-// }, [chartData, finalTotal]);
-
 const portfolioChange = useMemo(() => {
   if (chartData.length < 2) return 0;
 
@@ -308,7 +290,6 @@ const portfolioChange = useMemo(() => {
 
   return Number(change.toFixed(2));
 }, [chartData, finalTotal, period]);
-
   useEffect(() => {
     const fetchWallets = async () => {
       try {
