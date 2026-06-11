@@ -29,11 +29,12 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
-  const [isPriceLoading] = useState(false);
+  const [isPriceLoading, setIsPriceLoading] =
+  useState(false);
   const activeWallet = useSelector((state: RootState) => state.activeWallet.wallet);
   const dispatch = useDispatch();
   const currency = useSelector((state: RootState) => state.currency.value);
-  const [period, setPeriod] = useState("12H");
+  const [period, setPeriod] = useState("24H");
   const [openPeriod, setOpenPeriod] = useState(false);
   const periodRef = useRef<HTMLDivElement>(null);
   const periods = ["12H", "24H"];
@@ -58,9 +59,11 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
     };
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
   const loadPrices = async () => {
     try {
+      setIsPriceLoading(true);
+
       const res = await getPrices({
         base: currency,
         symbols: "ETH,BTC,USDT,BNB,TRX,USDC",
@@ -71,43 +74,54 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsPriceLoading(false);
     }
   };
 
   loadPrices();
 }, [currency]);
 
-  const getTokenPrice = (symbol: string) => {
-    return Number(
-      priceHistory?.data?.[currency]?.[symbol]?.[0]?.price || 0
-    );
-  };
+const getCurrentMarketPrice = (
+  symbol: string
+) => {
+  const item = marketPrices.find(
+    (p: any) => p.symbol === symbol
+  );
+
+  return Number(item?.price || 0);
+};
+  // const getTokenPrice = (symbol: string) => {
+  //   return Number(
+  //     priceHistory?.data?.[currency]?.[symbol]?.[0]?.price || 0
+  //   );
+  // };
 
   const totalValue =
-    Number(activeWallet?.eth_balance || 0) *
-      getTokenPrice("ETH") +
+  Number(activeWallet?.eth_balance || 0) *
+    getCurrentMarketPrice("ETH") +
 
-    Number(activeWallet?.btc_balance || 0) *
-      getTokenPrice("BTC") +
+  Number(activeWallet?.btc_balance || 0) *
+    getCurrentMarketPrice("BTC") +
 
-    Number(activeWallet?.bnb_balance || 0) *
-      getTokenPrice("BNB") +
+  Number(activeWallet?.bnb_balance || 0) *
+    getCurrentMarketPrice("BNB") +
 
-    Number(activeWallet?.trx_balance || 0) *
-      getTokenPrice("TRX") +
+  Number(activeWallet?.trx_balance || 0) *
+    getCurrentMarketPrice("TRX") +
 
-    Number(activeWallet?.usdt_balance || 0) *
-      getTokenPrice("USDT") +
+  Number(activeWallet?.usdt_balance || 0) *
+    getCurrentMarketPrice("USDT") +
 
-    Number(activeWallet?.usdc_balance || 0) *
-      getTokenPrice("USDC");
+  Number(activeWallet?.usdc_balance || 0) *
+    getCurrentMarketPrice("USDC");
 
    const customTokenTotal =
   activeWallet?.custom_tokens?.reduce(
     (sum: number, token: any) => {
-      const marketPrice = token.is_eth
-        ? getTokenPrice("ETH")
-        : getTokenPrice("USDT");
+    const marketPrice = token.is_eth
+  ? getCurrentMarketPrice("ETH")
+  : getCurrentMarketPrice("USDT");
 
       const balance = Number(token.balance || 0);
       const tokenValue = balance * marketPrice;
@@ -254,26 +268,31 @@ const chartData = useMemo(() => {
   period,
 ]);
 
-// const getCurrentMarketPrice = (
-//   symbol: string
-// ) => {
-//   const item = marketPrices.find(
-//     (p: any) => p.symbol === symbol
-//   );
+// const portfolioChange = useMemo(() => {
+//   if (chartData.length < 2) return 0;
 
-//   return Number(item?.price || 0);
-// };
+//   const previousTotal =
+//     Number(chartData[0]?.value || 0);
+
+//   const currentTotal = finalTotal;
+
+//   if (!previousTotal) return 0;
+
+//   return (
+//     ((currentTotal - previousTotal) /
+//       previousTotal) *
+//     100
+//   );
+// }, [chartData, finalTotal]);
 
 const portfolioChange = useMemo(() => {
   if (chartData.length < 2) return 0;
 
-  const previousTotal =
-    Number(chartData[0]?.value || 0);
+  const previousTotal = Number(
+    chartData[0]?.value || 0
+  );
 
-  const currentTotal =
-    Number(
-      chartData[chartData.length - 1]?.value || 0
-    );
+  const currentTotal = finalTotal;
 
   if (
     previousTotal <= 0 ||
@@ -287,12 +306,8 @@ const portfolioChange = useMemo(() => {
       previousTotal) *
     100;
 
-  // avoid crazy values
-  return Math.max(
-    -999,
-    Math.min(change, 999)
-  );
-}, [chartData]);
+  return Number(change.toFixed(2));
+}, [chartData, finalTotal, period]);
 
   useEffect(() => {
     const fetchWallets = async () => {

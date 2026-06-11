@@ -91,7 +91,7 @@ function AssetsTab({
 }: {
   refreshWallets: () => Promise<void>;
 }) {
-  const [loading, setLoading] = useState(true);
+  // const [setLoading] = useState(true);
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assetActionOpen, setAssetActionOpen] = useState(false);
@@ -240,7 +240,7 @@ function AssetsTab({
     const fetchBalance = async () => {
       // if we have cached prices, continue — no socketLoaded state needed
       try {
-        setLoading(true);
+        // setLoading(true);
         // const balanceRes = await getBalance({
         //   wallet_id: activeWallet.id,
         //   type: "all",
@@ -376,10 +376,10 @@ function AssetsTab({
           }
         );
         setAssets(sortedAssets);
-        setLoading(false);
+        // setLoading(false);
       } catch (err: any) {
         toast.error(err?.message || "Failed to load balance");
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
@@ -569,20 +569,25 @@ function AssetsTab({
     </button>
   </div>
 </div>
-      {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader />
-        </div>
-      ) : (
-        <CommonTable
-          data={filteredAssets}
-          columns={columns}
-          onRowClick={(asset) => {
-            setSelectedAsset(asset);
-            setAssetActionOpen(true);
-          }}
-        />
-      )}
+        {filteredAssets.length === 0 ? (
+  <div className="py-12 text-center">
+    <p className="text-white text-base font-medium">
+      No assets found
+    </p>
+    <p className="text-[#7A7D83] text-sm mt-1">
+      Try searching for BTC, ETH, USDT or another asset.
+    </p>
+  </div>
+) : (
+  <CommonTable
+    data={filteredAssets}
+    columns={columns}
+    onRowClick={(asset) => {
+      setSelectedAsset(asset);
+      setAssetActionOpen(true);
+    }}
+  />
+)}
 
       {assetActionOpen && selectedAsset && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">

@@ -113,16 +113,20 @@ function AssetPieChart({ data }: Props) {
 
         {/* Asset List */}
         <div className="w-full flex flex-col gap-3 max-h-[360px] overflow-y-auto pr-1">
-          {data.map((item, index) => {
-            const percentage =
-              total > 0
-                ? (
-                    (item.value / total) *
-                    100
-                  ).toFixed(1)
-                : "0";
+        {data.map((item, index) => {
+        const rawPercentage =
+          total > 0
+            ? (item.value / total) * 100
+            : 0;
 
-            return (
+        const percentage =
+          rawPercentage > 99.9
+            ? "99.9+"
+            : rawPercentage < 0.001
+            ? "<0.001"
+            : rawPercentage.toFixed(3);
+
+        return (
               <div
                 key={`${item.name}-${index}`}
                 className="flex items-center justify-between gap-4 bg-[#111A33] border border-[#2A324A] rounded-xl px-4 py-3 min-h-[72px]"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import DashboardLayout from "../../layout/DashboardLayout";
 import CommonTable, { type Column } from "../../component/CommonTable";
@@ -29,10 +29,48 @@ interface Asset {
     marketSymbol?: string;
 }
 
+const BASE_CURRENCY = "USD";
+
+const parseTime = (timestamp: string) => {
+  if (!timestamp) return 0;
+  return new Date(timestamp.replace(" ", "T")).getTime();
+};
+
+const getHistoricalPrice = (history: any[], targetTime: number) => {
+  if (!history?.length) return null;
+
+  const sorted = history
+    .map((item: any) => ({ ...item, _t: parseTime(item.recorded_at) }))
+    .filter((item: any) => item._t > 0)
+    .sort((a: any, b: any) => a._t - b._t);
+
+  if (!sorted.length) return null;
+
+  const before = sorted.filter((item: any) => item._t <= targetTime);
+  if (before.length) {
+    return Number(before[before.length - 1].price || 0);
+  }
+
+  return Number(sorted[0].price || 0);
+};
+
+const getLatestPriceFromHistory = (history: any[]) => {
+  if (!history?.length) return null;
+
+  const sorted = history
+    .map((item: any) => ({ ...item, _t: parseTime(item.recorded_at) }))
+    .filter((item: any) => item._t > 0)
+    .sort((a: any, b: any) => a._t - b._t);
+
+  return Number(sorted[sorted.length - 1]?.price || 0);
+};
+
 function Balance() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [socketLoaded, setSocketLoaded] = useState(false);
+  const [priceHistory, setPriceHistory] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -49,6 +87,15 @@ function Balance() {
     const socket = io("https://socket.cryptosfort.com", {
       transports: ["websocket"],
     });
+
+    socket.on("connect", () => {
+      // connected
+    });
+
+    socket.on("priceHistory", (data) => {
+      setPriceHistory(data);
+    });
+
     socket.onAny((_, data) => {
       if (!data?.prices) return;
       const saved = localStorage.getItem("crypto_balance_prices");
@@ -282,7 +329,35 @@ const match = data.prices.find(
     fetchBalance();
   }, [activeWallet?.id]);
 
-  const chartData = assets
+  const displayAssets = useMemo(() => {
+    if (!priceHistory?.data?.[BASE_CURRENCY]) {
+      return assets;
+    }
+
+    const historyData = priceHistory.data[BASE_CURRENCY];
+    const targetTime = Date.now() - 24 * 60 * 60 * 1000;
+
+    return assets.map((asset) => {
+      const priceSymbol = asset.marketSymbol || asset.symbol;
+      const history = historyData[priceSymbol] || [];
+      const latestPrice = getLatestPriceFromHistory(history) ?? Number(asset.price || 0);
+      const previousPrice = getHistoricalPrice(history, targetTime) ?? latestPrice;
+
+      if (previousPrice <= 0) {
+        return asset;
+      }
+
+      const changeValue = ((latestPrice - previousPrice) / previousPrice) * 100;
+      return {
+        ...asset,
+        price: String(latestPrice),
+        change: `${changeValue.toFixed(2)}%`,
+        up: changeValue >= 0,
+      };
+    });
+  }, [assets, priceHistory]);
+
+  const chartData = displayAssets
   .map((asset) => {
     const balance = Number(asset.balance || 0);
     const price = Number(asset.price || 0);
@@ -412,18 +487,32 @@ const match = data.prices.find(
       },
     },
   ];
+  const filteredAssets = displayAssets.filter(
+  (asset) =>
+    asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   return (
     <DashboardLayout>
       <div className="w-full rounded-2xl bg-[#161F37] border border-[#3C3D47]">
         <div className="px-2 sm:px-5 pt-5 pb-[15px]">
-          <h3 className="tet-xl text-[#25C866] font-semibold mb-[15px]">
+          <h3 className="tet-xl text-[#25C866] font-semibold mb-5">
             Balance
           </h3>
 
          <AssetPieChart data={chartData} />
         </div>
-
+   <div className="flex items-center justify-end gap-3 flex-wrap mb-[15px] px-3 sm:px-5">
+        
+          <input
+            type="text"
+            placeholder="Search BTC, ETH..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-[#202A43] border border-[#3C3D47] rounded-lg px-3 py-2 text-white text-sm outline-none w-[220px]"
+          />
+        </div>
         {loading || !socketLoaded ? (
           <div className="flex justify-center items-center py-20">
             <Loader />
@@ -438,7 +527,18 @@ const match = data.prices.find(
             </p>
           </div>
         ) : (
-          <CommonTable data={assets} columns={columns} />
+        filteredAssets.length === 0 ? (
+        <div className="py-12 text-center">
+          <p className="text-white text-base font-medium">
+            No assets found
+          </p>
+          <p className="text-[#7A7D83] text-sm mt-1">
+            Try searching for BTC, ETH, USDT or another asset.
+          </p>
+        </div>
+      ) : (
+        <CommonTable data={filteredAssets} columns={columns} />
+      )
         )}
       </div>
     </DashboardLayout>
