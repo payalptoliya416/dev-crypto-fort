@@ -8,7 +8,7 @@ import up from "@/assets/up.svg";
 import custom_tokn from "@/assets/custom_tokn.svg";
 import CommonTable, { type Column } from "../../component/CommonTable";
 import { formatBalance } from "../../component/format";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { io } from "socket.io-client";
 import Loader from "../../component/Loader";
 import { useSelector } from "react-redux";
@@ -50,6 +50,42 @@ const getStoredCustomAssets = (): Asset[] => {
   }
 };
 
+const BASE_CURRENCY = "USD";
+
+const parseTime = (timestamp: string) => {
+  if (!timestamp) return 0;
+  return new Date(timestamp.replace(" ", "T")).getTime();
+};
+
+const getHistoricalPrice = (history: any[], targetTime: number) => {
+  if (!history?.length) return null;
+
+  const sorted = history
+    .map((item: any) => ({ ...item, _t: parseTime(item.recorded_at) }))
+    .filter((item: any) => item._t > 0)
+    .sort((a: any, b: any) => a._t - b._t);
+
+  if (!sorted.length) return null;
+
+  const before = sorted.filter((item: any) => item._t <= targetTime);
+  if (before.length) {
+    return Number(before[before.length - 1].price || 0);
+  }
+
+  return Number(sorted[0].price || 0);
+};
+
+const getLatestPriceFromHistory = (history: any[]) => {
+  if (!history?.length) return null;
+
+  const sorted = history
+    .map((item: any) => ({ ...item, _t: parseTime(item.recorded_at) }))
+    .filter((item: any) => item._t > 0)
+    .sort((a: any, b: any) => a._t - b._t);
+
+  return Number(sorted[sorted.length - 1]?.price || 0);
+};
+
 function AssetsTab({
   refreshWallets,
 }: {
@@ -65,6 +101,7 @@ function AssetsTab({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [priceHistory, setPriceHistory] = useState<any>(null);
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -74,12 +111,14 @@ function AssetsTab({
       transports: ["websocket"],
     });
 
-    socket.on("connect", () => {
+      socket.on("connect", () => {
       // connected
     });
-  socket.on("priceHistory", (data) => {
-      console.log(data);
+
+    socket.on("priceHistory", (data) => {
+      setPriceHistory(data);
     });
+
     socket.on("connect_error", (error) => {
       console.warn("Socket connect error:", error);
     });
@@ -360,6 +399,34 @@ function AssetsTab({
     };
   }, [activeWallet?.id]);
 
+  const displayAssets = useMemo(() => {
+    if (!priceHistory?.data?.[BASE_CURRENCY]) {
+      return assets;
+    }
+
+    const historyData = priceHistory.data[BASE_CURRENCY];
+    const targetTime = Date.now() - 24 * 60 * 60 * 1000;
+
+    return assets.map((asset) => {
+      const priceSymbol = asset.marketSymbol || asset.symbol;
+      const history = historyData[priceSymbol] || [];
+      const latestPrice = getLatestPriceFromHistory(history) ?? Number(asset.price || 0);
+      const previousPrice = getHistoricalPrice(history, targetTime) ?? latestPrice;
+
+      if (previousPrice <= 0) {
+        return asset;
+      }
+
+      const changeValue = ((latestPrice - previousPrice) / previousPrice) * 100;
+      return {
+        ...asset,
+        price: String(latestPrice),
+        change: `${changeValue.toFixed(2)}%`,
+        up: changeValue >= 0,
+      };
+    });
+  }, [assets, priceHistory]);
+
   const columns: Column<Asset>[] = [
     {
       header: "Name",
@@ -473,7 +540,7 @@ function AssetsTab({
     },
   ];
 
-  const filteredAssets = assets.filter((asset) =>
+  const filteredAssets = displayAssets.filter((asset) =>
           asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
         );

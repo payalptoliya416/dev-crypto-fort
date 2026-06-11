@@ -67,8 +67,28 @@ const chartData = useMemo(() => {
   hide
   domain={["dataMin", "dataMax"]}
 />
+<Tooltip
+  content={({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
 
-  <Tooltip />
+    return (
+      <div className="bg-white p-2 border rounded text-black">
+        <div>
+         {new Date(label ?? Date.now()).toLocaleString([], {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+        </div>
+
+        <div className="text-green-600">
+          Value: {Number(payload[0].value).toFixed(2)}
+        </div>
+      </div>
+    );
+  }}
+/>
 
   <Area
     type="monotone"
