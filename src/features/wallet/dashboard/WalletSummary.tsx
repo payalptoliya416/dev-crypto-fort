@@ -19,6 +19,7 @@ import { useRef } from "react";
 import WalletTrendCard from "./WalletTrendCard";
 import { io } from "socket.io-client";
 import { getBalanceHistory } from "../../../api/importWallet";
+import { getPrices } from "../../../api/publicApi";
 
 export default function WalletSummary({ refreshWallets }: { refreshWallets: () => Promise<void> }) {
   const [open, setOpen] = useState(false);
@@ -32,12 +33,13 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
   const activeWallet = useSelector((state: RootState) => state.activeWallet.wallet);
   const dispatch = useDispatch();
   const currency = useSelector((state: RootState) => state.currency.value);
-  const [period, setPeriod] = useState("24H");
+  const [period, setPeriod] = useState("12H");
   const [openPeriod, setOpenPeriod] = useState(false);
   const periodRef = useRef<HTMLDivElement>(null);
   const periods = ["12H", "24H"];
   const [priceHistory, setPriceHistory] = useState<any>(null);
   const [balanceHistory, setBalanceHistory] = useState<any>(null);
+  const [marketPrices, setMarketPrices] = useState<any[]>([]);
   const handleCurrencyChange = (val: string) => {
     dispatch(setCurrency(val));
   };
@@ -48,7 +50,6 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
     });
 
     socket.on("priceHistory", (data) => {
-      console.log("data",data)
       setPriceHistory(data);
     });
 
@@ -56,6 +57,25 @@ export default function WalletSummary({ refreshWallets }: { refreshWallets: () =
       socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+  const loadPrices = async () => {
+    try {
+      const res = await getPrices({
+        base: currency,
+        symbols: "ETH,BTC,USDT,BNB,TRX,USDC",
+      });
+
+      if (res?.success) {
+        setMarketPrices(res.prices || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadPrices();
+}, [currency]);
 
   const getTokenPrice = (symbol: string) => {
     return Number(
@@ -140,29 +160,27 @@ const chartData = useMemo(() => {
     return [];
   }
 
-  const result: any[] = [];
-const hours = period === "12H" ? 12 : 24;
-  const now = Date.now();
-  const cutoffTime = now - hours * 60 * 60 * 1000;
-
   const parseTime = (s: string) => {
     if (!s) return 0;
-    // Ensure ISO-like parsing: replace space with T
     return new Date(s.replace(" ", "T")).getTime();
   };
 
-  // prepare price map for quick access
-  const priceMap: Record<string, any[]> = {};
+  const buildBuckets = () => {
+    const now = Date.now();
 
+    const hours = period === "12H" ? 12 : 24;
+    const cutoffTime = now - hours * 60 * 60 * 1000;
+    return Array.from({ length: hours + 1 }, (_, index) =>
+      cutoffTime + index * 60 * 60 * 1000
+    );
+  };
+
+  const priceMap: Record<string, any[]> = {};
   Object.keys(priceHistory.data[currency]).forEach((k) => {
     priceMap[k] = priceHistory.data[currency][k] || [];
   });
 
-  // create hourly buckets (inclusive of start and end)
-  const buckets: number[] = [];
-  for (let i = 0; i <= hours; i++) {
-    buckets.push(cutoffTime + i * 60 * 60 * 1000);
-  }
+  const buckets = buildBuckets();
 
   const finalData = buckets.map((bucketTime) => {
     let total = 0;
@@ -176,10 +194,8 @@ const hours = period === "12H" ? 12 : 24;
           ? priceMap["ETH"]
           : priceMap["USDT"]
         : priceMap[symbol];
-
       if (!prices?.length) return;
 
-      // find the latest balance snapshot at or before bucketTime
       const candidateBalances = balances
         .map((b: any) => ({
           ...b,
@@ -191,12 +207,9 @@ const hours = period === "12H" ? 12 : 24;
       const latestBalance = candidateBalances[0];
       if (!latestBalance) return;
 
-      // find nearest price entry at or before the balance time, fallback to nearest
       const balanceT = latestBalance._t;
-
       let matchedPrice: any = null;
 
-      // try to find price at or before balanceT
       const before = prices
         .map((p: any) => ({ ...p, _t: parseTime(p.recorded_at) }))
         .filter((p: any) => p._t <= balanceT)
@@ -204,7 +217,6 @@ const hours = period === "12H" ? 12 : 24;
 
       if (before.length) matchedPrice = before[0];
       else {
-        // fallback to closest by absolute diff
         matchedPrice = prices.reduce((closest: any, current: any) => {
           const curT = parseTime(current.recorded_at);
           if (!closest) return current;
@@ -214,7 +226,6 @@ const hours = period === "12H" ? 12 : 24;
             : closest;
         }, prices[0]);
       }
-
       if (!matchedPrice) return;
 
       total += Number(latestBalance.balance) * Number(matchedPrice.price || 0);
@@ -226,32 +237,180 @@ const hours = period === "12H" ? 12 : 24;
     };
   });
 
+  if (finalData.length > 0) {
+    finalData[finalData.length - 1] = {
+      ...finalData[finalData.length - 1],
+      value: finalTotal,
+    };
+  }
+
   return finalData;
 }, [
   balanceHistory,
   priceHistory,
   currency,
   customTokenMap,
+  finalTotal,
+  period,
 ]);
-const portfolioChange = useMemo(() => {
 
+const getCurrentMarketPrice = (
+  symbol: string
+) => {
+  const item = marketPrices.find(
+    (p: any) => p.symbol === symbol
+  );
+
+  return Number(item?.price || 0);
+};
+
+// const portfolioChange = useMemo(() => {
+//   if (
+//     !priceHistory?.data?.[currency] ||
+//     !activeWallet
+//   ) {
+//     return 0;
+//   }
+
+//   const targetIndex =
+//     period === "12H" ? 12 : 24;
+
+//   let currentTotal = 0;
+//   let previousTotal = 0;
+
+//   const symbols = [
+//     {
+//       key: "ETH",
+//       balance: Number(activeWallet.eth_balance || 0),
+//     },
+//     {
+//       key: "BTC",
+//       balance: Number(activeWallet.btc_balance || 0),
+//     },
+//     {
+//       key: "BNB",
+//       balance: Number(activeWallet.bnb_balance || 0),
+//     },
+//     {
+//       key: "TRX",
+//       balance: Number(activeWallet.trx_balance || 0),
+//     },
+//     {
+//       key: "USDT",
+//       balance: Number(activeWallet.usdt_balance || 0),
+//     },
+//     {
+//       key: "USDC",
+//       balance: Number(activeWallet.usdc_balance || 0),
+//     },
+//   ];
+
+//   symbols.forEach(({ key, balance }) => {
+//     const historyPrices =
+//       priceHistory.data[currency]?.[key] || [];
+
+//     if (!historyPrices.length) return;
+
+//     // CURRENT PRICE -> API
+//     const currentPrice =
+//       getCurrentMarketPrice(key);
+
+//     // PREVIOUS PRICE -> SOCKET HISTORY
+//     const previousPrice = Number(
+//       historyPrices[
+//         Math.min(
+//           targetIndex,
+//           historyPrices.length - 1
+//         )
+//       ]?.price || currentPrice
+//     );
+
+//     currentTotal +=
+//       balance * currentPrice;
+
+//     previousTotal +=
+//       balance * previousPrice;
+//   });
+
+//   // Custom Tokens
+//   (activeWallet.custom_tokens || []).forEach(
+//     (token: any) => {
+//       const priceKey =
+//         token.is_eth ? "ETH" : "USDT";
+
+//       const historyPrices =
+//         priceHistory.data[currency]?.[
+//           priceKey
+//         ] || [];
+
+//       if (!historyPrices.length) return;
+
+//       const currentPrice =
+//         getCurrentMarketPrice(priceKey);
+
+//       const previousPrice = Number(
+//         historyPrices[
+//           Math.min(
+//             targetIndex,
+//             historyPrices.length - 1
+//           )
+//         ]?.price || currentPrice
+//       );
+
+//       const balance = Number(
+//         token.balance || 0
+//       );
+
+//       currentTotal +=
+//         balance * currentPrice;
+
+//       previousTotal +=
+//         balance * previousPrice;
+//     }
+//   );
+
+//   if (!previousTotal) return 0;
+
+//   const change =
+//     ((currentTotal - previousTotal) /
+//       previousTotal) *
+//     100;
+
+//   console.log("========== RATIO DEBUG ==========");
+//   console.log("Period:", period);
+//   console.log("Current Total:", currentTotal);
+//   console.log("Previous Total:", previousTotal);
+//   console.log("Change %:", change);
+//   console.log("================================");
+
+//   return change;
+// }, [
+//   priceHistory,
+//   marketPrices,
+//   activeWallet,
+//   currency,
+//   period,
+// ]);
+
+const portfolioChange = useMemo(() => {
   if (chartData.length < 2) return 0;
 
-  const current = Number(
-    chartData[chartData.length - 1]?.value || 0
-  );
+  const previousTotal =
+    Number(chartData[0]?.value || 0);
 
-  const previous = Number(
-    chartData[0]?.value || 0
-  );
+  const currentTotal =
+    Number(
+      chartData[chartData.length - 1]?.value || 0
+    );
 
-  if (!previous) return 0;
+  if (!previousTotal) return 0;
 
   return (
-    ((current - previous) / previous) *
+    ((currentTotal - previousTotal) /
+      previousTotal) *
     100
   );
-}, [chartData, period]);
+}, [chartData]);
 
   useEffect(() => {
     const fetchWallets = async () => {
