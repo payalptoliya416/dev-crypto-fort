@@ -49,7 +49,7 @@ export default function WalletTrendCard({ history }: Props) {
 
           <XAxis hide dataKey="date" />
 
-          <YAxis hide domain={["dataMin", "dataMax"]} />
+          <YAxis hide domain={["dataMin - 0.1", "dataMax + 0.1"]} />
           <Tooltip
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;

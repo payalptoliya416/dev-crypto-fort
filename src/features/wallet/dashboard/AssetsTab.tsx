@@ -13,7 +13,10 @@ import { io } from "socket.io-client";
 import Loader from "../../component/Loader";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
-import { getBalance } from "../../../api/walletApi";
+import { getBalance, getTransactions } from "../../../api/walletApi";
+import { TbCopy } from "react-icons/tb";
+import { IoClose } from "react-icons/io5";
+import { ResponsiveContainer, AreaChart, Area, Tooltip, XAxis, YAxis } from "recharts";
 import SendTokenModal from "./SendTokenModal";
 import ReceiveTokenModal from "./ReceiveTokenModal";
 import ConfirmTransactionModal from "./ConfirmTransactionModal";
@@ -102,6 +105,8 @@ function AssetsTab({
   const [importOpen, setImportOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [priceHistory, setPriceHistory] = useState<any>(null);
+  const [assetTransactions, setAssetTransactions] = useState<any[]>([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -399,6 +404,48 @@ function AssetsTab({
     };
   }, [activeWallet?.id]);
 
+  useEffect(() => {
+    if (!assetActionOpen || !selectedAsset || !activeWallet?.id) {
+      setAssetTransactions([]);
+      return;
+    }
+
+    const fetchAssetTransactions = async () => {
+      setLoadingTransactions(true);
+      try {
+        const res = await getTransactions({
+          wallet_id: activeWallet.id,
+          type: "all",
+        });
+        const currency = selectedAsset.symbol.toUpperCase();
+        const filtered = (res.data || [])
+          .filter((tx: any) => (tx.currency || "ETH").toUpperCase() === currency)
+          .slice(0, 5);
+        setAssetTransactions(filtered);
+      } catch (err) {
+        console.error("Failed to load transactions for asset", err);
+      } finally {
+        setLoadingTransactions(false);
+      }
+    };
+
+    fetchAssetTransactions();
+  }, [selectedAsset, assetActionOpen, activeWallet?.id]);
+
+  const chartData = useMemo(() => {
+    if (!selectedAsset || !priceHistory?.data?.[BASE_CURRENCY]) return [];
+    const priceSymbol = selectedAsset.marketSymbol || selectedAsset.symbol;
+    const history = priceHistory.data[BASE_CURRENCY][priceSymbol] || [];
+    
+    return history
+      .map((item: any) => ({
+        date: parseTime(item.recorded_at),
+        value: Number(item.price || 0),
+      }))
+      .filter((item: any) => item.date > 0)
+      .sort((a: any, b: any) => a.date - b.date);
+  }, [selectedAsset, priceHistory]);
+
   const displayAssets = useMemo(() => {
     if (!priceHistory?.data?.[BASE_CURRENCY]) {
       return assets;
@@ -595,34 +642,222 @@ function AssetsTab({
             onClick={() => setAssetActionOpen(false)}
             className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
           />
-          <div className="relative w-full max-w-[420px] rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]">
-            <h3 className="text-[#25C866] font-semibold text-lg mb-4">
-              {selectedAsset.name}
-            </h3>
-            <p className="text-[#7A7D83] mb-4">
-              Balance: {formatBalance(selectedAsset.balance)}{" "}
-              {selectedAsset.symbol}
-            </p>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="relative w-full max-w-[560px] rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] flex flex-col gap-4">
+            
+            {/* Modal Header */}
+            <div className="flex justify-between items-center pb-2 border-b border-[#3C3D47]/40">
+              <div className="flex items-center gap-[10px]">
+                <img src={selectedAsset.icon} alt="icon" className="w-[30px] rounded-full" />
+                <div>
+                  <h3 className="text-white font-semibold text-base">
+                    {selectedAsset.name} ({selectedAsset.symbol})
+                  </h3>
+                  <p className="text-[10px] text-[#7A7D83] uppercase">
+                    {selectedAsset.network || "Ethereum Network"}
+                  </p>
+                </div>
+              </div>
               <button
-                onClick={() => {
-                  setAssetActionOpen(false);
-                  setSendOpen(true);
-                }}
-                className="py-3 rounded-xl bg-[#25C866] text-black font-semibold cursor-pointer"
+                onClick={() => setAssetActionOpen(false)}
+                className="text-[#7A7D83] hover:text-white cursor-pointer transition-colors"
               >
-                Send
-              </button>
-              <button
-                onClick={() => {
-                  setAssetActionOpen(false);
-                  setReceiveOpen(true);
-                }}
-                className="py-3 rounded-xl border border-[#3C3D47] text-white cursor-pointer"
-              >
-                Receive
+                <IoClose size={20} />
               </button>
             </div>
+
+            {/* Top: Graph of the asset */}
+            <div className="bg-[#0D1428] rounded-xl p-3 border border-[#3C3D47]/30">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[11px] font-semibold text-[#25C866] uppercase tracking-wider">
+                  24h Price Trend
+                </span>
+                <div className="text-right">
+                  <span className="text-sm font-semibold text-white block">
+                    ${Number(selectedAsset.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                  </span>
+                  <span className={`text-[10px] font-medium flex items-center gap-0.5 justify-end ${selectedAsset.up ? "text-green-500" : "text-red-500"}`}>
+                    {selectedAsset.up ? "▲" : "▼"} {selectedAsset.change}
+                  </span>
+                </div>
+              </div>
+              {chartData.length > 0 ? (
+                <div className="w-full h-[120px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="modalLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#8B5CF6" />
+                          <stop offset="50%" stopColor="#EC4899" />
+                          <stop offset="100%" stopColor="#F97316" />
+                        </linearGradient>
+                        <linearGradient id="modalAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.3} />
+                          <stop offset="50%" stopColor="#EC4899" stopOpacity={0.1} />
+                          <stop offset="100%" stopColor="#000000" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis hide dataKey="date" />
+                      <YAxis hide domain={["dataMin - 0.1", "dataMax + 0.1"]} />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          return (
+                            <div className="bg-[#161F37] border border-[#3C3D47] p-2 rounded text-white text-[11px] shadow-lg">
+                              <div className="text-[#7A7D83]">
+                                {new Date(label ?? Date.now()).toLocaleString([], {
+                                  day: "2-digit",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </div>
+                              <div className="text-[#25C866] font-semibold mt-0.5">
+                                Price: ${Number(payload[0].value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="url(#modalLineGradient)"
+                        strokeWidth={2}
+                        fill="url(#modalAreaGradient)"
+                        fillOpacity={1}
+                        isAnimationActive={false}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="w-full h-[120px] flex items-center justify-center text-[11px] text-[#7A7D83]">
+                  No price trend data available
+                </div>
+              )}
+            </div>
+
+            {/* Middle: Balance & Actions */}
+            <div className="flex justify-between items-center p-3 rounded-xl bg-[#202A43]/30 border border-[#3C3D47]/20">
+              <div>
+                <span className="text-[10px] uppercase text-[#7A7D83] tracking-wider block">
+                  Your Balance
+                </span>
+                <span className="text-base font-bold text-white mt-0.5 block">
+                  {formatBalance(selectedAsset.balance)} {selectedAsset.symbol}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setAssetActionOpen(false);
+                    setSendOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-[#25C866] text-black font-semibold text-xs cursor-pointer hover:bg-[#20b359] transition-colors"
+                >
+                  Send
+                </button>
+                <button
+                  onClick={() => {
+                    setAssetActionOpen(false);
+                    setReceiveOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-[#3C3D47] text-white font-semibold text-xs cursor-pointer hover:bg-white/5 transition-colors"
+                >
+                  Receive
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom: Transaction History */}
+            <div>
+              <h4 className="text-[11px] font-semibold text-[#25C866] uppercase tracking-wider mb-2">
+                Recent Transactions
+              </h4>
+              {loadingTransactions ? (
+                <div className="flex justify-center py-6">
+                  <div className="w-5 h-5 border-2 border-t-transparent border-[#25C866] rounded-full animate-spin" />
+                </div>
+              ) : assetTransactions.length > 0 ? (
+                <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+                  {assetTransactions.map((tx) => {
+                    const isSend = tx.transaction_type === "Send";
+                    const amountSign = isSend ? "-" : "+";
+                    const amountColor = isSend ? "text-white" : "text-green-500";
+                    const dateStr = new Date(tx.timestamp || tx.created_at).toLocaleString([], {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+
+                    return (
+                      <div key={tx.id || tx.hash} className="flex justify-between items-center p-3 rounded-xl bg-[#202A43]/20 border border-[#3C3D47]/20 hover:bg-[#202A43]/40 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                            isSend ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
+                          }`}>
+                            {isSend ? (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                              </svg>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-white flex items-center gap-2">
+                              {isSend ? "Sent" : "Received"}
+                              <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                                tx.txreceipt_status === "Success" 
+                                  ? "bg-green-500/10 text-green-500" 
+                                  : tx.txreceipt_status === "Pending" 
+                                  ? "bg-yellow-500/10 text-yellow-500" 
+                                  : "bg-red-500/10 text-red-500"
+                              }`}>
+                                {tx.txreceipt_status || "Success"}
+                              </span>
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="text-[10px] text-[#7A7D83] font-mono">
+                                {tx.hash ? `${tx.hash.slice(0, 10)}...${tx.hash.slice(-8)}` : "N/A"}
+                              </span>
+                              {tx.hash && (
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(tx.hash);
+                                    toast.success("Hash copied!");
+                                  }}
+                                  className="text-[#7A7D83] hover:text-white cursor-pointer transition-colors"
+                                >
+                                  <TbCopy size={11} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-xs font-bold ${amountColor}`}>
+                            {amountSign}{tx.amount} {selectedAsset.symbol}
+                          </p>
+                          <p className="text-[10px] text-[#7A7D83] mt-1">
+                            {dateStr}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-6 border border-dashed border-[#3C3D47]/40 rounded-xl text-[11px] text-[#7A7D83]">
+                  No transaction history found for this asset
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       )}

@@ -277,24 +277,22 @@ export default function WalletSummary({
         const latestBalance = candidateBalances[0];
         if (!latestBalance) return;
 
-        // const balanceT = latestBalance._t;
-        const balanceTime = latestBalance._t;
-
-        const matchedPrice = prices
+        // Find candidate prices that were recorded before or at bucketTime
+        const candidatePrices = prices
           .map((p: any) => ({
             ...p,
             _t: parseTime(p.recorded_at),
           }))
-          .filter((p: any) => {
-            const diff = Math.abs(p._t - balanceTime);
+          .filter((p: any) => p._t <= bucketTime)
+          .sort((a: any, b: any) => b._t - a._t);
 
-            // 1 hour thi vadhu gap hoy to reject
-            return diff <= 60 * 60 * 1000;
-          })
-          .sort(
-            (a: any, b: any) =>
-              Math.abs(a._t - balanceTime) - Math.abs(b._t - balanceTime),
-          )[0];
+        // Fallback to the oldest price record if bucketTime is before any price recordings
+        const matchedPrice = candidatePrices[0] || prices
+          .map((p: any) => ({
+            ...p,
+            _t: parseTime(p.recorded_at),
+          }))
+          .sort((a: any, b: any) => a._t - b._t)[0];
 
         if (!matchedPrice) {
           return;
