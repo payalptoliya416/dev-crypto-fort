@@ -524,9 +524,15 @@ export default function WalletSummary({
                       </div>
                     </div>
                     <div className="w-full sm:flex-1 min-w-0 h-[90px]">
-                    <WalletTrendCard history={chartData} />
+                      {
+                      chartData.length > 0 &&
+                      priceHistory &&
+                      balanceHistory && (
+                        <WalletTrendCard history={chartData} />
+                      )
+                    }
+                      </div>
                     </div>
-                  </div>
                 </>
               )}
             </div>
