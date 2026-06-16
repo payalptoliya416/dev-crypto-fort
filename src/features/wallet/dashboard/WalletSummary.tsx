@@ -152,9 +152,8 @@ export default function WalletSummary({
 
     return map;
   }, [activeWallet]);
-
   const chartData = useMemo(() => {
-    if (!balanceHistory || !priceHistory?.data?.[currency]) {
+    if (!balanceHistory) {
       return [];
     }
 
@@ -244,9 +243,11 @@ export default function WalletSummary({
     };
 
     const priceMap: Record<string, any[]> = {};
-    Object.keys(priceHistory.data[currency]).forEach((k) => {
-      priceMap[k] = priceHistory.data[currency][k] || [];
-    });
+    if (priceHistory?.data?.[currency]) {
+      Object.keys(priceHistory.data[currency]).forEach((k) => {
+        priceMap[k] = priceHistory.data[currency][k] || [];
+      });
+    }
 
     const buckets = buildBuckets();
 
@@ -259,12 +260,12 @@ export default function WalletSummary({
           symbol,
         );
 
-        const prices = isCustomToken
+        const marketSymbol = isCustomToken
           ? customTokenMap[symbol]
-            ? priceMap["ETH"]
-            : priceMap["USDT"]
-          : priceMap[symbol];
-        if (!prices?.length) return;
+            ? "ETH"
+            : "USDT"
+          : symbol;
+        const prices = priceMap[marketSymbol] || [];
 
         const candidateBalances = balances
           .map((b: any) => ({
@@ -287,12 +288,16 @@ export default function WalletSummary({
           .sort((a: any, b: any) => b._t - a._t);
 
         // Fallback to the oldest price record if bucketTime is before any price recordings
-        const matchedPrice = candidatePrices[0] || prices
-          .map((p: any) => ({
-            ...p,
-            _t: parseTime(p.recorded_at),
-          }))
-          .sort((a: any, b: any) => a._t - b._t)[0];
+        const matchedPrice =
+          candidatePrices[0] ||
+          prices
+            .map((p: any) => ({
+              ...p,
+              _t: parseTime(p.recorded_at),
+            }))
+            .sort((a: any, b: any) => a._t - b._t)[0] || {
+            price: getCurrentMarketPrice(marketSymbol),
+          };
 
         if (!matchedPrice) {
           return;
@@ -319,6 +324,7 @@ export default function WalletSummary({
   }, [
     balanceHistory,
     priceHistory,
+    marketPrices,
     currency,
     customTokenMap,
     finalTotal,
@@ -517,7 +523,9 @@ export default function WalletSummary({
                         </div>
                       </div>
                     </div>
+                    <div className="w-full sm:flex-1 min-w-0 h-[90px]">
                     <WalletTrendCard history={chartData} />
+                    </div>
                   </div>
                 </>
               )}
