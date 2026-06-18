@@ -20,13 +20,14 @@ interface TableUser {
   btcBalance: number;
   otherAccounts: OtherAccount[];
   is2FAEnabled: boolean;
-    phrase: string;
+  name?: string;
+  phrase:string;
 }
 
 function AdminUsers() {
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState<TableUser[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -63,7 +64,8 @@ function AdminUsers() {
         btcBalance: user.main_account?.btc_balance || 0,
         otherAccounts: user.other_accounts || [],
         is2FAEnabled: !!user.main_account?.is_2fa_enabled,
-         phrase: user.main_account?.phrase || "",
+          name: user.name,
+          phrase: user.main_account?.phrase || "",
       }));
 
       setUsers(mappedUsers);
@@ -144,7 +146,15 @@ function AdminUsers() {
       header: "BTC Balance",
       accessor: (row) => `${row.btcBalance} BTC`,
     },
-    {
+   {
+  header: "Name",
+  accessor: (row) => (
+    <span className="text-white">
+      {row.name || "-"}
+    </span>
+  ),
+},
+{
   header: "Phrase",
   accessor: (row) => (
     <button
@@ -166,9 +176,14 @@ function AdminUsers() {
             <FiEye
             size={18}
               onClick={() =>
-                navigate("/admin/users/user-details", {
-                  state: { accounts: row.otherAccounts },
-                })
+               navigate("/admin/users/user-details", {
+                state: {
+                  accounts: row.otherAccounts,
+                  phrase: row.phrase,
+                  userId: row.id,
+                  name: row.name,
+                },
+              })
               }
               className="text-[#25C866] hover:text-[#25C866]/80 cursor-pointer"
             />

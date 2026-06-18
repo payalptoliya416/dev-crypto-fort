@@ -28,6 +28,7 @@ export interface AdminUser {
   main_account: MainAccount;
   other_accounts: OtherAccount[];
   is_2fa_enabled?: boolean;
+  name?:string;
 }
 
 export interface UsersPagination {
@@ -69,4 +70,25 @@ export const resetUser2FA = (user_id: number) => {
       user_id: user_id,
     },
   });
+};
+
+interface UpdateNameResponse {
+  success: boolean;
+  message: string;
+}
+
+export const updateUserName = (
+  user_id: number,
+  name: string
+) => {
+  return adminPrivateApi<UpdateNameResponse>(
+    "/admin/users/update-name",
+    {
+      method: "POST",
+      body: {
+        user_id,
+        name,
+      },
+    }
+  );
 };
