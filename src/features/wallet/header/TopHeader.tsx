@@ -1,5 +1,5 @@
 import logo from "@/assets/logo_svg.svg";
-import logo2 from "@/assets/logo2.svg";
+import logo2 from "@/assets/Union.svg";
 import avtar from "@/assets/avtar.png";
 import { Link, useNavigate } from "react-router-dom";
 import { IoSettingsOutline } from "react-icons/io5";

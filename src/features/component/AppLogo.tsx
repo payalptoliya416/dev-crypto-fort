@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo_svg.svg";
-import logo2 from "@/assets/logo2.svg";
+import logo2 from "@/assets/Union.svg";
 import { useEffect, useState } from "react";
 
 type AppLogoProps = {
