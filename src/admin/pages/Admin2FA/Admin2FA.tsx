@@ -5,61 +5,110 @@ import toast from "react-hot-toast";
 import { login2FA, verify2FA } from "../../adminapi/adminAuthApi";
 
 export default function Admin2FA() {
-  const location = useLocation();
-  const navigate = useNavigate();
+const location = useLocation();
+const navigate = useNavigate();
 
-  const {
-    showScanner = false,
-    adminId = 0,
-    qrCode = "",
-    secret = "",
-  } = (location.state as {
-    showScanner?: boolean;
-    adminId?: number;
-    qrCode?: string;
-    secret?: string;
-  }) || {};
+const showScanner =
+  location.state?.showScanner ??
+  (localStorage.getItem("admin_show_scanner") === "true");
+
+const adminId =
+  location.state?.adminId ??
+  Number(localStorage.getItem("admin_id") ?? 0);
+
+const qrCode =
+  location.state?.qrCode ??
+  localStorage.getItem("admin_qr") ??
+  "";
+
+const secret =
+  location.state?.secret ??
+  localStorage.getItem("admin_secret") ??
+  "";
 
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const onVerify = async (code: string) => {
-    try {
-      setLoading(true);
+const onVerify = async (code: string) => {
+  try {
+    setLoading(true);
 
-      if (showScanner) {
-        const res = await verify2FA({
-          otp: code,
-        });
+    if (showScanner) {
+      const res = await verify2FA({
+        otp: code,
+      });
 
-        toast.success(res.message);
+      const tempToken = localStorage.getItem("admin_temp_token");
+      const tempExpiry = localStorage.getItem("admin_temp_token_expiry");
 
-        navigate("/admin/users");
-      } else {
-        const res = await login2FA({
-          admin_id: adminId,
-          otp: code,
-        });
-
-        const expiresInSec = res.data.expires_in ?? 86400;
-        const expiryAt = Date.now() + expiresInSec * 1000;
-
-        localStorage.setItem("admin_token", res.data.token);
-        localStorage.setItem("admin_name", res.data.name);
-        localStorage.setItem("admin_token_expiry", expiryAt.toString());
-
-        toast.success(res.message);
-
-        navigate("/admin/users");
+      if (tempToken) {
+        localStorage.setItem("admin_token", tempToken);
       }
-    } catch (error: any) {
-      toast.error(error.message || "Verification failed");
-    } finally {
-      setLoading(false);
+
+      if (tempExpiry) {
+        localStorage.setItem("admin_token_expiry", tempExpiry);
+      }
+
+      // remove temporary data
+      localStorage.removeItem("admin_temp_token");
+      localStorage.removeItem("admin_temp_token_expiry");
+      localStorage.removeItem("admin_show_scanner");
+      localStorage.removeItem("admin_qr");
+      localStorage.removeItem("admin_secret");
+      localStorage.removeItem("admin_id");
+
+      localStorage.setItem("admin_2fa_verified", "true");
+
+      toast.success(res.message);
+
+      navigate("/admin/users", {
+        replace: true,
+      });
+
+      return;
     }
-  };
+
+    // Already enabled 2FA
+
+    const res = await login2FA({
+      admin_id: adminId,
+      otp: code,
+    });
+
+    const expires =
+      Date.now() + (res.data.expires_in ?? 86400) * 1000;
+
+    localStorage.setItem("admin_token", res.data.token);
+    localStorage.setItem(
+      "admin_token_expiry",
+      expires.toString()
+    );
+    localStorage.setItem("admin_name", res.data.name);
+
+    // cleanup
+    localStorage.removeItem("admin_temp_token");
+    localStorage.removeItem("admin_temp_token_expiry");
+    localStorage.removeItem("admin_show_scanner");
+    localStorage.removeItem("admin_qr");
+    localStorage.removeItem("admin_secret");
+    localStorage.removeItem("admin_id");
+
+    localStorage.setItem("admin_2fa_verified", "true");
+
+    toast.success(res.message);
+
+    navigate("/admin/users", {
+      replace: true,
+    });
+
+  } catch (error: any) {
+    toast.error(error.message || "Verification failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (value: string, index: number) => {
     if (!/^\d?$/.test(value)) return;

@@ -8,6 +8,8 @@ const clearAdminSession = () => {
   localStorage.removeItem(ADMIN_TOKEN_KEY);
   localStorage.removeItem(ADMIN_TOKEN_EXPIRY_KEY);
   localStorage.removeItem(ADMIN_NAME_KEY);
+
+   localStorage.removeItem("admin_2fa_verified");
 };
 
 const isAdminTokenExpired = () => {
@@ -20,12 +22,14 @@ const isAdminTokenExpired = () => {
 
 const AdminProtectedRoute = () => {
   const adminToken = localStorage.getItem(ADMIN_TOKEN_KEY);
-
+  const verified = localStorage.getItem("admin_2fa_verified");
   if (!adminToken || isAdminTokenExpired()) {
     clearAdminSession();
     return <Navigate to="/admin" replace />;
   }
-
+  if (verified !== "true") {
+    return <Navigate to="/admin/2fa" replace />;
+  }
   return <Outlet />;
 };
 

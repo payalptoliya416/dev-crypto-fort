@@ -18,25 +18,44 @@ function AdminLogin() {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const adminToken = localStorage.getItem("admin_token");
-    const adminExpiry = localStorage.getItem("admin_token_expiry");
+useEffect(() => {
+  const token =
+    localStorage.getItem("admin_token") ||
+    localStorage.getItem("admin_temp_token");
 
-    const expired =
-      !adminToken ||
-      !adminExpiry ||
-      Number.isNaN(Number(adminExpiry)) ||
-      Date.now() >= Number(adminExpiry);
+  const expiry =
+    localStorage.getItem("admin_token_expiry") ||
+    localStorage.getItem("admin_temp_token_expiry");
 
-    if (expired) {
-      localStorage.removeItem("admin_token");
-      localStorage.removeItem("admin_token_expiry");
-      localStorage.removeItem("admin_name");
-      return;
-    }
+  const verified = localStorage.getItem("admin_2fa_verified");
 
-    navigate("/admin/users");
-  }, [navigate]);
+  const expired =
+    !token ||
+    !expiry ||
+    Number.isNaN(Number(expiry)) ||
+    Date.now() >= Number(expiry);
+
+  if (expired) {
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_token_expiry");
+    localStorage.removeItem("admin_temp_token");
+    localStorage.removeItem("admin_temp_token_expiry");
+    localStorage.removeItem("admin_name");
+    localStorage.removeItem("admin_2fa_verified");
+    return;
+  }
+
+  // 2FA completed
+  if (verified === "true") {
+    navigate("/admin/users", { replace: true });
+    return;
+  }
+
+  // Login already done but 2FA pending
+  if (verified === "false") {
+    navigate("/admin/2fa", { replace: true });
+  }
+}, [navigate]);
 
   const initialValues: LoginFormValues = {
     email: "",
@@ -64,61 +83,93 @@ const handleSubmit = async (
 
     toast.success(res.message);
 
-    if (res.data.token) {
-      const expiresInSec = res.data.expires_in ?? 86400;
-      const expiryAt = Date.now() + expiresInSec * 1000;
-
-      localStorage.setItem("admin_token", res.data.token);
-      localStorage.setItem("admin_name", res.data.name ?? "");
+    // -----------------------------------
+    // CASE 1 : 2FA already enabled
+    // API:
+    // { requires_2fa: true }
+    // -----------------------------------
+    if (res.data.requires_2fa) {
+      localStorage.setItem("admin_2fa_verified", "false");
+      localStorage.setItem("admin_show_scanner", "false");
       localStorage.setItem(
-        "admin_token_expiry",
-        expiryAt.toString()
+        "admin_id",
+        String(res.data.admin_id)
+      );
+
+      navigate("/admin/2fa", {
+        replace: true,
+      });
+
+      resetForm();
+      return;
+    }
+
+    // -----------------------------------
+    // Save temporary token
+    // -----------------------------------
+    if (res.data.token) {
+      const expiry =
+        Date.now() + (res.data.expires_in ?? 86400) * 1000;
+
+      localStorage.setItem(
+        "admin_temp_token",
+        res.data.token
+      );
+
+      localStorage.setItem(
+        "admin_temp_token_expiry",
+        expiry.toString()
+      );
+
+      localStorage.setItem(
+        "admin_name",
+        res.data.name ?? ""
+      );
+
+      localStorage.setItem(
+        "admin_2fa_verified",
+        "false"
       );
     }
 
-    // ===============================
-    // CASE 1 : 2FA already enabled
-    // ===============================
-    if (res.data.requires_2fa) {
-      navigate("/admin/2fa", {
-        state: {
-          showScanner: false,
-          adminId: res.data.admin_id,
-        },
-      });
-
-      resetForm();
-      return;
-    }
-
-    // ===============================
+    // -----------------------------------
     // CASE 2 : Enable 2FA
-    // ===============================
+    // -----------------------------------
     if (
-      res.data.is_2fa_verify === false ||
-      res.data.is_2fa_enabled === false
+      res.data.is_2fa_enabled === false ||
+      res.data.is_2fa_verify === false
     ) {
       const qrRes = await enable2FA();
 
+      localStorage.setItem(
+        "admin_show_scanner",
+        "true"
+      );
+
+      localStorage.setItem(
+        "admin_id",
+        String(res.data.admin_id)
+      );
+
+      localStorage.setItem(
+        "admin_qr",
+        qrRes.data.qr_code_image
+      );
+
+      localStorage.setItem(
+        "admin_secret",
+        qrRes.data.secret
+      );
+
       navigate("/admin/2fa", {
-        state: {
-          showScanner: true,
-          adminId: res.data.admin_id,
-          qrCode: qrRes.data.qr_code_image,
-          secret: qrRes.data.secret,
-        },
+        replace: true,
       });
 
       resetForm();
       return;
     }
 
-    // ===============================
-    // CASE 3 : Direct Login
-    // ===============================
-    navigate("/admin/users");
-
-    resetForm();
+    toast.error("Invalid login response");
 
   } catch (error: any) {
     toast.error(error.message || "Login failed");

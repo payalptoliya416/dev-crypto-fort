@@ -11,17 +11,31 @@ const ADMIN_TOKEN_KEY = "admin_token";
 const ADMIN_TOKEN_EXPIRY_KEY = "admin_token_expiry";
 const ADMIN_NAME_KEY = "admin_name";
 
+const ADMIN_TEMP_TOKEN_KEY = "admin_temp_token";
+const ADMIN_TEMP_TOKEN_EXPIRY_KEY = "admin_temp_token_expiry";
+
 const clearAdminSession = () => {
   localStorage.removeItem(ADMIN_TOKEN_KEY);
   localStorage.removeItem(ADMIN_TOKEN_EXPIRY_KEY);
+
+  localStorage.removeItem(ADMIN_TEMP_TOKEN_KEY);
+  localStorage.removeItem(ADMIN_TEMP_TOKEN_EXPIRY_KEY);
+
   localStorage.removeItem(ADMIN_NAME_KEY);
+  localStorage.removeItem("admin_2fa_verified");
 };
 
 const isAdminTokenExpired = () => {
-  const expiry = localStorage.getItem(ADMIN_TOKEN_EXPIRY_KEY);
+  const expiry =
+    localStorage.getItem(ADMIN_TOKEN_EXPIRY_KEY) ||
+    localStorage.getItem(ADMIN_TEMP_TOKEN_EXPIRY_KEY);
+
   if (!expiry) return true;
+
   const expiryTime = Number(expiry);
+
   if (Number.isNaN(expiryTime)) return true;
+
   return Date.now() >= expiryTime;
 };
 
@@ -29,7 +43,9 @@ export async function adminPrivateApi<T>(
   url: string,
   options: ApiOptions = {}
 ): Promise<T> {
-  const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+ const token =
+  localStorage.getItem(ADMIN_TOKEN_KEY) ||
+  localStorage.getItem(ADMIN_TEMP_TOKEN_KEY);
 
   if (!token || isAdminTokenExpired()) {
     clearAdminSession();
