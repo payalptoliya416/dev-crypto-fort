@@ -23,6 +23,7 @@ import LoginVerify2FA from "./features/wallet/auth/LoginVerify2FA";
 import UserProtectedRoute from "./routes/UserProtectedRoute";
 import CustomTokenList from "./admin/pages/customToken/CustomTokenList";
 import CustomTokenDetails from "./admin/pages/customToken/CustomTokenDetails";
+import Admin2FA from "./admin/pages/Admin2FA/Admin2FA";
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
           </Route>
 
           <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/2fa" element={<Admin2FA />} />
           <Route path="/admin" element={<AdminProtectedRoute />}>
             <Route element={<AdminLayout />}>
               <Route path="transaction" element={<AdminDashboard />} />

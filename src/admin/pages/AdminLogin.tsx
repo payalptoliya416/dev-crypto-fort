@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { adminLogin } from "../adminapi/adminAuthApi";
+import { adminLogin, enable2FA } from "../adminapi/adminAuthApi";
 
 interface LoginFormValues {
   email: string;
@@ -53,33 +53,75 @@ function AdminLogin() {
       .required("Password is required"),
   });
 
- const handleSubmit = async (
+const handleSubmit = async (
   values: LoginFormValues,
   { resetForm }: FormikHelpers<LoginFormValues>
 ) => {
-
   try {
     setLoading(true);
 
     const res = await adminLogin(values);
 
-    const expiresInSec = res.data.expires_in ?? 24 * 60 * 60;
-    const expiryAt = Date.now() + expiresInSec * 1000;
-
-    localStorage.setItem("admin_token", res.data.token);
-    localStorage.setItem("admin_name", res.data.name);
-    localStorage.setItem("admin_token_expiry", expiryAt.toString());
-
     toast.success(res.message);
 
+    if (res.data.token) {
+      const expiresInSec = res.data.expires_in ?? 86400;
+      const expiryAt = Date.now() + expiresInSec * 1000;
+
+      localStorage.setItem("admin_token", res.data.token);
+      localStorage.setItem("admin_name", res.data.name ?? "");
+      localStorage.setItem(
+        "admin_token_expiry",
+        expiryAt.toString()
+      );
+    }
+
+    // ===============================
+    // CASE 1 : 2FA already enabled
+    // ===============================
+    if (res.data.requires_2fa) {
+      navigate("/admin/2fa", {
+        state: {
+          showScanner: false,
+          adminId: res.data.admin_id,
+        },
+      });
+
+      resetForm();
+      return;
+    }
+
+    // ===============================
+    // CASE 2 : Enable 2FA
+    // ===============================
+    if (
+      res.data.is_2fa_verify === false ||
+      res.data.is_2fa_enabled === false
+    ) {
+      const qrRes = await enable2FA();
+
+      navigate("/admin/2fa", {
+        state: {
+          showScanner: true,
+          adminId: res.data.admin_id,
+          qrCode: qrRes.data.qr_code_image,
+          secret: qrRes.data.secret,
+        },
+      });
+
+      resetForm();
+      return;
+    }
+
+    // ===============================
+    // CASE 3 : Direct Login
+    // ===============================
     navigate("/admin/users");
 
     resetForm();
 
   } catch (error: any) {
-
     toast.error(error.message || "Login failed");
-
   } finally {
     setLoading(false);
   }
