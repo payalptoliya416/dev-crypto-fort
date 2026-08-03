@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
 import { setWalletPassword } from "../../../api/setWalletPassword";
 import { setToken } from "../../../redux/authSlice";
+import { saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
 
 import AuthLayout from "../../layout/AuthLayout";
 import CommonSuccessModal from "../../component/CommonSuccessModal";
@@ -42,6 +43,10 @@ function SecureWallet() {
       const res = await setWalletPassword(payload, false);
 
       if (res.success) {
+        if (wallet && wallet.phrase) {
+          saveEncryptedSeedPhrase(wallet.phrase, values.password);
+        }
+
         if (res.data?.token) {
           dispatch(
             setToken({

@@ -1,14 +1,33 @@
+import { useState } from "react";
+import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import wrong from "@/assets/wrong.png";
 
 interface Props {
   input: string;
+  password?: string;
+  confirmPassword?: string;
   error: string;
   loading: boolean;
   setInput: (v: string) => void;
+  setPassword?: (v: string) => void;
+  setConfirmPassword?: (v: string) => void;
   onImport: () => void;
 }
 
-function SeedPhraseUI({ input, error, loading, setInput, onImport }: Props) {
+function SeedPhraseUI({
+  input,
+  password = "",
+  confirmPassword = "",
+  error,
+  loading,
+  setInput,
+  setPassword,
+  setConfirmPassword,
+  onImport,
+}: Props) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   return (
     <div
       className="
@@ -33,21 +52,97 @@ function SeedPhraseUI({ input, error, loading, setInput, onImport }: Props) {
         Use your original 12 word recovery phrase to restore your wallet.
       </p>
 
-      <div className="w-full max-w-[640px] mb-4">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Enter seed Phrase"
-          rows={4}
-          className="
-        w-full resize-none
-        rounded-[18px]
-        border border-[#3C3D47]
-        bg-[#161F37]
-        p-5 text-white text-lg
-        placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866]
-      "
-        />
+      <div className="w-full max-w-[640px] mb-4 space-y-4">
+        <div>
+          <label className="text-[#7A7D83] mb-2 block text-base text-left">
+            Recovery Phrase (12 Words)
+          </label>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Enter seed Phrase"
+            rows={3}
+            className="
+              w-full resize-none
+              rounded-[18px]
+              border border-[#3C3D47]
+              bg-[#161F37]
+              p-5 text-white text-lg
+              placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866]
+            "
+          />
+        </div>
+
+        {setPassword && setConfirmPassword && (
+          <>
+            <div>
+              <label className="text-[#7A7D83] mb-2 block text-base text-left">
+                Create Wallet Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Create a password/PIN for this device"
+                  className="
+                    w-full
+                    rounded-[18px]
+                    border border-[#3C3D47]
+                    bg-[#161F37]
+                    p-5 text-white text-lg
+                    placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866]
+                  "
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                >
+                  {showPassword ? (
+                    <IoEyeOffOutline size={20} />
+                  ) : (
+                    <IoEyeOutline size={20} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[#7A7D83] mb-2 block text-base text-left">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password/PIN"
+                  className="
+                    w-full
+                    rounded-[18px]
+                    border border-[#3C3D47]
+                    bg-[#161F37]
+                    p-5 text-white text-lg
+                    placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866]
+                  "
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                >
+                  {showConfirm ? (
+                    <IoEyeOffOutline size={20} />
+                  ) : (
+                    <IoEyeOutline size={20} />
+                  )}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
         {error && (
           <p className="text-[#ef4343] text-sm mt-1 text-left">{error}</p>
         )}

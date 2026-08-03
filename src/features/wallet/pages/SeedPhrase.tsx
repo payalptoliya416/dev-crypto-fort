@@ -9,6 +9,7 @@ import SeedPhraseUI from "../components/SeedPhraseUI";
 import { importWallet } from "../../../api/importWallet";
 import { useDispatch } from "react-redux";
 import { setToken } from "../../../redux/authSlice";
+import { saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
 
 function SeedPhrase() {
   const navigate = useNavigate();
@@ -16,12 +17,29 @@ function SeedPhrase() {
 
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   const handleImport = async () => {
     if (!input.trim()) {
       setError("Recovery phrase is required");
+      return;
+    }
+
+    if (!password) {
+      setError("Password is required");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
@@ -34,6 +52,9 @@ function SeedPhrase() {
         { type: "phrase", data: input.trim() },
         false
       );
+
+      // Securely save the seed phrase locally encrypted by the password
+      saveEncryptedSeedPhrase(input.trim(), password);
 
       toast.success(res.message);
       
@@ -58,10 +79,20 @@ function SeedPhrase() {
       <AuthLayout>
         <SeedPhraseUI
           input={input}
+          password={password}
+          confirmPassword={confirmPassword}
           error={error}
           loading={loading}
           setInput={(v) => {
             setInput(v);
+            setError("");
+          }}
+          setPassword={(v) => {
+            setPassword(v);
+            setError("");
+          }}
+          setConfirmPassword={(v) => {
+            setConfirmPassword(v);
             setError("");
           }}
           onImport={handleImport}
