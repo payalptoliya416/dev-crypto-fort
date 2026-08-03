@@ -14,7 +14,6 @@ import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import {
   hasEncryptedSeedPhrase,
   decryptSeedPhrase,
-  saveEncryptedSeedPhrase,
   clearEncryptedSeedPhrase,
 } from "../../../utils/walletCrypto";
 import CommonConfirmModal from "../../component/CommonConfirmModal";
@@ -26,7 +25,6 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
@@ -126,9 +124,9 @@ function Login() {
             })
           );
           toast.success(res.message || "2FA verification required");
-          navigate("/login-verify-2fa", {
+          navigate("/create-password", {
             replace: true,
-            state: { seedPhrase },
+            state: { seedPhrase, requires2fa: true, userId: data.user_id },
           });
           return;
         }

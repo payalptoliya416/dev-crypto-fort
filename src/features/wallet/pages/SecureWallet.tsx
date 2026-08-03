@@ -22,6 +22,7 @@ function SecureWallet() {
         initialToken?: string;
         expiresIn?: number;
         userId?: number;
+        requires2fa?: boolean;
       }
     | null) ?? null;
 
@@ -57,6 +58,12 @@ function SecureWallet() {
       }
 
       saveEncryptedSeedPhrase(seedPhrase, values.password);
+
+      if (state?.requires2fa) {
+        toast.success("Password set. Continue to 2FA verification.");
+        navigate("/login-verify-2fa", { replace: true });
+        return;
+      }
 
       if (state?.initialToken) {
         dispatch(
