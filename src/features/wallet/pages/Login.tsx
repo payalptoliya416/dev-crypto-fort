@@ -50,18 +50,10 @@ function Login() {
 
   const initialValuesLogin = {
     seed_phrase: "",
-    password: "",
-    confirmPassword: "",
   };
 
   const validationSchemaLogin = Yup.object({
     seed_phrase: Yup.string().required("Seed phrase is required"),
-    password: Yup.string()
-      .min(8, "Password must be at least 8 characters")
-      .required("Password is required"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password")], "Passwords must match")
-      .required("Confirm password is required"),
   });
 
   const handleUnlock = async (values: typeof initialValuesUnlock) => {
@@ -117,15 +109,13 @@ function Login() {
   const handleLogin = async (values: typeof initialValuesLogin) => {
     try {
       setLoading(true);
+      const seedPhrase = values.seed_phrase.trim();
       const res = await loginUser({
-        seed_phrase: values.seed_phrase.trim(),
+        seed_phrase: seedPhrase,
       });
 
       if (res.success) {
         const data = res.data;
-
-        // Securely save the seed phrase locally encrypted by the new password
-        saveEncryptedSeedPhrase(values.seed_phrase.trim(), values.password);
 
         if ("requires_2fa" in data && data.requires_2fa) {
           dispatch(
@@ -136,20 +126,24 @@ function Login() {
             })
           );
           toast.success(res.message || "2FA verification required");
-          navigate("/login-verify-2fa", { replace: true });
+          navigate("/login-verify-2fa", {
+            replace: true,
+            state: { seedPhrase },
+          });
           return;
         }
 
         if ("token" in data && data.token) {
-          dispatch(
-            setToken({
-              token: data.token,
+          toast.success(res.message || "Proceed to set your password");
+          navigate("/create-password", {
+            replace: true,
+            state: {
+              seedPhrase,
+              initialToken: data.token,
               expiresIn: data.expires_in,
               userId: data.user_id,
-            })
-          );
-          toast.success(res.message || "Login successful");
-          navigate("/dashboard", { replace: true });
+            },
+          });
           return;
         }
       }
@@ -273,8 +267,8 @@ function Login() {
                       as="textarea"
                       name="seed_phrase"
                       placeholder="Enter seed phrase"
-                      rows={3}
-                      className={`w-full resize-none rounded-[18px] border bg-[#161F37] px-5 py-3 text-white text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
+                      rows={4}
+                      className={`w-full resize-none rounded-[18px] border bg-[#161F37] px-5 py-4 text-white text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
                         errors.seed_phrase && touched.seed_phrase
                           ? "border-[#ef4343]"
                           : "border-[#3C3D47]"
@@ -283,74 +277,6 @@ function Login() {
                   </div>
                   <ErrorMessage
                     name="seed_phrase"
-                    component="p"
-                    className="text-[#ef4343] text-sm mt-1 text-left"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[#7A7D83] mb-2 block text-lg text-left">
-                    Create Wallet Password
-                  </label>
-                  <div className="relative">
-                    <Field
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password/PIN for this device"
-                      className={`w-full rounded-[18px] border bg-[#161F37] px-5 py-3 text-white text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
-                        errors.password && touched.password
-                          ? "border-[#ef4343]"
-                          : "border-[#3C3D47]"
-                      }`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
-                    >
-                      {showPassword ? (
-                        <IoEyeOffOutline size={20} />
-                      ) : (
-                        <IoEyeOutline size={20} />
-                      )}
-                    </button>
-                  </div>
-                  <ErrorMessage
-                    name="password"
-                    component="p"
-                    className="text-[#ef4343] text-sm mt-1 text-left"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[#7A7D83] mb-2 block text-lg text-left">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <Field
-                      name="confirmPassword"
-                      type={showConfirm ? "text" : "password"}
-                      placeholder="Confirm password/PIN"
-                      className={`w-full rounded-[18px] border bg-[#161F37] px-5 py-3 text-white text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
-                        errors.confirmPassword && touched.confirmPassword
-                          ? "border-[#ef4343]"
-                          : "border-[#3C3D47]"
-                      }`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
-                    >
-                      {showConfirm ? (
-                        <IoEyeOffOutline size={20} />
-                      ) : (
-                        <IoEyeOutline size={20} />
-                      )}
-                    </button>
-                  </div>
-                  <ErrorMessage
-                    name="confirmPassword"
                     component="p"
                     className="text-[#ef4343] text-sm mt-1 text-left"
                   />
@@ -365,7 +291,7 @@ function Login() {
                       : "bg-[#25C866] hover:bg-green-500"
                   } text-white`}
                 >
-                  {loading ? "Logging in..." : "Login"}
+                  {loading ? "Logging in..." : "Continue"}
                 </button>
               </Form>
             )}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "../../layout/AuthLayout";
 import { loginVerify2FA } from "../../../api/login";
 import type { RootState } from "../../../redux/store/store";
@@ -11,9 +11,11 @@ import { setToken } from "../../../redux/authSlice";
 
 function LoginVerify2FA() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const userId = useSelector((state: RootState) => state.auth.userId);
   const dispatch = useDispatch();
+  const state = (location.state as { seedPhrase?: string } | null) ?? null;
 
   const initialValues = {
     otp: ["", "", "", "", "", ""],
@@ -55,6 +57,19 @@ function LoginVerify2FA() {
       }
 
       if (res.success && res.data?.token) {
+        if (state?.seedPhrase) {
+          navigate("/create-password", {
+            replace: true,
+            state: {
+              seedPhrase: state.seedPhrase,
+              initialToken: res.data.token,
+              expiresIn: res.data.expires_in,
+              userId: res.data.user_id,
+            },
+          });
+          return;
+        }
+
         dispatch(
           setToken({
             token: res.data.token,
