@@ -10,6 +10,7 @@ import Dashboard from "./features/wallet/dashboard/Dashboard";
 import Balance from "./features/wallet/balance/Balance";
 import Transaction from "./features/wallet/transaction/Transaction";
 import Login from "./features/wallet/pages/Login";
+import SecureWalletLocal from "./features/wallet/pages/SecureWalletLocal";
 import NotFound from "./routes/NotFound";
 import AdminLogin from "./admin/pages/AdminLogin";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
@@ -46,6 +47,7 @@ function App() {
             <Route path="login" element={<Login />} />
             <Route path="recovery-phrase" element={<RecoveryPhrase />} />
             <Route path="create-password" element={<SecureWallet />} />
+            <Route path="create-password-local" element={<SecureWalletLocal />} />
             <Route path="setup-2fa" element={<TwoFactorSetup />} />
             <Route path="verify-2fa" element={<Verify2FA />} />
             <Route path="login-verify-2fa" element={<LoginVerify2FA />} />

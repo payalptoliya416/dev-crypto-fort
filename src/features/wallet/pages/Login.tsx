@@ -124,7 +124,7 @@ function Login() {
             })
           );
           toast.success(res.message || "2FA verification required");
-          navigate("/create-password", {
+          navigate("/create-password-local", {
             replace: true,
             state: { seedPhrase, requires2fa: true, userId: data.user_id },
           });
@@ -133,7 +133,7 @@ function Login() {
 
         if ("token" in data && data.token) {
           toast.success(res.message || "Proceed to set your password");
-          navigate("/create-password", {
+          navigate("/create-password-local", {
             replace: true,
             state: {
               seedPhrase,
