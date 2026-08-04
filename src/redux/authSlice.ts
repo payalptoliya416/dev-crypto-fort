@@ -33,7 +33,7 @@ const getUserId = () => {
 const initialState: AuthState = {
   token: getValidToken(),
   userId: getUserId(),
-  unlocked: false,
+  unlocked: sessionStorage.getItem("wallet_unlocked") === "true",
 };
 
 const authSlice = createSlice({
@@ -74,6 +74,13 @@ const authSlice = createSlice({
     },
 
     logout: (state) => {
+      // clear session unlock marker as well
+      try {
+        sessionStorage.removeItem("wallet_unlocked");
+      } catch (e) {
+        // ignore
+      }
+
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(EXPIRY_KEY);
       localStorage.removeItem(USER_ID_KEY);
@@ -86,10 +93,20 @@ const authSlice = createSlice({
     },
     unlockWallet: (state) => {
       state.unlocked = true;
+      try {
+        sessionStorage.setItem("wallet_unlocked", "true");
+      } catch (e) {
+        // ignore if sessionStorage unavailable
+      }
     },
 
     lockWallet: (state) => {
       state.unlocked = false;
+      try {
+        sessionStorage.removeItem("wallet_unlocked");
+      } catch (e) {
+        // ignore
+      }
     },
   },
 });
