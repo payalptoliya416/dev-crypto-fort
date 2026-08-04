@@ -11,6 +11,7 @@ import Loader from "../../component/Loader";
 import { formatBalance } from "../../component/format";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
+import { getPrices } from "../../../api/publicApi";
 import { setActiveWallet } from "../../../redux/activeWalletSlice";
 
 interface AccountModalProps {
@@ -44,6 +45,9 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
+  const currency = useSelector((state: RootState) => state.currency.value);
+  const [marketPrices, setMarketPrices] = useState<any[]>([]);
+
   const refreshWallets = async () => {
     try {
       setLoading(true);
@@ -91,6 +95,73 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
 
     fetchWallets();
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const loadPrices = async () => {
+      try {
+        const res = await getPrices({
+          base: currency,
+          symbols: "ETH,BTC,USDT,BNB,TRX,USDC",
+        });
+
+        if (res?.success) {
+          setMarketPrices(res.prices || []);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    loadPrices();
+  }, [open, currency]);
+
+  const getCurrentMarketPrice = (symbol: string) => {
+    const item = marketPrices.find((p: any) => p.symbol === symbol);
+    return Number(item?.price || 0);
+  };
+
+  const getSymbol = (cur: string) => {
+    const symbols: any = {
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+      AED: "د.إ",
+      AUD: "A$",
+      CAD: "C$",
+      NOK: "kr",
+      NZD: "NZ$",
+      CHF: "CHF",
+      BTC: "₿",
+    };
+
+    return symbols[cur] || "";
+  };
+
+  const computeWalletValue = (wallet: any) => {
+    const totalValue =
+      Number(wallet.eth_balance || 0) * getCurrentMarketPrice("ETH") +
+      Number(wallet.btc_balance || 0) * getCurrentMarketPrice("BTC") +
+      Number(wallet.bnb_balance || 0) * getCurrentMarketPrice("BNB") +
+      Number(wallet.trx_balance || 0) * getCurrentMarketPrice("TRX") +
+      Number(wallet.usdt_balance || 0) * getCurrentMarketPrice("USDT") +
+      Number(wallet.usdc_balance || 0) * getCurrentMarketPrice("USDC");
+
+    const customTokenTotal =
+      wallet?.custom_tokens?.reduce((sum: number, token: any) => {
+        const marketPrice = token.is_eth
+          ? getCurrentMarketPrice("ETH")
+          : getCurrentMarketPrice("USDT");
+
+        const balance = Number(token.balance || 0);
+        const tokenValue = balance * marketPrice;
+
+        return sum + tokenValue;
+      }, 0) || 0;
+
+    return totalValue + customTokenTotal;
+  };
 
   if (!open) return null;
   return (
@@ -163,7 +234,12 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
                       {/* RIGHT */}
                       <div className="flex items-center justify-between sm:justify-end gap-3">
                         <p className="text-white text-base sm:text-lg whitespace-nowrap">
-                          {formatBalance(wallet.eth_balance)} ETH
+                          {marketPrices.length > 0
+                            ? `${getSymbol(currency)}${formatBalance(
+                                computeWalletValue(wallet),
+                                { isFiat: true },
+                              )}`
+                            : `${formatBalance(wallet.eth_balance)} ETH`}
                         </p>
 
                         <div className="relative">
