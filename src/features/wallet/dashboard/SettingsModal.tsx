@@ -17,6 +17,7 @@ import autoTable from "jspdf-autotable";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import ToggleSwitch from "../../../hooks/ToggleSwitch";
 import { disable2FA } from "../../../api/login";
+import { decryptSeedPhrase, saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
 import TwoFactorModal from "./TwoFactorModal";
 interface SettingsModalProps {
   open: boolean;
@@ -41,6 +42,14 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState("");
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const [exportFormat, setExportFormat] = useState<"excel" | "pdf" | null>(
     null,
   );
@@ -380,6 +389,49 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      toast.error("Please fill in all password fields");
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("New password should be at least 6 characters");
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+
+      const seedPhrase = decryptSeedPhrase(currentPassword);
+
+      if (!seedPhrase) {
+        toast.error("Current password is incorrect");
+        return;
+      }
+
+      saveEncryptedSeedPhrase(seedPhrase, newPassword);
+
+      toast.success("Login password updated successfully");
+      setShowChangePasswordModal(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to update login password");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
@@ -483,6 +535,22 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             </select>
           </div>
 
+          <div className="mb-8">
+            <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
+              Login / Unlock Password
+            </label>
+
+            <button
+              onClick={() => setShowChangePasswordModal(true)}
+              className="w-full rounded-xl border border-[#3C3D47] bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556] cursor-pointer"
+            >
+              Change Password
+            </button>
+            <p className="text-[#434548] text-sm mt-2">
+              Update the password you use to unlock the wallet after login.
+            </p>
+          </div>
+
           <h3 className="text-white text-lg sm:text-xl font-medium mb-[15px]">
             Backup & Export
           </h3>
@@ -566,6 +634,91 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
           )}
         </div>
+        {showChangePasswordModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-[9999] px-3">
+            <div className="bg-[#161F37] p-6 rounded-2xl w-full max-w-[400px] relative">
+              <button
+                onClick={() => {
+                  setShowChangePasswordModal(false);
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setConfirmNewPassword("");
+                  setShowCurrentPassword(false);
+                  setShowNewPassword(false);
+                  setShowConfirmPassword(false);
+                }}
+                className="absolute top-2 right-3 text-white text-xl cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-white my-4">Change Wallet Password</h3>
+
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full p-3 pr-10 rounded-lg bg-[#0F172A] text-white focus:outline-none"
+                    placeholder="Current password"
+                  />
+                  <span
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                  >
+                    {showCurrentPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full p-3 pr-10 rounded-lg bg-[#0F172A] text-white focus:outline-none"
+                    placeholder="New password"
+                  />
+                  <span
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                  >
+                    {showNewPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    className="w-full p-3 pr-10 rounded-lg bg-[#0F172A] text-white focus:outline-none"
+                    placeholder="Confirm new password"
+                  />
+                  <span
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                  >
+                    {showConfirmPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleChangePassword}
+                disabled={changingPassword}
+                className={`w-full py-2 rounded-lg text-white transition mt-4 ${
+                  changingPassword
+                    ? "bg-green-400 cursor-not-allowed opacity-70"
+                    : "bg-[#25C866] hover:bg-green-500 cursor-pointer"
+                }`}
+              >
+                {changingPassword ? "Updating..." : "Update Password"}
+              </button>
+            </div>
+          </div>
+        )}
+
         {showPasswordModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-[9999]">
             <div className="bg-[#161F37] p-6 rounded-2xl w-[350px] relative mx-3">
