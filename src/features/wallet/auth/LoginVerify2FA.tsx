@@ -7,7 +7,7 @@ import AuthLayout from "../../layout/AuthLayout";
 import { loginVerify2FA } from "../../../api/login";
 import type { RootState } from "../../../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setToken } from "../../../redux/authSlice";
+import { setToken, unlockWallet } from "../../../redux/authSlice";
 
 function LoginVerify2FA() {
   const navigate = useNavigate();
@@ -77,6 +77,7 @@ function LoginVerify2FA() {
             userId: res.data.user_id,
           }),
         );
+        dispatch(unlockWallet());
 
         toast.success(res.message || "Login successful");
 

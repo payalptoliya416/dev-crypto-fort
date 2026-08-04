@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import type { RootState } from "../../../redux/store/store";
 import { setWalletPassword } from "../../../api/setWalletPassword";
-import { setToken } from "../../../redux/authSlice";
+import { setToken, unlockWallet } from "../../../redux/authSlice";
 import { saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
 
 import AuthLayout from "../../layout/AuthLayout";
@@ -73,6 +73,7 @@ function SecureWallet() {
             userId: state.userId,
           })
         );
+        dispatch(unlockWallet());
         toast.success(res?.message || "Password set successfully");
         navigate("/dashboard", { replace: true });
         return;
@@ -88,11 +89,13 @@ function SecureWallet() {
             })
           );
         }
+        dispatch(unlockWallet());
         toast.success(res.message);
         navigate("/setup-2fa", { replace: true });
         return;
       }
 
+      dispatch(unlockWallet());
       toast.success("Password saved locally. You can now unlock your wallet with it.");
       navigate("/dashboard", { replace: true });
     } catch (error: any) {

@@ -1,4 +1,4 @@
-import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 const TOKEN_KEY = "token";
 const EXPIRY_KEY = "token_expiry";
@@ -7,6 +7,7 @@ const USER_ID_KEY = "user_id";
 type AuthState = {
   token: string | null;
   userId?: number | null;
+  unlocked: boolean;
 };
 
 const getValidToken = () => {
@@ -32,6 +33,7 @@ const getUserId = () => {
 const initialState: AuthState = {
   token: getValidToken(),
   userId: getUserId(),
+  unlocked: false,
 };
 
 const authSlice = createSlice({
@@ -41,10 +43,10 @@ const authSlice = createSlice({
     setToken: (
       state,
       action: PayloadAction<{
-        token: string | null; 
+        token: string | null;
         expiresIn: number;
-        userId?: number; 
-      }>
+        userId?: number;
+      }>,
     ) => {
       const { token, expiresIn, userId } = action.payload;
 
@@ -53,7 +55,7 @@ const authSlice = createSlice({
 
       const expiryTime = Date.now() + expirySeconds * 1000;
 
-        if (token) {
+      if (token) {
         localStorage.setItem(TOKEN_KEY, token);
         localStorage.setItem(EXPIRY_KEY, expiryTime.toString());
       } else {
@@ -78,11 +80,19 @@ const authSlice = createSlice({
 
       state.token = null;
       state.userId = null;
+      state.unlocked = false;
 
       localStorage.clear();
+    },
+    unlockWallet: (state) => {
+      state.unlocked = true;
+    },
+
+    lockWallet: (state) => {
+      state.unlocked = false;
     },
   },
 });
 
-export const { setToken, logout } = authSlice.actions;
+export const { setToken, logout, unlockWallet, lockWallet } = authSlice.actions;
 export default authSlice.reducer;

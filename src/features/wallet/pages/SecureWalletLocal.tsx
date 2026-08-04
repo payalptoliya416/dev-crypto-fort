@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 
 import type { RootState } from "../../../redux/store/store";
-import { setToken } from "../../../redux/authSlice";
+import { setToken, unlockWallet } from "../../../redux/authSlice";
 import { saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
 
 import AuthLayout from "../../layout/AuthLayout";
@@ -55,6 +55,7 @@ function SecureWalletLocal() {
             userId: state.userId,
           }),
         );
+        dispatch(unlockWallet());
         toast.success("Password set successfully");
         navigate("/dashboard", { replace: true });
         return;
@@ -66,6 +67,7 @@ function SecureWalletLocal() {
         return;
       }
 
+      dispatch(unlockWallet());
       toast.success("Password saved locally. You can now unlock your wallet with it.");
       navigate("/dashboard", { replace: true });
     } catch (error: any) {

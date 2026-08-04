@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../../api/login";
 import { useDispatch, useSelector } from "react-redux";
-import { setToken } from "../../../redux/authSlice";
+import { setToken, unlockWallet } from "../../../redux/authSlice";
 import type { RootState } from "../../../redux/store/store";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import {
@@ -22,6 +22,7 @@ function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = useSelector((state: RootState) => state.auth.token);
+  const unlocked = useSelector((state: RootState) => state.auth.unlocked);
   const [loading, setLoading] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -32,10 +33,10 @@ function Login() {
   }, []);
 
   useEffect(() => {
-    if (token) {
+    if (token && unlocked) {
       navigate("/dashboard", { replace: true });
     }
-  }, [token, navigate]);
+  }, [token, unlocked, navigate]);
 
   // Initial values & validation schemas based on whether we are unlocking or logging in fresh
   const initialValuesUnlock = {
@@ -92,6 +93,7 @@ function Login() {
               userId: data.user_id,
             })
           );
+          dispatch(unlockWallet());
           toast.success(res.message || "Login successful");
           navigate("/dashboard", { replace: true });
           return;
