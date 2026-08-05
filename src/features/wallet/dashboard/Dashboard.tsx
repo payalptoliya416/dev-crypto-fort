@@ -38,6 +38,15 @@ function Dashboard() {
     refreshWallets();
   }, []);
 
+  useEffect(() => {
+    const handleWalletsUpdated = () => {
+      refreshWallets();
+    };
+
+    window.addEventListener("wallets-updated", handleWalletsUpdated);
+    return () => window.removeEventListener("wallets-updated", handleWalletsUpdated);
+  }, [refreshWallets]);
+
   return (
     <>
       <DashboardLayout>

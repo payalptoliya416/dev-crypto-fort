@@ -145,7 +145,7 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
       />
 
-      <div className="relative w-full max-w-[560px]">
+      <div className="relative w-full max-w-[600px]">
         <div className="flex justify-end">
           <button
             onClick={onClose}

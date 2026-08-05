@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import CurrencyDropdown from "./CurrencyDropdown";
 import { FiUpload } from "react-icons/fi";
@@ -346,20 +346,27 @@ export default function WalletSummary({
 
     return Number(change.toFixed(2));
   }, [chartData, finalTotal, period]);
-  useEffect(() => {
-    const fetchWallets = async () => {
-      try {
-        const res = await getWallets();
-        if (res.success) {
-          setWallets(res.data);
-        }
-      } catch {
-        console.log("Failed to load wallets");
+  const fetchWallets = useCallback(async () => {
+    try {
+      const res = await getWallets();
+      if (res.success) {
+        setWallets(res.data);
       }
+    } catch {
+      console.log("Failed to load wallets");
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWallets();
+
+    const handleWalletsUpdated = () => {
+      fetchWallets();
     };
 
-    fetchWallets();
-  }, []);
+    window.addEventListener("wallets-updated", handleWalletsUpdated);
+    return () => window.removeEventListener("wallets-updated", handleWalletsUpdated);
+  }, [fetchWallets]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

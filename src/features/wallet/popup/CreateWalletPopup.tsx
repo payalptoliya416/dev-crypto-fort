@@ -24,6 +24,7 @@ function CreateWalletPopup({
       const res = await createWallet(true);
 
       dispatch(setWallet(res.data));
+      window.dispatchEvent(new Event("wallets-updated"));
       onNext();
     } finally {
       setLoading(false);
