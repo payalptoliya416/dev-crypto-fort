@@ -58,7 +58,7 @@ function LoginVerify2FA() {
 
       if (res.success && res.data?.token) {
         if (state?.seedPhrase) {
-          navigate("/create-password", {
+          navigate("/create-password-local", {
             replace: true,
             state: {
               seedPhrase: state.seedPhrase,
@@ -160,7 +160,7 @@ function LoginVerify2FA() {
                   {loading ? "Verifying..." : "Verify"}
                 </button>
                 <Link
-                  to="/create-password"
+                  to="/create-password-local"
                   className="text-[#25C866] text-base font-normal underline"
                 >
                   back to create wallet{" "}

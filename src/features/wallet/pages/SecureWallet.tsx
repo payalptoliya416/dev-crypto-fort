@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 
 import type { RootState } from "../../../redux/store/store";
 import { setWalletPassword } from "../../../api/setWalletPassword";
 import { setToken, unlockWallet } from "../../../redux/authSlice";
-import { saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
 
 import AuthLayout from "../../layout/AuthLayout";
 import CommonSuccessModal from "../../component/CommonSuccessModal";
@@ -15,16 +14,6 @@ import SecureWalletUI from "../components/SecureWalletUI";
 function SecureWallet() {
   const wallet = useSelector((state: RootState) => state.wallet.wallet);
   const navigate = useNavigate();
-  const location = useLocation();
-  const state = (location.state as
-    | {
-        seedPhrase?: string;
-        initialToken?: string;
-        expiresIn?: number;
-        userId?: number;
-        requires2fa?: boolean;
-      }
-    | null) ?? null;
 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,50 +25,23 @@ function SecureWallet() {
 
   const handleSubmit = async (values: any) => {
     try {
-      const seedPhrase = state?.seedPhrase ?? wallet?.phrase;
-      if (!seedPhrase) {
-        toast.error("Seed phrase not available for password setup.");
-        return;
-      }
+     if (!wallet) {
+      toast.error("Wallet not found!");
+      return;
+    }
 
       setLoading(true);
-      let res: any = null;
+       const payload = {
+        wallet_id: wallet.wallet_id,
+        eth_address: wallet.eth_address,
+        password: values.password,
+        password_confirmation: values.confirmPassword,
+        acknowledge_password_loss: values.acknowledge_password_loss,
+      };
 
-      if (wallet?.wallet_id && wallet?.eth_address) {
-        const payload = {
-          wallet_id: wallet.wallet_id,
-          eth_address: wallet.eth_address,
-          password: values.password,
-          password_confirmation: values.confirmPassword,
-          acknowledge_password_loss: values.acknowledge_password_loss,
-        };
+      const res = await setWalletPassword(payload, false);
 
-        res = await setWalletPassword(payload, false);
-      }
-
-      saveEncryptedSeedPhrase(seedPhrase, values.password);
-
-      if (state?.requires2fa) {
-        toast.success("Password set. Continue to 2FA verification.");
-        navigate("/login-verify-2fa", { replace: true });
-        return;
-      }
-
-      if (state?.initialToken) {
-        dispatch(
-          setToken({
-            token: state.initialToken,
-            expiresIn: state.expiresIn ?? 24 * 60 * 60,
-            userId: state.userId,
-          })
-        );
-        dispatch(unlockWallet());
-        toast.success(res?.message || "Password set successfully");
-        navigate("/dashboard", { replace: true });
-        return;
-      }
-
-      if (res?.success) {
+      if (res.success) {
         if (res.data?.token) {
           dispatch(
             setToken({
