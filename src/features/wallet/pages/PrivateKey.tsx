@@ -34,7 +34,9 @@ function PrivateKey() {
       );
 
       toast.success(res.message);
-      
+      // Notify app to refresh wallet lists
+      window.dispatchEvent(new Event("wallets-updated"));
+
       if (res.data?.token) {
         dispatch(setToken({ 
           token: res.data.token, 

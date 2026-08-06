@@ -28,6 +28,8 @@ function SeedPhrasePopup({ onFinish , onClose }: { onFinish: () => void,   onClo
       );
 
       toast.success(res.message);
+      // Notify app to refresh wallet lists
+      window.dispatchEvent(new Event("wallets-updated"));
       setShowModal(true);
     } catch (err: any) {
       setError(err.message || "Something went wrong");

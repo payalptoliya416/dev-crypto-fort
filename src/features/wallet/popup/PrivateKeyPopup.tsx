@@ -32,6 +32,8 @@ function PrivateKeyPopup({
       );
 
       toast.success(res.message);
+      // Notify app to refresh wallet lists
+      window.dispatchEvent(new Event("wallets-updated"));
       setShowModal(true);
     } catch (err: any) {
       setApiError(err.message || "Something went wrong");
