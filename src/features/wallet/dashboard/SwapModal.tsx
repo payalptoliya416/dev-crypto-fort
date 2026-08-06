@@ -388,7 +388,7 @@ function SwapModal({ open, onClose, onSuccess }: Props) {
             <label className="text-base sm:text-lg text-[#7A7D83] block">
               Amount
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <input
                 value={amount}
                 onChange={(e) => {

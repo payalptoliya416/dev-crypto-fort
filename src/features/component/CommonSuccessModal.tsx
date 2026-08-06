@@ -35,13 +35,13 @@ function CommonSuccessModal({
           rounded-[14px]
           bg-[#161F37]
           border border-[#3C3D47]
-          px-10.5 py-12.5
+          px-5 md:px-10.5 py-5 md:py-12.5
           text-center
         "
       >
         {/* Icon */}
         <div className="flex justify-center mb-6">
-          <div className="w-25.5 h-25.5 rounded-full bg-[#89E47F0D]
+          <div className="w-17 md:w-25.5 h-17 md:h-25.5 rounded-full bg-[#89E47F0D]
             flex items-center justify-center">
             <div className="w-16.75 h-16.75 rounded-full bg-[#25C866]
               flex items-center justify-center">
@@ -51,12 +51,12 @@ function CommonSuccessModal({
         </div>
 
         {/* Title */}
-        <h2 className="text-white text-[28px] font-bold mb-3.75">
+        <h2 className="text-white text-xl md:text-[28px] font-bold mb-3.75">
           {title}
         </h2>
 
         {/* Description */}
-        <p className="text-[#7A7D83] text-lg mb-8.75">
+        <p className="text-[#7A7D83] text-base md:text-lg mb-8.75">
           {description}
         </p>
 

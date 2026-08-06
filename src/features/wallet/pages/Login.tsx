@@ -191,7 +191,7 @@ function Login() {
             {({ errors, touched }) => (
               <Form className="space-y-4">
                 <div>
-                  <label className="text-[#7A7D83] mb-2 block text-lg text-left">
+                  <label className="text-[#7A7D83] mb-2 block text-base sm:text-lg text-left">
                     PIN / Password
                   </label>
                   <div className="relative">
@@ -199,7 +199,7 @@ function Login() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your PIN/Password"
-                      className={`w-full rounded-[18px] border bg-[#161F37] px-5 py-3 text-white text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
+                      className={`w-full rounded-[18px] border bg-[#161F37] pl-4 pr-10 sm:px-5 py-3 text-white text-sm sm:text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
                         errors.password && touched.password
                           ? "border-[#ef4343]"
                           : "border-[#3C3D47]"
@@ -227,7 +227,7 @@ function Login() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full py-4 rounded-xl font-semibold transition cursor-pointer ${
+                  className={`w-full py-3 sm:py-4 rounded-xl font-semibold transition text-sm sm:text-base cursor-pointer ${
                     loading
                       ? "bg-green-400 cursor-not-allowed opacity-70"
                       : "bg-[#25C866] hover:bg-green-500"
@@ -241,7 +241,7 @@ function Login() {
                   <button
                     type="button"
                     onClick={() => setShowResetConfirm(true)}
-                    className="w-full py-3 rounded-xl font-semibold border border-[#ef4343] text-[#ef4343] hover:bg-[#ef4343]/10 transition cursor-pointer text-sm"
+                    className="w-full py-3 rounded-xl font-semibold border border-[#ef4343] text-[#ef4343] hover:bg-[#ef4343]/10 transition cursor-pointer text-xs sm:text-sm"
                   >
                     Reset & Import Different Seed Phrase
                   </button>

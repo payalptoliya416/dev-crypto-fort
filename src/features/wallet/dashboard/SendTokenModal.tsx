@@ -377,7 +377,7 @@ function SendTokenModal({
                 Amount
               </label>
 
-               <div className="flex gap-2">
+               <div className="flex gap-2 flex-wrap">
                   <input
                     value={amount}
                     onChange={(e) => {

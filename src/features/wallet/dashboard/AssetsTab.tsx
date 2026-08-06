@@ -747,7 +747,7 @@ function AssetsTab({
                   {formatBalance(selectedAsset.balance)} {selectedAsset.symbol}
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() => {
                     setAssetActionOpen(false);

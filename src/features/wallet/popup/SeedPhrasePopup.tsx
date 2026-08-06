@@ -41,7 +41,7 @@ function SeedPhrasePopup({ onFinish , onClose }: { onFinish: () => void,   onClo
   return (
     <>
            <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        className=""
         onClick={onClose} // 👈 outside click close
       >
         {/* ================= MODAL CONTENT ================= */}

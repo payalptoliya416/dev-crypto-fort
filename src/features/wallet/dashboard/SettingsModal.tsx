@@ -481,7 +481,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             />
           </div>
 
-          <div className="mb-[30px]">
+          <div className="mb-5 sm:mb-[30px]">
             <label className="text-base sm:text-lg text-[#7A7D83] block mb-3">
               Currency
             </label>
@@ -489,7 +489,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             <select
               value={currency}
               onChange={(e) => dispatch(setCurrency(e.target.value))}
-              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-6 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
+              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
             >
               <option className="bg-[#161F37] text-[#7A7D83]">
                 Select currency
@@ -515,7 +515,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
             <select
               value={language}
               onChange={(e) => changeLanguage(e.target.value)}
-              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-5 py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
+              className="w-full bg-[#161F37] border border-[#3C3D47] rounded-xl px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-base sm:text-lg text-white outline-none cursor-pointer"
             >
               <option className="bg-[#161F37] text-white" value="en">
                 English

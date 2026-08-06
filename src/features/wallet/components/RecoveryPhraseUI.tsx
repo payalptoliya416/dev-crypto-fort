@@ -36,7 +36,7 @@ function RecoveryPhraseUI({
       </p>
 
       {/* ================= RECOVERY WORDS ================= */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-6.25">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6.25">
         {words.map((word: string, i: number) => (
           <div
             key={i}
@@ -48,7 +48,7 @@ function RecoveryPhraseUI({
               rounded-xl bg-[#202A43]"
           >
             <span className="text-white font-semibold">{i + 1}.</span>
-            <span className="text-[#52535B] font-normal">{word}</span>
+            <span className="text-[#52535B] font-normal break-all">{word}</span>
           </div>
         ))}
       </div>
@@ -82,11 +82,11 @@ function RecoveryPhraseUI({
       </div>
 
       {/* Confirm Button */}
-      <div className="px-10 lg:mx-16">
+      <div className="md:px-10 lg:mx-16">
         <button
           onClick={onConfirm}
           disabled={confirmLoading}
-          className={`block w-full py-3.5 sm:py-4.5 rounded-xl font-semibold t  ransition cursor-pointer
+          className={`block w-full py-3 sm:py-4.5 rounded-xl font-semibold  transition cursor-pointer text-sm sm:text-base
             ${
               confirmLoading
                 ? "bg-green-400 cursor-not-allowed opacity-70"

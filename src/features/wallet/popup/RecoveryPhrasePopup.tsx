@@ -37,11 +37,11 @@ function RecoveryPhrasePopup({
 
   return (
      <div
-  className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 overflow-y-auto"
+  className=""
   onClick={onClose}
 >
       {/* ================= MODAL CONTENT ================= */}
-      <div onClick={(e) => e.stopPropagation()}   className="max-h-[90vh] overflow-y-auto">
+      <div onClick={(e) => e.stopPropagation()} className="m-2 max-h-[90vh] overflow-y-auto">
         <RecoveryPhraseUI
           words={words}
           phrase={wallet.phrase}
