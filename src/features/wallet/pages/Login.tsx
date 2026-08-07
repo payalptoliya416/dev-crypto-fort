@@ -163,15 +163,7 @@ function Login() {
   return (
     <AuthLayout>
       <div
-        className="
-          w-full max-w-full sm:max-w-[560px]
-          mt-20 sm:mt-0
-          rounded-2xl bg-[#0f1a2f]/80 backdrop-blur-md
-          border border-[#3C3D47]
-          px-5 sm:px-12.5
-          py-8 sm:py-10
-          text-center
-        "
+        className="w-full max-w-full sm:max-w-[560px] mt-20 md:mt-10 lg:mt-0 rounded-2xl bg-[#0f1a2f]/80 backdrop-blur-md border border-[#3C3D47] px-5 sm:px-12.5 py-8 sm:py-10 text-center"
       >
         <div className="flex justify-center mb-6">
           <img src={lock} alt="Login" className="h-20" />
@@ -199,7 +191,7 @@ function Login() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your PIN/Password"
-                      className={`w-full rounded-[18px] border bg-[#161F37] pl-4 pr-10 sm:px-5 py-3 text-white text-sm sm:text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
+                      className={`w-full rounded-[18px] border bg-[#161F37] pl-4 sm:pl-5 pr-12 py-3 text-white text-sm sm:text-lg placeholder:text-[#7A7D83] focus:outline-none focus:border-[#25C866] ${
                         errors.password && touched.password
                           ? "border-[#ef4343]"
                           : "border-[#3C3D47]"
