@@ -81,7 +81,7 @@ function SecureWalletUI({
                   name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter create password"
-                  className={`border border-[#3C3D47] rounded-xl  bg-[#161F37] px-5 py-4 text-white placeholder:text-[#52535B] text-lg w-full ${
+                  className={`border border-[#3C3D47] rounded-xl  bg-[#161F37] pl-4 sm:pl-5 pr-12 py-3 text-white placeholder:text-[#52535B] text-lg w-full ${
                     errors.password && touched.password
                       ? "border-[#ef4343]"
                       : "border-[#3C3D47]"
@@ -121,7 +121,7 @@ function SecureWalletUI({
                   type={showConfirm ? "text" : "password"}
                   placeholder="Enter confirm password"
                   className={`border rounded-xl
-                  bg-[#161F37] px-5 py-4 text-white
+                  bg-[#161F37] pl-4 sm:pl-5 pr-12 py-3 text-white
                   placeholder:text-[#52535B] text-lg w-full ${
                     errors.confirmPassword && touched.confirmPassword
                       ? "border-[#ef4343]"
