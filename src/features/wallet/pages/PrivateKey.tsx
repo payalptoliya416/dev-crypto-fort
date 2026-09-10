@@ -7,12 +7,9 @@ import AppLogo from "../../component/AppLogo";
 import PrivateKeyUI from "../components/PrivateKeyUI";
 
 import { importWallet } from "../../../api/importWallet";
-import { useDispatch } from "react-redux";
-import { setToken } from "../../../redux/authSlice";
 
 function PrivateKey() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [showModal, setShowModal] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -38,11 +35,14 @@ function PrivateKey() {
       window.dispatchEvent(new Event("wallets-updated"));
 
       if (res.data?.token) {
-        dispatch(setToken({ 
-          token: res.data.token, 
-          expiresIn: res.data.expires_in! 
-        }));
-        navigate("/dashboard");
+        navigate("/create-password-local", {
+          state: {
+            seedPhrase: res.data.phrase ?? privateKey.trim(),
+            initialToken: res.data.token,
+            expiresIn: res.data.expires_in,
+            userId: res.data.user_id,
+          },
+        });
       } else {
         setShowModal(true);
       }
