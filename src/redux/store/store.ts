@@ -45,5 +45,11 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = {
+  auth: ReturnType<typeof authReducer>;
+  wallet: ReturnType<typeof walletReducer>;
+  activeWallet: ReturnType<typeof activeWalletReducer>;
+  transaction: ReturnType<typeof transactionReducer>;
+  currency: ReturnType<typeof currencyReducer>;
+};
 export type AppDispatch = typeof store.dispatch;

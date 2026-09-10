@@ -1,6 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  getStoredToken,
+  removeStoredToken,
+  setStoredToken,
+} from "../utils/tokenStorage";
 
-const TOKEN_KEY = "token";
 const EXPIRY_KEY = "token_expiry";
 const USER_ID_KEY = "user_id";
 
@@ -11,13 +15,13 @@ type AuthState = {
 };
 
 const getValidToken = () => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = getStoredToken();
   const expiry = localStorage.getItem(EXPIRY_KEY);
 
   if (!token || !expiry) return null;
 
   if (Date.now() > Number(expiry)) {
-    localStorage.removeItem(TOKEN_KEY);
+    removeStoredToken();
     localStorage.removeItem(EXPIRY_KEY);
     return null;
   }
@@ -56,10 +60,10 @@ const authSlice = createSlice({
       const expiryTime = Date.now() + expirySeconds * 1000;
 
       if (token) {
-        localStorage.setItem(TOKEN_KEY, token);
+        setStoredToken(token);
         localStorage.setItem(EXPIRY_KEY, expiryTime.toString());
       } else {
-        localStorage.removeItem(TOKEN_KEY);
+        removeStoredToken();
         localStorage.removeItem(EXPIRY_KEY);
       }
 
@@ -92,7 +96,7 @@ const authSlice = createSlice({
     },
 
     clearToken: (state) => {
-      localStorage.removeItem(TOKEN_KEY);
+      removeStoredToken();
       localStorage.removeItem(EXPIRY_KEY);
       localStorage.removeItem(USER_ID_KEY);
       state.token = null;

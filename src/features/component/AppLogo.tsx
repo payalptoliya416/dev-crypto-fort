@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/logo_svg.svg";
 import logo2 from "@/assets/Union.svg";
 import { useEffect, useState } from "react";
+import { getStoredToken } from "../../utils/tokenStorage";
 
 type AppLogoProps = {
   to?: string;
@@ -14,7 +15,7 @@ function AppLogo({
   imgClassName = "pe-1 w-full max-w-[200px]",
 }: AppLogoProps) {
   const [isSmall, setIsSmall] = useState(window.innerWidth < 425);
-  const token = localStorage.getItem("token");
+  const token = getStoredToken();
 
 useEffect(() => {
   const handleResize = () => {

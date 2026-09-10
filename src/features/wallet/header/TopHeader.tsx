@@ -21,6 +21,7 @@ import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { GoHistory } from "react-icons/go";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { RiDashboardFill } from "react-icons/ri";
+import { getStoredToken } from "../../../utils/tokenStorage";
 
 export default function TopHeader() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export default function TopHeader() {
   const dispatch = useDispatch();
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const token = localStorage.getItem("token");
+  const token = getStoredToken();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

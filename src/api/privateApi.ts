@@ -1,3 +1,5 @@
+import { removeStoredToken, getStoredToken } from "../utils/tokenStorage";
+
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 type ApiOptions = {
@@ -9,7 +11,7 @@ export async function privateApi<T>(
   url: string,
   options: ApiOptions = {}
 ): Promise<T> {
-  const token = localStorage.getItem("token");
+  const token = getStoredToken();
 
   const res = await fetch(`${BASE_URL}${url}`, {
     method: options.method || "GET",
@@ -24,7 +26,7 @@ export async function privateApi<T>(
 
   if (!res.ok) {
     if (res.status === 401 || res.status === 419) {
-      localStorage.removeItem("token");
+      removeStoredToken();
       localStorage.removeItem("token_expiry");
       localStorage.removeItem("user_id");
       window.location.href = "/login";

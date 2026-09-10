@@ -18,6 +18,7 @@ import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import ToggleSwitch from "../../../hooks/ToggleSwitch";
 import { disable2FA } from "../../../api/login";
 import { decryptSeedPhrase, saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
+import { removeStoredToken } from "../../../utils/tokenStorage";
 import TwoFactorModal from "./TwoFactorModal";
 interface SettingsModalProps {
   open: boolean;
@@ -805,7 +806,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                       expiredMsg.includes("expired") ||
                       expiredMsg.includes("session")
                     ) {
-                      localStorage.removeItem("token");
+                      removeStoredToken();
                       localStorage.removeItem("token_expiry");
                       localStorage.removeItem("user_id");
                       window.location.href = "/login";

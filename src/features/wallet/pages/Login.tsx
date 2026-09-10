@@ -22,6 +22,7 @@ import {
   clearEncryptedSeedPhrase,
 } from "../../../utils/walletCrypto";
 import CommonConfirmModal from "../../component/CommonConfirmModal";
+import { getStoredToken } from "../../../utils/tokenStorage";
 
 function Login() {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ function Login() {
         return;
       }
 
-      if (localStorage.getItem("token")) {
+      if (getStoredToken()) {
         dispatch(restoreToken());
         dispatch(unlockWallet());
         toast.success("Login successful");
