@@ -10,6 +10,7 @@ type ImportResponse = {
   success: boolean;
   message: string;
   data: {
+    user_id?: number;
     wallet_id: number;
     eth_address: string;
     phrase?: string;

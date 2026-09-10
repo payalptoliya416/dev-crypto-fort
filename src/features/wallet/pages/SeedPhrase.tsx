@@ -7,12 +7,9 @@ import CommonSuccessModal from "../../component/CommonSuccessModal";
 import SeedPhraseUI from "../components/SeedPhraseUI";
 
 import { importWallet } from "../../../api/importWallet";
-import { useDispatch } from "react-redux";
-import { setToken } from "../../../redux/authSlice";
 
 function SeedPhrase() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
@@ -39,12 +36,16 @@ function SeedPhrase() {
       // Notify app to refresh wallet lists
       window.dispatchEvent(new Event("wallets-updated"));
 
+      
       if (res.data?.token) {
-        dispatch(setToken({ 
-          token: res.data.token, 
-          expiresIn: res.data.expires_in! 
-        }));
-        navigate("/dashboard");
+        navigate("/create-password-local", {
+          state: {
+            seedPhrase: input.trim(),
+            initialToken: res.data.token,
+            expiresIn: res.data.expires_in,
+            userId: res.data.user_id,
+          },
+        });
       } else {
         setShowModal(true);
       }
@@ -70,7 +71,7 @@ function SeedPhrase() {
         />
       </AuthLayout>
 
-      <CommonSuccessModal
+       <CommonSuccessModal
         open={showModal}
         onClose={() => setShowModal(false)}
         title="Access Unlocked"
