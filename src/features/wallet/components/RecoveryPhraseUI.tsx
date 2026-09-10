@@ -36,14 +36,14 @@ function RecoveryPhraseUI({
       </p>
 
       {/* ================= RECOVERY WORDS ================= */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6.25">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         {words.map((word: string, i: number) => (
           <div
             key={i}
             className="w-full sm:w-38.5
               py-2 sm:py-4.25
-              px-2 sm:px-5
-              flex items-center gap-2 sm:gap-3.75
+              px-2 sm:px-3
+              flex items-center gap-2
               text-sm sm:text-xl
               rounded-xl bg-[#202A43]"
           >

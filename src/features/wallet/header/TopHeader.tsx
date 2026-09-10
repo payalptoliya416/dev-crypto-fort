@@ -13,7 +13,6 @@ import RecoveryPhrasePopup from "../popup/RecoveryPhrasePopup";
 import ExistingWalletPopup from "../popup/ExistingWalletPopup";
 import SeedPhrasePopup from "../popup/SeedPhrasePopup";
 import PrivateKeyPopup from "../popup/PrivateKeyPopup";
-import { logoutUser } from "../../../api/authApi";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../redux/authSlice";
 import { resetActiveWallet } from "../../../redux/activeWalletSlice";
@@ -57,14 +56,14 @@ export default function TopHeader() {
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
-      await logoutUser();
-    } catch (error) {
-      console.log("Logout API failed");
-    } finally {
       dispatch(resetActiveWallet());
       await persistor.purge();
       dispatch(logout());
       navigate("/login");
+    } catch (error) {
+      console.log("Logout failed", error);
+    } finally {
+      setLoggingOut(false);
     }
   };
 

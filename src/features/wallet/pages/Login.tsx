@@ -8,7 +8,12 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../../api/login";
 import { useDispatch, useSelector } from "react-redux";
-import { setToken, unlockWallet } from "../../../redux/authSlice";
+import {
+  clearToken,
+  restoreToken,
+  setToken,
+  unlockWallet,
+} from "../../../redux/authSlice";
 import type { RootState } from "../../../redux/store/store";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import {
@@ -62,6 +67,14 @@ function Login() {
       if (!decryptedPhrase) {
         toast.error("Incorrect PIN / Password");
         setLoading(false);
+        return;
+      }
+
+      if (localStorage.getItem("token")) {
+        dispatch(restoreToken());
+        dispatch(unlockWallet());
+        toast.success("Login successful");
+        navigate("/dashboard", { replace: true });
         return;
       }
 
@@ -156,6 +169,7 @@ function Login() {
 
   const handleReset = () => {
     clearEncryptedSeedPhrase();
+    dispatch(clearToken());
     setHasWallet(false);
     toast.success("Saved wallet cleared from this device");
   };

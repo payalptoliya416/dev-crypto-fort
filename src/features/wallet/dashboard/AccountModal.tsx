@@ -28,6 +28,7 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
   const [editingWallet, setEditingWallet] = useState<Wallet | null>(null);
   const [labelInput, setLabelInput] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [pricesLoading, setPricesLoading] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{
     top: number;
     left: number;
@@ -101,6 +102,7 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
 
     const loadPrices = async () => {
       try {
+        setPricesLoading(true);
         const res = await getPrices({
           base: currency,
           symbols: "ETH,BTC,USDT,BNB,TRX,USDC",
@@ -111,6 +113,8 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
         }
       } catch (err) {
         // ignore
+      } finally {
+        setPricesLoading(false);
       }
     };
 
@@ -198,7 +202,7 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
 
             {/* Account List */}
             <div className="space-y-3 overflow-y-auto scroll-thin flex-1 pr-1">
-              {loading ? (
+              {loading || pricesLoading ? (
                 <div className="flex items-center justify-center min-h-[200px]">
                   <Loader />
                 </div>
@@ -239,7 +243,7 @@ function AccountModal({ open, onClose, onAddAccount }: AccountModalProps) {
                                 computeWalletValue(wallet),
                                 { isFiat: true },
                               )}`
-                            : `${formatBalance(wallet.eth_balance)} ETH`}
+                            : "--"}
                         </p>
 
                         <div className="relative">

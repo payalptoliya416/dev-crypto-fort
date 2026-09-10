@@ -81,15 +81,22 @@ const authSlice = createSlice({
         // ignore
       }
 
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(EXPIRY_KEY);
-      localStorage.removeItem(USER_ID_KEY);
-
       state.token = null;
       state.userId = null;
       state.unlocked = false;
+    },
 
-      localStorage.clear();
+    restoreToken: (state) => {
+      state.token = getValidToken();
+      state.userId = getUserId();
+    },
+
+    clearToken: (state) => {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(EXPIRY_KEY);
+      localStorage.removeItem(USER_ID_KEY);
+      state.token = null;
+      state.userId = null;
     },
     unlockWallet: (state) => {
       state.unlocked = true;
@@ -111,5 +118,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { setToken, logout, unlockWallet, lockWallet } = authSlice.actions;
+export const {
+  setToken,
+  logout,
+  restoreToken,
+  clearToken,
+  unlockWallet,
+  lockWallet,
+} = authSlice.actions;
 export default authSlice.reducer;
