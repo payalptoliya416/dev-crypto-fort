@@ -46,7 +46,7 @@ function SecureWallet() {
           dispatch(
             setToken({
               token: res.data.token,
-              expiresIn: res.data.expires_in ?? 24 * 60 * 60,
+              expiresIn: res.data.expires_in,
               userId: res.data.user_id,
             })
           );

@@ -19,7 +19,7 @@ function SecureWalletLocal() {
     | {
         seedPhrase?: string;
         initialToken?: string;
-        expiresIn?: number;
+        expiresIn?: number | null;
         userId?: number;
         requires2fa?: boolean;
       }
@@ -51,7 +51,7 @@ function SecureWalletLocal() {
         dispatch(
           setToken({
             token: state.initialToken,
-            expiresIn: state.expiresIn ?? 24 * 60 * 60,
+            expiresIn: state.expiresIn,
             userId: state.userId,
           }),
         );

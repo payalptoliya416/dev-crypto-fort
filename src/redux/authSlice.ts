@@ -15,18 +15,7 @@ type AuthState = {
 };
 
 const getValidToken = () => {
-  const token = getStoredToken();
-  const expiry = localStorage.getItem(EXPIRY_KEY);
-
-  if (!token || !expiry) return null;
-
-  if (Date.now() > Number(expiry)) {
-    removeStoredToken();
-    localStorage.removeItem(EXPIRY_KEY);
-    return null;
-  }
-
-  return token;
+  return getStoredToken();
 };
 
 const getUserId = () => {
@@ -48,23 +37,16 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         token: string | null;
-        expiresIn: number;
+        expiresIn?: number | null;
         userId?: number;
       }>,
     ) => {
-      const { token, expiresIn, userId } = action.payload;
-
-      const expirySeconds =
-        typeof expiresIn === "number" ? expiresIn : 24 * 60 * 60;
-
-      const expiryTime = Date.now() + expirySeconds * 1000;
+      const { token, userId } = action.payload;
 
       if (token) {
         setStoredToken(token);
-        localStorage.setItem(EXPIRY_KEY, expiryTime.toString());
       } else {
         removeStoredToken();
-        localStorage.removeItem(EXPIRY_KEY);
       }
 
       if (typeof userId === "number") {
