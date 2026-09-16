@@ -51,7 +51,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
-  const [exportFormat, setExportFormat] = useState<"excel" | "pdf" | null>(
+  const [passwordPurpose, setPasswordPurpose] = useState<"backup" | null>(
     null,
   );
   const [checkingPassword, setCheckingPassword] = useState(false);
@@ -557,7 +557,15 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           </h3>
 
           <div
-            onClick={exporting ? undefined : handleExportTxHash}
+            onClick={
+              exporting
+                ? undefined
+                : () => {
+                    setPasswordPurpose("backup");
+                    setPassword("");
+                    setShowPasswordModal(true);
+                  }
+            }
             className={`relative w-full border border-[#3C3D47] rounded-xl p-3 sm:p-5 mb-[15px]
           bg-[#202A43]/40 transition
           ${exporting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#202A43]/70"}`}
@@ -608,8 +616,8 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                 //   handleExportTxReport("excel", "all");
                 // }}
                 onClick={() => {
-                  setExportFormat("excel");
-                  setShowPasswordModal(true);
+                  setShowExportOptions(false);
+                  handleExportTxReport("excel", "all");
                 }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556]  cursor-pointer"
@@ -624,8 +632,8 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                 //   handleExportTxReport("pdf", "all");
                 // }}
                 onClick={() => {
-                  setExportFormat("pdf");
-                  setShowPasswordModal(true);
+                  setShowExportOptions(false);
+                  handleExportTxReport("pdf", "all");
                 }}
                 className="flex-1 rounded-lg border border-[#3C3D47] 
       bg-[#202A43] px-4 py-3 text-white hover:bg-[#2A3556] cursor-pointer"
@@ -724,12 +732,19 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
           <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-[9999]">
             <div className="bg-[#161F37] p-6 rounded-2xl w-[350px] relative mx-3">
               <button
-                onClick={() => setShowPasswordModal(false)}
+                onClick={() => {
+              setShowPasswordModal(false);
+              setPassword("");
+              setPasswordPurpose(null);
+            }}
                 className="absolute top-2 right-3 text-white text-xl cursor-pointer"
               >
                 ✕
               </button>
-              <h3 className="text-white my-4">Enter Your Password</h3>
+              <h3 className="text-white my-4">Verify Your Password</h3>
+              <p className="text-[#A1A1AA] text-sm leading-5 mb-4">
+                Enter your wallet password to view your backup details.
+              </p>
 
               <div className="relative">
                 <input
@@ -783,13 +798,13 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
                     }
 
                     setShowPasswordModal(false);
-                    setShowExportOptions(false);
 
-                    if (exportFormat) {
-                      handleExportTxReport(exportFormat, "all");
+                    if (passwordPurpose === "backup") {
+                      await handleExportTxHash();
                     }
 
                     setPassword("");
+                    setPasswordPurpose(null);
                   } catch (err: any) {
                     const apiError =
                       err?.message ||
@@ -923,9 +938,7 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
                 <div className="flex justify-end mt-2 gap-5">
                     <button
-                    onClick={() =>
-                      setShowRecoveryPhrase(!showRecoveryPhrase)
-                    }
+                    onClick={() => setShowRecoveryPhrase(!showRecoveryPhrase)}
                     className="flex items-center gap-2 text-[#25C866] text-sm font-medium cursor-pointer"
                   >
                     {showRecoveryPhrase ? (
