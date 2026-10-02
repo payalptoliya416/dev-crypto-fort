@@ -28,12 +28,9 @@ function SecureWalletUI({
   };
 
  const validationSchema = Yup.object({
- password: Yup.string()
+  password: Yup.string()
   .required("Password is required")
-  .matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}$/,
-    "Password must be at least 8 characters and include uppercase, lowercase, number & special character"
-  ),
+  .min(4, "Password must be at least 4 characters"),
 
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords must match")
