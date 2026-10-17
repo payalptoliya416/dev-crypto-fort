@@ -18,7 +18,6 @@ import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import ToggleSwitch from "../../../hooks/ToggleSwitch";
 import { disable2FA } from "../../../api/login";
 import { decryptSeedPhrase, saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
-import { removeStoredToken } from "../../../utils/tokenStorage";
 import TwoFactorModal from "./TwoFactorModal";
 interface SettingsModalProps {
   open: boolean;
@@ -85,8 +84,16 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
     }
   }, [open]);
 
-  const handleExportTxHash = async () => {
+  const handleExportTxHash = async (decryptedLocalPhrase?: string | null) => {
     if (!activeWallet?.id) {
+      if (decryptedLocalPhrase) {
+        setBackupData({
+          privateKey: (activeWallet as any)?.private_key || "N/A",
+          recoveryPhrase: decryptedLocalPhrase,
+        });
+        setShowBackupModal(true);
+        return;
+      }
       toast.error("Wallet not found");
       return;
     }
@@ -102,6 +109,14 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       const recoveryPhrase = res?.data?.recovery_phrase;
 
       if (!privateKey || !recoveryPhrase) {
+        if (decryptedLocalPhrase) {
+          setBackupData({
+            privateKey: privateKey || (activeWallet as any)?.private_key || "N/A",
+            recoveryPhrase: decryptedLocalPhrase,
+          });
+          setShowBackupModal(true);
+          return;
+        }
         toast.error("Backup data not available");
         return;
       }
@@ -115,6 +130,14 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
       // 👉 open modal
       setShowBackupModal(true);
     } catch (err: any) {
+      if (decryptedLocalPhrase) {
+        setBackupData({
+          privateKey: (activeWallet as any)?.private_key || "N/A",
+          recoveryPhrase: decryptedLocalPhrase,
+        });
+        setShowBackupModal(true);
+        return;
+      }
       toast.error(err?.message || "Failed");
     } finally {
       setExporting(null);
@@ -765,67 +788,71 @@ function SettingsModal({ open, onClose }: SettingsModalProps) {
 
               <button
                 onClick={async () => {
-                  if (!password) {
+                  if (!password.trim()) {
                     toast.error("Enter password");
-                    return;
-                  }
-
-                  if (!userId) {
-                    toast.error("User not found. Please log in again.");
                     return;
                   }
 
                   try {
                     setCheckingPassword(true);
-                    const res = await checkUserPassword({
-                      user_id: userId,
-                      password: password,
-                    });
 
-                    if (!res.success) {
-                      const apiError =
-                        (res as any)?.errors?.user_id?.[0] ||
-                        (res as any)?.message ||
-                        "Something went wrong";
+                    let isVerified = false;
+                    let localPhrase: string | null = null;
+                    let lastErrorMessage = "Incorrect password";
 
-                      toast.error(apiError);
+                    // First check password via API
+                    if (userId) {
+                      try {
+                        const res = await checkUserPassword({
+                          user_id: userId,
+                          password: password,
+                        });
+
+                        if (res?.success && res?.match) {
+                          isVerified = true;
+                        } else {
+                          lastErrorMessage =
+                            (res as any)?.errors?.user_id?.[0] ||
+                            (res as any)?.message ||
+                            "Incorrect password";
+                        }
+                      } catch (err: any) {
+                        lastErrorMessage =
+                          err?.message ||
+                          err?.data?.message ||
+                          err?.errors?.user_id?.[0] ||
+                          (err?.errors &&
+                            Object.values(err.errors).flat().filter(Boolean)[0]) ||
+                          "Incorrect password";
+                      }
+                    }
+
+                    // If API check didn't succeed or had error, check browser-based password
+                    try {
+                      const decrypted = decryptSeedPhrase(password);
+                      if (decrypted && decrypted.trim().length > 0) {
+                        localPhrase = decrypted;
+                        isVerified = true;
+                      }
+                    } catch {
+                      // ignore local decryption error
+                    }
+
+                    // If both failed, show error
+                    if (!isVerified) {
+                      toast.error(lastErrorMessage);
                       return;
                     }
 
-                    if (!res.match) {
-                      toast.error("Incorrect password");
-                      return;
-                    }
-
+                    // If either succeeded, proceed with success
                     setShowPasswordModal(false);
 
                     if (passwordPurpose === "backup") {
-                      await handleExportTxHash();
+                      await handleExportTxHash(localPhrase);
                     }
 
                     setPassword("");
                     setPasswordPurpose(null);
-                  } catch (err: any) {
-                    const apiError =
-                      err?.message ||
-                      err?.data?.message ||
-                      err?.errors?.user_id?.[0] ||
-                      (err?.errors &&
-                        Object.values(err.errors).flat().filter(Boolean)[0]) ||
-                      "Password check failed";
-
-                    toast.error(apiError);
-
-                    const expiredMsg = (apiError as string).toLowerCase();
-                    if (
-                      expiredMsg.includes("expired") ||
-                      expiredMsg.includes("session")
-                    ) {
-                      removeStoredToken();
-                      localStorage.removeItem("token_expiry");
-                      localStorage.removeItem("user_id");
-                      window.location.href = "/login";
-                    }
                   } finally {
                     setCheckingPassword(false);
                     setPassword("");
