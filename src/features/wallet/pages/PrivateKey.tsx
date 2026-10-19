@@ -35,7 +35,7 @@ function PrivateKey() {
       window.dispatchEvent(new Event("wallets-updated"));
 
       if (res.data?.token) {
-        navigate("/create-password-local", {
+        navigate("/create-password", {
           state: {
             seedPhrase: res.data.phrase ?? privateKey.trim(),
             initialToken: res.data.token,

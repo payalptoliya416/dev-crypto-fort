@@ -38,7 +38,7 @@ function SeedPhrase() {
 
       
       if (res.data?.token) {
-        navigate("/create-password-local", {
+        navigate("/create-password", {
           state: {
             seedPhrase: input.trim(),
             initialToken: res.data.token,

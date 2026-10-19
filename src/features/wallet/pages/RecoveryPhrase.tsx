@@ -29,7 +29,7 @@ function RecoveryPhrase() {
     setConfirmLoading(true);
 
     setTimeout(() => {
-      navigate("/create-password");
+      navigate("/secure-create-password");
     }, 500);
   };
 

@@ -122,7 +122,7 @@ function Verify2FA() {
                   {loading ? "Verifying..." : "Verify"}
                 </button>
                 <Link
-                  to="/create-password-local"
+                  to="/create-password"
                   className="text-[#25C866] text-base font-normal underline"
                 >
                   back to create wallet{" "}

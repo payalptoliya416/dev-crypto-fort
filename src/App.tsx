@@ -46,8 +46,8 @@ function App() {
             <Route index element={<CreateWallet />} />
             <Route path="login" element={<Login />} />
             <Route path="recovery-phrase" element={<RecoveryPhrase />} />
-            <Route path="create-password" element={<SecureWallet />} />
-            <Route path="create-password-local" element={<SecureWalletLocal />} />
+            <Route path="secure-create-password" element={<SecureWallet />} />
+            <Route path="create-password" element={<SecureWalletLocal />} />
             <Route path="setup-2fa" element={<TwoFactorSetup />} />
             <Route path="verify-2fa" element={<Verify2FA />} />
             <Route path="login-verify-2fa" element={<LoginVerify2FA />} />
