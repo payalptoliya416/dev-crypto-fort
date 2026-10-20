@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import type { RootState } from "../../../redux/store/store";
 import { setToken, unlockWallet } from "../../../redux/authSlice";
 import { saveEncryptedSeedPhrase } from "../../../utils/walletCrypto";
+import { setWalletPassword } from "../../../api/setWalletPassword";
 
 import AuthLayout from "../../layout/AuthLayout";
 import CommonSuccessModal from "../../component/CommonSuccessModal";
@@ -21,6 +22,8 @@ function SecureWalletLocal() {
         initialToken?: string;
         expiresIn?: number | null;
         userId?: number;
+        walletId?: number;
+        ethAddress?: string;
         requires2fa?: boolean;
       }
     | null) ?? null;
@@ -41,12 +44,42 @@ function SecureWalletLocal() {
         return;
       }
 
+      const walletId = state?.walletId;
+      const ethAddress = state?.ethAddress;
+
       setLoading(true);
 
       // Save encrypted seed locally (cookie + localStorage backup)
       saveEncryptedSeedPhrase(seedPhrase, values.password);
 
-      // If flow provided an initial token (e.g. from registration/login), persist it locally
+      // Only call setWalletPassword API when coming from import flow (walletId + ethAddress available)
+      if (walletId && ethAddress) {
+        const response = await setWalletPassword(
+          {
+            wallet_id: walletId,
+            eth_address: ethAddress,
+            password: values.password,
+            password_confirmation: values.confirmPassword,
+            acknowledge_password_loss: true,
+          },
+          !!state?.initialToken,
+        );
+
+        const apiToken = response?.data?.token ?? state?.initialToken ?? null;
+        const userId = response?.data?.user_id ?? state?.userId;
+        const expiresIn = response?.data?.expires_in ?? state?.expiresIn ?? null;
+
+        if (apiToken) {
+          dispatch(setToken({ token: apiToken, expiresIn, userId }));
+        }
+
+        dispatch(unlockWallet());
+        toast.success(response?.message ?? "Password set successfully");
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+
+      // Login flow — no import, use token from state if available
       if (state?.initialToken) {
         dispatch(
           setToken({
@@ -71,7 +104,7 @@ function SecureWalletLocal() {
       toast.success("Password saved locally. You can now unlock your wallet with it.");
       navigate("/dashboard", { replace: true });
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message ?? "Failed to set wallet password.");
       setShowModal(false);
     } finally {
       setLoading(false);

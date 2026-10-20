@@ -34,18 +34,16 @@ function PrivateKey() {
       // Notify app to refresh wallet lists
       window.dispatchEvent(new Event("wallets-updated"));
 
-      if (res.data?.token) {
-        navigate("/create-password", {
-          state: {
-            seedPhrase: res.data.phrase ?? privateKey.trim(),
-            initialToken: res.data.token,
-            expiresIn: res.data.expires_in,
-            userId: res.data.user_id,
-          },
-        });
-      } else {
-        setShowModal(true);
-      }
+      navigate("/create-password", {
+        state: {
+          seedPhrase: res.data?.phrase ?? privateKey.trim(),
+          initialToken: res.data?.token,
+          expiresIn: res.data?.expires_in,
+          userId: res.data?.user_id,
+          walletId: res.data?.wallet_id,
+          ethAddress: res.data?.eth_address,
+        },
+      });
     } catch (err: any) {
       setApiError(err.message || "Something went wrong");
     } finally {
@@ -74,7 +72,7 @@ function PrivateKey() {
         title="Access Unlocked"
         description="Your funds are now accessible. Continue to your dashboard."
         buttonText="Go to Dashboard"
-        onButtonClick={() => navigate("/dashboard")}
+        onButtonClick={() => navigate("/create-password")}
       />
     </>
   );
