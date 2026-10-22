@@ -432,6 +432,24 @@ function AssetsTab({
     fetchAssetTransactions();
   }, [selectedAsset, assetActionOpen, activeWallet?.id]);
 
+  useEffect(() => {
+    const handleTransactionsUpdated = (e: any) => {
+      if (!selectedAsset) return;
+      if (e.detail?.walletId && e.detail.walletId !== activeWallet?.id) return;
+      if (Array.isArray(e.detail?.transactions)) {
+        const currency = selectedAsset.symbol.toUpperCase();
+        const filtered = e.detail.transactions
+          .filter((tx: any) => (tx.currency || "ETH").toUpperCase() === currency)
+          .slice(0, 5);
+        setAssetTransactions(filtered);
+      }
+    };
+
+    window.addEventListener("transactions-updated", handleTransactionsUpdated);
+    return () =>
+      window.removeEventListener("transactions-updated", handleTransactionsUpdated);
+  }, [selectedAsset, activeWallet?.id]);
+
   const chartData = useMemo(() => {
     if (!selectedAsset || !priceHistory?.data?.[BASE_CURRENCY]) return [];
     const priceSymbol = selectedAsset.marketSymbol || selectedAsset.symbol;

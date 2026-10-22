@@ -67,23 +67,23 @@ function TransactionPage() {
           }
         };
         const mapped: TransactionRow[] = res.data.map((tx: Transaction) => {
-         const currency = tx.currency || "ETH";
+          const currency = tx.currency || "ETH";
 
-        const tokenMap: Record<string, { name: string; icon: string }> = {
-          ETH: { name: "Ethereum", icon: d1 },
-          BTC: { name: "Bitcoin", icon: d2 },
-          USDT: { name: "Tether", icon: d5 },
-          USDC: { name: "USDC (ERC20)", icon: d4 },
-          TRX: { name: "Tron", icon: d9 },
-          TRC20: { name: "Trc20", icon: d5 },
-          BNB: { name: "Bnb", icon: d3 },
-        };
+          const tokenMap: Record<string, { name: string; icon: string }> = {
+            ETH: { name: "Ethereum", icon: d1 },
+            BTC: { name: "Bitcoin", icon: d2 },
+            USDT: { name: "Tether", icon: d5 },
+            USDC: { name: "USDC (ERC20)", icon: d4 },
+            TRX: { name: "Tron", icon: d9 },
+            TRC20: { name: "Trc20", icon: d5 },
+            BNB: { name: "Bnb", icon: d3 },
+          };
 
-        const isCustomToken = !tokenMap[currency];
+          const isCustomToken = !tokenMap[currency];
 
-        const displayIcon =
-          tx.token_image_url ||
-          getDisplayTokenIcon(tx.currency?.toLowerCase() || "", custom_tokn);
+          const displayIcon =
+            tx.token_image_url ||
+            getDisplayTokenIcon(tx.currency?.toLowerCase() || "", custom_tokn);
           const tokenData = isCustomToken
             ? {
                 name: tx.currency || "Token",
@@ -96,20 +96,14 @@ function TransactionPage() {
 
           return {
             name: tokenData.name,
-
             from_address: tx.from_address,
             to_address: tx.to_address,
             hash: tx.hash,
-
             amount: `${tx.amount} ${currency}`,
-
             type: tx.transaction_type === "Send" ? "Sent" : "Received",
-
             status: mapTxStatus(tx.txreceipt_status),
-
             icon: tokenData.icon,
             timestamp: tx.timestamp,
-
             is_swap: tx.is_swap,
             token_transfers: tx.token_transfers || [],
           };
@@ -123,6 +117,72 @@ function TransactionPage() {
     };
 
     fetchTransactions();
+
+    const handleTransactionsUpdated = (e: any) => {
+      if (e.detail?.walletId && e.detail.walletId !== activeWallet?.id) return;
+      if (Array.isArray(e.detail?.transactions)) {
+        const mapTxStatus = (
+          status: Transaction["txreceipt_status"],
+        ): TransactionRow["status"] => {
+          switch (status) {
+            case "Success":
+              return "Confirmed";
+            case "Pending":
+              return "Pending";
+            default:
+              return "Failed";
+          }
+        };
+        const mapped: TransactionRow[] = e.detail.transactions.map((tx: Transaction) => {
+          const currency = tx.currency || "ETH";
+
+          const tokenMap: Record<string, { name: string; icon: string }> = {
+            ETH: { name: "Ethereum", icon: d1 },
+            BTC: { name: "Bitcoin", icon: d2 },
+            USDT: { name: "Tether", icon: d5 },
+            USDC: { name: "USDC (ERC20)", icon: d4 },
+            TRX: { name: "Tron", icon: d9 },
+            TRC20: { name: "Trc20", icon: d5 },
+            BNB: { name: "Bnb", icon: d3 },
+          };
+
+          const isCustomToken = !tokenMap[currency];
+
+          const displayIcon =
+            tx.token_image_url ||
+            getDisplayTokenIcon(tx.currency?.toLowerCase() || "", custom_tokn);
+          const tokenData = isCustomToken
+            ? {
+                name: tx.currency || "Token",
+                icon: displayIcon,
+              }
+            : {
+                ...tokenMap[currency],
+                icon: tx.token_image_url || tokenMap[currency].icon,
+              };
+
+          return {
+            name: tokenData.name,
+            from_address: tx.from_address,
+            to_address: tx.to_address,
+            hash: tx.hash,
+            amount: `${tx.amount} ${currency}`,
+            type: tx.transaction_type === "Send" ? "Sent" : "Received",
+            status: mapTxStatus(tx.txreceipt_status),
+            icon: tokenData.icon,
+            timestamp: tx.timestamp,
+            is_swap: tx.is_swap,
+            token_transfers: tx.token_transfers || [],
+          };
+        });
+        setRows(mapped);
+      }
+    };
+
+    window.addEventListener("transactions-updated", handleTransactionsUpdated);
+    return () => {
+      window.removeEventListener("transactions-updated", handleTransactionsUpdated);
+    };
   }, [activeWallet?.id]);
 
   const handleCopy = async (text: string) => {

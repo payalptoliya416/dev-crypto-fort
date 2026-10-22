@@ -171,10 +171,16 @@ export function useWalletAssets() {
       fetchBalance();
     };
 
+    const handleWalletsUpdated = () => {
+      fetchBalance();
+    };
+
     window.addEventListener("custom-token-imported", handleCustomTokenImport);
+    window.addEventListener("wallets-updated", handleWalletsUpdated);
 
     return () => {
       window.removeEventListener("custom-token-imported", handleCustomTokenImport);
+      window.removeEventListener("wallets-updated", handleWalletsUpdated);
     };
   }, [activeWallet?.id]);
 

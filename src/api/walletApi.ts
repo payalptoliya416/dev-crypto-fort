@@ -159,6 +159,26 @@ export const getTransactions = (payload: GetTransactionsPayload) => {
   });
 };
 
+export interface FetchAllTransactionsPayload {
+  wallet_id: number;
+}
+
+export interface FetchAllTransactionsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    wallet_id: number;
+    is_transaction: boolean;
+  };
+}
+
+export const fetchAllTransactions = (payload: FetchAllTransactionsPayload) => {
+  return privateApi<FetchAllTransactionsResponse>("/fetch-all-transactions", {
+    method: "POST",
+    body: payload,
+  });
+};
+
 export interface GetMeResponse {
   success: boolean;
   message: string;
