@@ -1,4 +1,4 @@
-import { IoClose } from "react-icons/io5";
+import { IoArrowBack } from "react-icons/io5";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { getGasFee } from "../../../api/transactionApi";
@@ -299,15 +299,23 @@ function SendTokenModal({
         />
 
         <div className="relative w-full max-w-[560px]">
-          <div className="flex justify-end">
-            <button
+          <div className="flex justify-start mb-2">
+              <button
+                      onClick={onClose}
+                      className="w-10 h-10 flex items-center justify-center rounded-full
+                      bg-[#202A43] text-white border border-[#3C3D47]
+                      shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
+                    >
+                      <IoArrowBack size={20} />
+                    </button>
+            {/* <button
               onClick={onClose}
               className="w-10 h-10 flex items-center justify-center rounded-full 
             bg-[#202A43] text-white border border-[#3C3D47] mb-[10px]
             shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
             >
               <IoClose size={20} />
-            </button>
+            </button> */}
           </div>
 
           <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]  max-h-[90vh] overflow-y-auto">

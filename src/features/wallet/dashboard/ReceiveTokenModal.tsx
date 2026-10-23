@@ -1,4 +1,4 @@
-import { IoClose } from "react-icons/io5";
+
 import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 import { useSelector } from "react-redux";
@@ -8,7 +8,7 @@ import { getWallets } from "../../../api/walletApi";
 import TokenDropdown from "./TokenDropdown";
 import { useWalletAssets } from "../hooks/useWalletAssets";
 // import { formatBalance } from "../../component/format";
-
+import { IoArrowBack } from "react-icons/io5";
 interface ReceiveTokenModalProps {
   open: boolean;
   onClose: () => void;
@@ -145,16 +145,25 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
       />
 
       <div className="relative w-full max-w-[600px]">
-        <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-full 
-            bg-[#202A43] text-white border border-[#3C3D47] mb-[10px]
-            shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
-          >
-            <IoClose size={20} />
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-2">
+        <button
+          onClick={onClose}
+          className="w-10 h-10 flex items-center justify-center rounded-full
+          bg-[#202A43] text-white border border-[#3C3D47]
+          shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
+        >
+          <IoArrowBack size={20} />
+        </button>
+
+        {/* <button
+          onClick={onClose}
+          className="w-10 h-10 flex items-center justify-center rounded-full
+          bg-[#202A43] text-white border border-[#3C3D47]
+          shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
+        >
+          <IoClose size={20} />
+        </button> */}
+      </div>
 
         <div
           className="rounded-2xl bg-[#161F37] border border-[#3C3D47] 
@@ -230,9 +239,9 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
                   </p>
                 </div>
 
-                <div className="flex justify-center">
+                <div className="flex justify-start">
                   <button
-                    className="px-[9px] py-2 rounded-[5px] text-sm font-medium inline-flex w-full bg-[#25C866] max-w-[120px] text-white mt-3 justify-center cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-[#25C866] text-black font-semibold text-xs cursor-pointer hover:bg-[#20b359] transition-colors mt-3"
                     onClick={handleCopy}
                   >
                     Copy
