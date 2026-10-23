@@ -1,5 +1,4 @@
 import { IoClose } from "react-icons/io5";
-import { TbCopy } from "react-icons/tb";
 import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 import { useSelector } from "react-redux";
@@ -219,21 +218,28 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
           </div>
 
           <div className="mb-[15px]">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
               <p className="text-white text-base sm:text-lg font-medium shrink-0">
                 Your Address:
               </p>
+              {address && (
+                <div className="min-w-0 sm:max-w-[70%]">
+                <div className="flex items-center gap-2">
+                  <p className="text-[#7A7D83] text-sm flex-1 min-w-0 break-all">
+                    {address || "--"}
+                  </p>
+                </div>
 
-              <div className="flex items-center gap-2 min-w-0 sm:max-w-[70%]">
-               <p className="text-[#7A7D83] text-sm flex-1 min-w-0 break-all">
-                  {address || "--"}
-                </p>
-
-                <TbCopy
-                  onClick={handleCopy}
-                  className="shrink-0 cursor-pointer text-[#7A7D83] hover:text-white"
-                />
+                <div className="flex justify-center">
+                  <button
+                    className="px-[9px] py-2 rounded-[5px] text-sm font-medium inline-flex w-full bg-[#25C866] max-w-[120px] text-white mt-3 justify-center cursor-pointer"
+                    onClick={handleCopy}
+                  >
+                    Copy
+                  </button>
+                </div>
               </div>
+              )}
             </div>
           </div>
 
