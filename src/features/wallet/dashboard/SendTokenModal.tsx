@@ -1,17 +1,20 @@
-import { IoArrowBack } from "react-icons/io5";
-import { useDispatch } from "react-redux";
+import { IoArrowBack, IoClose } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store/store";
 import { useEffect, useState } from "react";
 import { getGasFee } from "../../../api/transactionApi";
 import { getPrices } from "../../../api/publicApi";
 import Loader from "../../component/Loader";
-import { setTransactionData } from "../../../redux/transactionSlice";
+import { setTransactionData, resetTransaction } from "../../../redux/transactionSlice";
 import QRCode from "react-qr-code";
 import { formatBalance } from "../../component/format";
 import TokenDropdown from "./TokenDropdown";
 import { useWalletAssets } from "../hooks/useWalletAssets";
+
 interface SendTokenModalProps {
   open: boolean;
   onClose: () => void;
+  onBack?: () => void;
   onNext: () => void;
   defaultSelectedToken?: string;
   defaultAmount?: string;
@@ -21,12 +24,14 @@ interface SendTokenModalProps {
 function SendTokenModal({
   open,
   onClose,
+  onBack,
   onNext,
   defaultSelectedToken,
   defaultAmount,
   dashboardMode = false,
 }: SendTokenModalProps) {
   const dispatch = useDispatch();
+  const transactionData = useSelector((state: RootState) => state.transaction);
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedToken, setSelectedToken] = useState("");
@@ -104,21 +109,40 @@ function SendTokenModal({
 
   useEffect(() => {
     if (!open) {
-      setToAddress("");
-      setAmount("");
-      setSelectedToken("");
       setErrors({});
       setGasFeeEth(null);
       setShowQR(false);
       return;
     }
 
-    if (defaultSelectedToken) {
+    if (transactionData?.selectedToken) {
+      setSelectedToken(transactionData.selectedToken);
+    } else if (defaultSelectedToken) {
       setSelectedToken(defaultSelectedToken);
+    } else {
+      setSelectedToken("");
     }
-    if (defaultAmount) {
+
+    if (transactionData?.toAddress) {
+      setToAddress(transactionData.toAddress);
+    } else {
+      setToAddress("");
+    }
+
+    if (transactionData?.amount) {
+      setAmount(transactionData.amount);
+    } else if (defaultAmount) {
       setAmount(defaultAmount);
+    } else {
+      setAmount("");
     }
+
+    if (transactionData?.isMaxAmount !== undefined) {
+      setIsMaxAmount(transactionData.isMaxAmount);
+    } else {
+      setIsMaxAmount(false);
+    }
+
     setErrors({});
     setShowQR(false);
   }, [open, defaultSelectedToken, defaultAmount]);
@@ -288,34 +312,43 @@ function SendTokenModal({
 
   const isDisabled = gasLoading || gasFeeEth === null;
 
+  const handleClose = () => {
+    dispatch(resetTransaction());
+    onClose();
+  };
+
   if (!open) return null;
 
   return (
     <>
       <div className="fixed inset-0 z-[999] flex items-center justify-center  overflow-y-auto px-3 sm:px-5">
         <div
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
         />
 
         <div className="relative w-full max-w-[560px]">
-          <div className="flex justify-start mb-2">
+          <div className={`flex ${onBack ? "justify-between" : "justify-end"} items-center mb-2`}>
+            {onBack && (
               <button
-                      onClick={onClose}
-                      className="w-10 h-10 flex items-center justify-center rounded-full
-                      bg-[#202A43] text-white border border-[#3C3D47]
-                      shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
-                    >
-                      <IoArrowBack size={20} />
-                    </button>
-            {/* <button
-              onClick={onClose}
+                type="button"
+                onClick={onBack}
+                className="w-10 h-10 flex items-center justify-center rounded-full
+                bg-[#202A43] text-white border border-[#3C3D47] mb-[10px]
+                shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
+              >
+                <IoArrowBack size={20} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleClose}
               className="w-10 h-10 flex items-center justify-center rounded-full 
-            bg-[#202A43] text-white border border-[#3C3D47] mb-[10px]
-            shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
+              bg-[#202A43] text-white border border-[#3C3D47] mb-[10px] ml-auto
+              shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
             >
               <IoClose size={20} />
-            </button> */}
+            </button> 
           </div>
 
           <div className="rounded-2xl bg-[#161F37] border border-[#3C3D47] p-5 z-10 shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)]  max-h-[90vh] overflow-y-auto">

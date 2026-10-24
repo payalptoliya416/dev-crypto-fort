@@ -1,8 +1,9 @@
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoArrowBack } from "react-icons/io5";
 import { TbCopy } from "react-icons/tb";
 import toast from "react-hot-toast";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../../redux/store/store";
+import { resetTransaction } from "../../../redux/transactionSlice";
 import { useState } from "react";
 import { sendTransaction } from "../../../api/transactionApi";
 import { formatBalance } from "../../component/format";
@@ -15,14 +16,17 @@ function shortenAddress(address: string) {
 interface ConfirmTransactionModalProps {
   open: boolean;
   onClose: () => void;
+  onBack?: () => void;
   onSuccess?: () => Promise<void>;
 }
 
 function ConfirmTransactionModal({
   open,
   onClose,
+  onBack,
   onSuccess,
 }: ConfirmTransactionModalProps) {
+  const dispatch = useDispatch();
   // transaction data (includes gasFee)
   const { toAddress, amount, selectedToken, marketValue, gasFee , isMaxAmount ,  tokenSymbol, } = useSelector(
     (state: RootState) => state.transaction,
@@ -130,6 +134,7 @@ function ConfirmTransactionModal({
 
       if (res.success) {
         toast.success(res.message || "Transaction sent");
+        dispatch(resetTransaction());
         onClose();
         await onSuccess?.();
       } else {
@@ -172,21 +177,38 @@ function ConfirmTransactionModal({
     }
   };
 
+  const handleClose = () => {
+    dispatch(resetTransaction());
+    onClose();
+  };
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center px-3 sm:px-5">
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className="absolute inset-0 bg-[#121316]/40 backdrop-blur-sm"
       />
 
       <div className="relative w-full max-w-[560px]">
-        <div className="flex justify-end">
+        <div className={`flex ${onBack ? "justify-between" : "justify-end"} items-center mb-2`}>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-10 h-10 flex items-center justify-center rounded-full
+              bg-[#202A43] text-white border border-[#3C3D47] mb-[10px]
+              shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
+            >
+              <IoArrowBack size={20} />
+            </button>
+          )}
           <button
-            onClick={onClose}
+            type="button"
+            onClick={handleClose}
             className="w-10 h-10 flex items-center justify-center rounded-full 
-            bg-[#202A43] text-white border border-[#3C3D47] mb-[10px]
+            bg-[#202A43] text-white border border-[#3C3D47] mb-[10px] ml-auto
             shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
           >
             <IoClose size={20} />

@@ -309,6 +309,10 @@ export default function TopHeader() {
       <ConfirmTransactionModal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
+        onBack={() => {
+          setConfirmOpen(false);
+          setSendOpen(true);
+        }}
       />
       {/* ---------------------- */}
 

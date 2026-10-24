@@ -1,4 +1,4 @@
-
+import { IoClose, IoArrowBack } from "react-icons/io5";
 import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 import { useSelector } from "react-redux";
@@ -8,10 +8,10 @@ import { getWallets } from "../../../api/walletApi";
 import TokenDropdown from "./TokenDropdown";
 import { useWalletAssets } from "../hooks/useWalletAssets";
 // import { formatBalance } from "../../component/format";
-import { IoArrowBack } from "react-icons/io5";
 interface ReceiveTokenModalProps {
   open: boolean;
   onClose: () => void;
+  onBack?: () => void;
   defaultSelectedToken?: string;
 }
 
@@ -22,7 +22,7 @@ interface WalletAddressData {
   tron_address?: string;
 }
 
-function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveTokenModalProps) {
+function ReceiveTokenModal({ open, onClose, onBack, defaultSelectedToken }: ReceiveTokenModalProps) {
   const activeWallet = useSelector(
     (state: RootState) => state.activeWallet.wallet,
   );
@@ -147,22 +147,24 @@ function ReceiveTokenModal({ open, onClose, defaultSelectedToken }: ReceiveToken
       <div className="relative w-full max-w-[600px]">
       <div className="flex justify-between items-center mb-2">
         <button
-          onClick={onClose}
+          type="button"
+          onClick={onBack || onClose}
           className="w-10 h-10 flex items-center justify-center rounded-full
-          bg-[#202A43] text-white border border-[#3C3D47]
+          bg-[#202A43] text-white border border-[#3C3D47] mb-[10px]
           shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
         >
           <IoArrowBack size={20} />
         </button>
 
-        {/* <button
+        <button
+          type="button"
           onClick={onClose}
           className="w-10 h-10 flex items-center justify-center rounded-full
-          bg-[#202A43] text-white border border-[#3C3D47]
+          bg-[#202A43] text-white border border-[#3C3D47] mb-[10px] ml-auto
           shadow-[8px_10px_80px_0px_rgba(0,0,0,0.2)] cursor-pointer"
         >
           <IoClose size={20} />
-        </button> */}
+        </button>
       </div>
 
         <div

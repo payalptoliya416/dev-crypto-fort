@@ -590,6 +590,10 @@ export default function WalletSummary({
       <ConfirmTransactionModal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
+        onBack={() => {
+          setConfirmOpen(false);
+          setSendOpen(true);
+        }}
         onSuccess={refreshWallets}
       />
       {/* ---------------------- */}

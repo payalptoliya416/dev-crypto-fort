@@ -888,6 +888,10 @@ function AssetsTab({
       <SendTokenModal
         open={sendOpen}
         onClose={() => setSendOpen(false)}
+        onBack={() => {
+          setSendOpen(false);
+          setAssetActionOpen(true);
+        }}
         onNext={() => {
           setSendOpen(false);
           setAssetActionOpen(false);
@@ -900,12 +904,20 @@ function AssetsTab({
       <ReceiveTokenModal
         open={receiveOpen}
         onClose={() => setReceiveOpen(false)}
+        onBack={() => {
+          setReceiveOpen(false);
+          setAssetActionOpen(true);
+        }}
         defaultSelectedToken={selectedAsset?.token ?? "eth"}
       />
 
       <ConfirmTransactionModal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
+        onBack={() => {
+          setConfirmOpen(false);
+          setSendOpen(true);
+        }}
         onSuccess={async () => {
           try {
             if (activeWallet?.id) {
